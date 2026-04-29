@@ -1,14 +1,13 @@
+from email.mime import image
 import json
 import sys
 import os
-from time import sleep
-from PIL.ImageChops import screen
 from PyQt6.QtWidgets import (
     QApplication, QSpinBox, QWidget, QPushButton, QFileDialog,
     QVBoxLayout, QLabel, QScrollArea, QGridLayout,
     QHBoxLayout, QTextEdit, QLineEdit, QProgressBar
 )
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
 from ollama_wrapper_iut import OllamaWrapper
 
@@ -108,6 +107,56 @@ class SaveMetadataWorker(QThread):
         except Exception as e:
             self.error.emit(str(e))
 
+# ───────── WORKER : CHARGEMENT ASYNCHRONE DES IMAGES ─────────
+
+
+class ImageLoaderWorker(QThread):
+    batch_ready = pyqtSignal(list)
+    all_done = pyqtSignal()
+
+    BATCH_SIZE = 10
+
+    def __init__(self, folder, images, size):
+        super().__init__()
+        self.folder = folder
+        self.images = images
+        self.size = size
+        self._cancelled = False
+
+    def cancel(self):
+        self._cancelled = True
+
+    def run(self):
+        batch = []
+        print(len(self.images), "images à charger")
+        for i, img_name in enumerate(self.images):
+            if self._cancelled:
+                break
+            path = os.path.join(self.folder, img_name)
+            
+            image = QImage(path)
+            if image.isNull():
+                continue
+
+            image = image.scaled(
+                self.size, self.size,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
+
+            batch.append((i, img_name, image))
+
+            if len(batch) >= self.BATCH_SIZE:
+                self.batch_ready.emit(batch)
+                print(f"Batch émis {i} images")
+                batch = []
+
+        # Émettre le dernier batch partiel s'il reste des images
+        if batch and not self._cancelled:
+            self.batch_ready.emit(batch)
+
+        self.all_done.emit()
+        print("Chargement terminé")
 
 class ImageExplorer(QWidget):
     def __init__(self):
@@ -122,6 +171,7 @@ class ImageExplorer(QWidget):
         self.current_folder = None
         self.worker = None
         self.batch_worker = None
+        self.load_worker = None
 
         # ───────── TIMER DE SAUVEGARDE AUTOMATIQUE ─────────
         self.save_timer = QTimer()
@@ -336,32 +386,56 @@ class ImageExplorer(QWidget):
                 w.setParent(None)
 
     def populate_grid(self, images: list[str]):
-        """Ajoute une liste d'images dans la grille."""
-        row, col = 0, 0
-        for img_name in images:
-            label = self.load_image(img_name)
-            if label is None:
-                continue
-            self.grid.addWidget(label, row, col)
-            col += 1
-            if col == self.columns:
-                col = 0
-                row += 1
+        if hasattr(self, 'load_worker') and self.load_worker and self.load_worker.isRunning():
+            self.load_worker.cancel()
+            self.load_worker.wait()
 
+        self._load_row = 0
+        self._load_col = 0
+        self._load_images = images
+
+        self.load_worker = ImageLoaderWorker(
+            self.current_folder, images, self.image_size)
+        self.load_worker.batch_ready.connect(self.on_batch_ready)
+        self.load_worker.all_done.connect(self.on_load_done)
+        self.load_worker.start()
+
+    def on_batch_ready(self, batch: list):
+        """Insère un batch de (idx, img_name, pixmap) dans la grille en une passe."""
+        for _idx, img_name, image in batch:
+            pixmap = QPixmap.fromImage(image)
+
+            label = QLabel()
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setPixmap(pixmap)
+            label.setStyleSheet("border: 2px solid transparent;")
+            label.setToolTip(
+                "Indexé" if img_name in self.index else "Non indexé")
+            label.mousePressEvent = lambda e, l=label, n=img_name: self.select_image(
+                l, n)
+
+            self.grid.addWidget(label, self._load_row, self._load_col)
+            self._load_col += 1
+            if self._load_col >= self.columns:
+                self._load_col = 0
+                self._load_row += 1
+        
+
+    def on_load_done(self):
+        pass
+    
     def load_image(self, img_name: str) -> QLabel | None:
-        """Crée et retourne un QLabel pour une image, ou None si elle est invalide."""
+        """Gardée pour compatibilité (utilisée nulle part en dehors de populate_grid)."""
         path = os.path.join(self.current_folder, img_name)
         pixmap = QPixmap(path)
         if pixmap.isNull():
             return None
 
         pixmap = pixmap.scaled(
-            self.image_size,
-            self.image_size,
+            self.image_size, self.image_size,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
         )
-
         label = QLabel()
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setPixmap(pixmap)
@@ -386,7 +460,7 @@ class ImageExplorer(QWidget):
                 if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp"))
             ]
             self.populate_grid(images)
-            
+
         except FileNotFoundError as e:
             print(f"[ERROR] Dossier introuvable : {e}")
 
@@ -663,7 +737,7 @@ class ImageExplorer(QWidget):
             self.desc_edit.setText(desc)
             self.keywords_edit.setText(", ".join(keywords))
 
-        self.load_images()
+        # self.load_images()  à Verifier.
 
     def on_batch_image_error(self, idx, img_name, error_msg):
         total = self.progress_bar.maximum()
@@ -686,9 +760,10 @@ class ImageExplorer(QWidget):
         self.auto_complete_button.setEnabled(True)
         self.cancel_button.setVisible(False)
 
-        sleep(4)  # Laisser le temps de lire le message final
-        self.progress_bar.setVisible(False)
-        self.progress_label.setVisible(False)
+        QTimer.singleShot(4000, lambda: (
+            self.progress_bar.setVisible(False),
+            self.progress_label.setVisible(False)
+        ))
 
     def cancel_batch(self):
         if self.batch_worker and self.batch_worker.isRunning():
