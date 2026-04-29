@@ -115,7 +115,7 @@ class ImageLoaderWorker(QThread):
     batch_ready = pyqtSignal(list)
     all_done = pyqtSignal()
 
-    BATCH_SIZE = 10
+    BATCH_SIZE = 100
 
     def __init__(self, folder, images, size):
         super().__init__()
