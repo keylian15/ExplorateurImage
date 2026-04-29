@@ -379,11 +379,16 @@ class ImageExplorer(QWidget):
         self.load_index()
         self.clear_grid()
 
-        images = [
-            f for f in os.listdir(self.current_folder)
-            if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp"))
-        ]
-        self.populate_grid(images)
+        try:
+
+            images = [
+                f for f in os.listdir(self.current_folder)
+                if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp"))
+            ]
+            self.populate_grid(images)
+            
+        except FileNotFoundError as e:
+            print(f"[ERROR] Dossier introuvable : {e}")
 
     def load_images_from_filter(self, filter: str):
         """Charge les images dont la description ou les mots-clés matchent le filtre."""
@@ -828,6 +833,7 @@ class ImageExplorer(QWidget):
             self.k_neighbors = self.neighbors_input.value()
             self.save_config()
             self.display_neighbors(self.selected_image)
+
 
 # ───────── MAIN ─────────
 if __name__ == "__main__":
