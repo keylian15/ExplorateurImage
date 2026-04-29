@@ -835,7 +835,7 @@ class OllamaWrapper:
 
             "MOTS-CLÉS — exactement 5 :\n"
             "- Noms uniquement (pas d'adjectifs, pas de verbes)\n"
-            "- Ordre : sujet → environnement → détails distinctifs\n"
+            "- Ordre : sujet -> environnement -> détails distinctifs\n"
             "- Privilégier les termes de recherche qu'un utilisateur taperait\n"
             "- Pas de doublons avec les premiers mots de la description\n"
             "- Éviter les génériques inutiles : 'lumière', 'image', 'photo', 'nature', 'atmosphère'\n\n"

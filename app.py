@@ -12,6 +12,7 @@ from PyQt6.QtCore import QTimer, Qt, QThread, pyqtSignal
 from ollama_wrapper_iut import OllamaWrapper
 
 client = OllamaWrapper()
+EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp")
 
 
 # ───────── WORKER : UNE IMAGE ─────────
@@ -457,7 +458,7 @@ class ImageExplorer(QWidget):
 
             images = [
                 f for f in os.listdir(self.current_folder)
-                if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp"))
+                if f.lower().endswith(EXTENSIONS)
             ]
             self.populate_grid(images)
 
@@ -688,7 +689,7 @@ class ImageExplorer(QWidget):
             return
 
         images = [f for f in os.listdir(self.current_folder)
-                  if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp"))]
+                  if f.lower().endswith(EXTENSIONS)]
         if not images:
             return
 
