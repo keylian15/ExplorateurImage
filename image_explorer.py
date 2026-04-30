@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QApplication, QSpinBox, QWidget, QPushButton, QFileDialog,
     QVBoxLayout, QLabel, QScrollArea, QGridLayout,
     QHBoxLayout, QTextEdit, QLineEdit, QProgressBar,
-    QListView, QAbstractItemView,
+    QListView, QAbstractItemView, QDockWidget, QMainWindow,
 )
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import (
@@ -37,7 +37,7 @@ MODEL_EMBEDDING = 'nomic-embed-text:v1.5'
 # ─────────────────────────────────────────────────────────────
 
 
-class ImageExplorer(QWidget):
+class ImageExplorer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Explorateur d'images")
@@ -56,8 +56,6 @@ class ImageExplorer(QWidget):
         self.save_worker: SaveMetadataWorker | None = None
 
         # ── Cache + scheduler ─────────────────────────────────
-        # On initialise avec un dossier fictif ; set_folder() sera appelé
-        # dès qu'un dossier réel est ouvert.
         _dummy = os.path.expanduser("~")
         self.cache = ThumbnailCache(_dummy, DEFAULT_THUMB_SIZE, LRU_MAX_MEMORY)
         self.scheduler = ThumbnailScheduler(self.cache)
@@ -100,7 +98,9 @@ class ImageExplorer(QWidget):
     # ═════════════════════════════════════════════════════════
 
     def _build_ui(self):
-        main_layout = QVBoxLayout()
+        # ── Widget central ────────────────────────────────────
+        central_widget = QWidget()
+        main_layout = QVBoxLayout(central_widget)
 
         # ── Barre du haut ─────────────────────────────────────
         top = QHBoxLayout()
@@ -126,12 +126,7 @@ class ImageExplorer(QWidget):
         top.addStretch()
         main_layout.addLayout(top)
 
-        # ── Zone centrale ─────────────────────────────────────
-        center = QHBoxLayout()
-
         # ── QListView ─────────────────────────────────────────
-        left_layout = QVBoxLayout()
-
         self.list_view = QListView()
         self.list_view.setModel(self.model)
         self.list_view.setItemDelegate(self.delegate)
@@ -158,21 +153,33 @@ class ImageExplorer(QWidget):
         self._prefetch_timer.setSingleShot(True)
         self._prefetch_timer.timeout.connect(self._prefetch_visible)
 
-        left_layout.addWidget(self.list_view)
+        main_layout.addWidget(self.list_view)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
-        left_layout.addWidget(self.progress_bar)
+        main_layout.addWidget(self.progress_bar)
 
         self.progress_label = QLabel("")
         self.progress_label.setVisible(False)
-        left_layout.addWidget(self.progress_label)
+        main_layout.addWidget(self.progress_label)
 
-        center.addLayout(left_layout, 3)
+        self.setCentralWidget(central_widget)
 
-        # ── Panel droit ───────────────────────────────────────
-        self.right_panel = QWidget()
-        right_layout = QVBoxLayout()
+        # ── Dock droit ────────────────────────────────────────
+        self.dock = QDockWidget("Détails de l'image", self)
+        self.dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea |
+            Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        self.dock.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetMovable |
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable |
+            QDockWidget.DockWidgetFeature.DockWidgetClosable
+        )
+
+        # Contenu du dock
+        dock_content = QWidget()
+        right_layout = QVBoxLayout(dock_content)
 
         title_layout = QHBoxLayout()
         self.title = QLineEdit()
@@ -236,12 +243,13 @@ class ImageExplorer(QWidget):
         self.neighbors_scroll.setWidget(self.neighbors_widget)
         right_layout.addWidget(self.neighbors_scroll)
 
-        self.right_panel.setLayout(right_layout)
-        self.right_panel.setVisible(False)
+        self.dock.setWidget(dock_content)
+        self.dock.setMinimumWidth(280)
 
-        center.addWidget(self.right_panel, 1)
-        main_layout.addLayout(center)
-        self.setLayout(main_layout)
+        # Caché par défaut, affiché à la sélection d'une image
+        self.dock.setVisible(False)
+
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock)
 
     # ═════════════════════════════════════════════════════════
     #  Config
@@ -356,24 +364,21 @@ class ImageExplorer(QWidget):
 
             score = 0
 
-            # Pondération
-            score += sim * 1.0              # embedding = signal principal
+            # Pondération embedding vs texte : 70% embedding, 30% texte
+            score += sim * 1.0
 
+            # Bonus si le texte correspond
             if text_match:
-                score += 0.3               # bonus texte
+                score += 0.3
 
+            # Bonus si la similarité est déjà élevée et que le texte correspond (renforce la pertinence)
             if sim > 0.5 and text_match:
-                score += 0.5               # 🔥 gros boost intersection
+                score += 0.5
 
             scores[key] = score
 
-        # Tri final
         sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-
         return [name for name, _ in sorted_items[:100]]
-
-        # Retourne les 100 images les plus similaires
-        # return [k for k, v in sorted_items if v > 0.75][:100]
 
     # ═════════════════════════════════════════════════════════
     #  Lazy loading / prefetch
@@ -439,8 +444,9 @@ class ImageExplorer(QWidget):
             )
             self.image_preview.setPixmap(scaled)
 
-        if not self.right_panel.isVisible():
-            self.right_panel.setVisible(True)
+        # Afficher le dock s'il est fermé
+        if not self.dock.isVisible():
+            self.dock.setVisible(True)
 
         self.title.setText(img_name)
         self.title.setStyleSheet("")
@@ -593,7 +599,6 @@ class ImageExplorer(QWidget):
             return
 
         images = []
-
         for file in os.listdir(self.current_folder):
             if file.lower().endswith(EXTENSIONS):
                 if file not in self.index:
