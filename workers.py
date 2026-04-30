@@ -16,6 +16,7 @@ from PyQt6.QtCore import (QObject, QRunnable, QThreadPool, QMutex, QMutexLocker,
 )
 from PyQt6.QtGui import QPixmap
 
+from ollama_wrapper_iut import OllamaWrapper
 from thumbnail_cache import ThumbnailCache
 
 
@@ -152,12 +153,12 @@ class AutoCompleteWorker(QThread):
     finished = pyqtSignal(dict)
     error = pyqtSignal(str)
 
-    def __init__(self, image_path: str, client):
+    def __init__(self, image_path: str, client: OllamaWrapper):
         """Stocke les arguments et prépare les signaux.
 
         Args:
             img_name (str): Le nom de l'image à traiter.
-            client (_type_): Le client.
+            client (OllamaWrapper): Le client.
         """
         
         super().__init__()

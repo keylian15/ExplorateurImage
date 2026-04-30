@@ -32,6 +32,8 @@ SIZE_INDEX_DEFAULT = 4   # 192 px
 LRU_MAX_MEMORY = 600
 PREFETCH_ROWS = 3   # lignes supplémentaires chargées hors viewport
 EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp")
+
+MODEL_EMBEDDING = 'nomic-embed-text:v1.5'
 # ─────────────────────────────────────────────────────────────
 
 
@@ -321,13 +323,57 @@ class ImageExplorer(QWidget):
         # Précharger le viewport initial
         QTimer.singleShot(50, self._prefetch_visible)
 
-    def _filtered_images(self, filter_text: str) -> list[str]:
+    def _filtered_images(self, filter_text: str, images: list[str] | None = None) -> list[str]:
+        """Retourne une liste d'images filtrée et triée par pertinence par rapport au texte de recherche.
+        Si images est fourni, ne filtre que cette liste (ex: résultats précédents)
+        Avec une approche hybride : score de similarité cosinus sur les embeddings + correspondance texte (description + mots-clés).
+
+        Args: 
+            filter_text: le texte de recherche
+            images: liste optionnelle d'images à filtrer (si None, filtre tout le dossier)
+
+        Returns:
+            une liste d'images triée par pertinence
+        """
+
         ft = filter_text.lower().strip()
-        return [
-            name for name, data in self.index.items()
-            if ft in data.get("description", "").lower()
-            or ft in " ".join(data.get("keywords", [])).lower()
-        ]
+        query_embedding = client.embed(model=MODEL_EMBEDDING, text=ft)
+
+        if images is None:
+            images = list(self.index.keys())
+
+        scores = {}
+
+        for key in images:
+            data = self.index[key]
+
+            # 1. Score embedding
+            sim = client.similarite_cosinus(query_embedding, data["embedding"])
+
+            # 2. Score texte (booléen)
+            text_match = (ft in data.get("description", "").lower()
+                          or ft in " ".join(data.get("keywords", [])).lower())
+
+            score = 0
+
+            # Pondération
+            score += sim * 1.0              # embedding = signal principal
+
+            if text_match:
+                score += 0.3               # bonus texte
+
+            if sim > 0.5 and text_match:
+                score += 0.5               # 🔥 gros boost intersection
+
+            scores[key] = score
+
+        # Tri final
+        sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+        return [name for name, _ in sorted_items[:100]]
+
+        # Retourne les 100 images les plus similaires
+        # return [k for k, v in sorted_items if v > 0.75][:100]
 
     # ═════════════════════════════════════════════════════════
     #  Lazy loading / prefetch
@@ -579,7 +625,7 @@ class ImageExplorer(QWidget):
         keywords = result["keywords"]
 
         embedding = client.embed(
-            model='nomic-embed-text:v1.5',
+            model=MODEL_EMBEDDING,
             text=client.build_embedding(desc, keywords)
         )
         self.index[img_name] = {
