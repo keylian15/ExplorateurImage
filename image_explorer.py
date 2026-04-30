@@ -3,12 +3,12 @@ import sys
 import os
 
 from PyQt6.QtWidgets import (
-    QApplication, QSpinBox, QWidget, QPushButton, QFileDialog,
+    QApplication, QDialog, QSpinBox, QWidget, QPushButton, QFileDialog,
     QVBoxLayout, QLabel, QScrollArea, QGridLayout,
     QHBoxLayout, QTextEdit, QLineEdit, QProgressBar,
     QListView, QAbstractItemView, QDockWidget, QMainWindow,
 )
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QWheelEvent
 from PyQt6.QtCore import (
     Qt, QTimer, QSize, QModelIndex,
 )
@@ -35,6 +35,26 @@ EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp")
 
 MODEL_EMBEDDING = 'nomic-embed-text:v1.5'
 # ─────────────────────────────────────────────────────────────
+
+
+class ClickableLabel(QLabel):
+    def __init__(self, text_or_parent=None, parent=None):
+        if isinstance(text_or_parent, str):
+            super().__init__(text_or_parent, parent)
+        elif isinstance(text_or_parent, QWidget):
+            super().__init__(text_or_parent)
+        else:
+            super().__init__(parent)
+        self.rightClicked = None  # callback clic droit
+        self.leftClicked = None   # callback clic gauche
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.RightButton:
+            if self.rightClicked:
+                self.rightClicked()
+        elif event.button() == Qt.MouseButton.LeftButton:
+            if self.leftClicked:
+                self.leftClicked()
 
 
 class ImageExplorer(QMainWindow):
@@ -143,7 +163,14 @@ class ImageExplorer(QMainWindow):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list_view.setVerticalScrollMode(
             QAbstractItemView.ScrollMode.ScrollPerPixel)
+
+        # Clic gauche -> sélection
         self.list_view.clicked.connect(self._on_item_clicked)
+        # Clic droit -> gros plan (via contextMenuEvent intercepté)
+        self.list_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
+        self.list_view.customContextMenuRequested.connect(
+            self._on_grid_right_click)
 
         # Préchargement lors du scroll
         self.list_view.verticalScrollBar().valueChanged.connect(
@@ -193,11 +220,29 @@ class ImageExplorer(QMainWindow):
         title_layout.addWidget(self.rename_button)
         right_layout.addLayout(title_layout)
 
-        self.image_preview = QLabel()
+        # Container pour l'aperçu + bouton
+        preview_container = QWidget()
+        preview_layout = QVBoxLayout(preview_container)
+        preview_layout.setContentsMargins(0, 0, 0, 0)
+        preview_layout.setSpacing(2)
+
+        # Label image
+        self.image_preview = ClickableLabel()
         self.image_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.image_preview.setFixedHeight(200)
         self.image_preview.setStyleSheet("border: 1px solid #ccc;")
-        right_layout.addWidget(self.image_preview)
+        self.image_preview.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.image_preview.rightClicked = self.open_fullscreen_preview
+
+        # Bouton plein écran
+        self.fullscreen_btn = QPushButton("⛶ Plein écran")
+        self.fullscreen_btn.setFixedHeight(24)
+        self.fullscreen_btn.setStyleSheet("font-size: 11px; color: #555;")
+        self.fullscreen_btn.clicked.connect(self.open_fullscreen_preview)
+
+        preview_layout.addWidget(self.image_preview)
+        preview_layout.addWidget(self.fullscreen_btn)
+        right_layout.addWidget(preview_container)
 
         self.desc_edit = QTextEdit()
         self.desc_edit.setPlaceholderText("Description...")
@@ -219,7 +264,7 @@ class ImageExplorer(QMainWindow):
 
         # Voisins
         neighbors_header = QHBoxLayout()
-        self.neighbors_label = QLabel("Images similaires")
+        self.neighbors_label = ClickableLabel("Images similaires")
         self.neighbors_label.setStyleSheet(
             "font-weight: bold; margin-top: 8px;")
         self.neighbors_input = QSpinBox()
@@ -250,6 +295,21 @@ class ImageExplorer(QMainWindow):
         self.dock.setVisible(False)
 
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock)
+
+    # ═════════════════════════════════════════════════════════
+    #  Clic droit dans la grille -> gros plan
+    # ═════════════════════════════════════════════════════════
+
+    def _on_grid_right_click(self, pos):
+        index = self.list_view.indexAt(pos)
+        if not index.isValid():
+            return
+        img_name = index.data(IMG_NAME_ROLE)
+        if not img_name:
+            return
+
+        self.open_fullscreen_preview(
+            QPixmap(os.path.join(self.current_folder, img_name)))
 
     # ═════════════════════════════════════════════════════════
     #  Config
@@ -436,7 +496,9 @@ class ImageExplorer(QMainWindow):
         pixmap = QPixmap(path)
         if pixmap.isNull():
             self.image_preview.clear()
+            self._current_pixmap = None
         else:
+            self._current_pixmap = pixmap
             scaled = pixmap.scaled(
                 self.image_preview.size(),
                 Qt.AspectRatioMode.KeepAspectRatio,
@@ -468,6 +530,187 @@ class ImageExplorer(QMainWindow):
         self.keywords_edit.blockSignals(False)
 
         self._display_neighbors(img_name)
+
+    def open_fullscreen_preview(self, pixmap_override: QPixmap | None = None):
+        """Ouvre le gros plan. Si pixmap_override est fourni, affiche cette image
+        à la place de _current_pixmap (utile pour les voisins)."""
+
+        pixmap_current = pixmap_override or getattr(
+            self, "_current_pixmap", None)
+        if pixmap_current is None or pixmap_current.isNull():
+            return
+
+        screen = QApplication.primaryScreen().availableGeometry()
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(self.selected_image)
+        dialog.setWindowState(Qt.WindowState.WindowActive)
+        dialog.resize(screen.width(), screen.height())
+
+        # ── Layout principal ──────────────────────────────────
+        main_layout = QVBoxLayout(dialog)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        # ── Barre du haut ─────────────────────────────────────
+        bar = QHBoxLayout()
+        bar.setContentsMargins(8, 4, 8, 4)
+
+        btn_zoom_in = QPushButton("🔍 +")
+        btn_zoom_out = QPushButton("🔍 -")
+        btn_reset = QPushButton("↺ Reset")
+        lbl_zoom = QLabel("100%")
+        lbl_zoom.setFixedWidth(55)
+        lbl_zoom.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        for btn in (btn_zoom_in, btn_zoom_out, btn_reset):
+            btn.setFixedHeight(28)
+
+        bar.addWidget(btn_zoom_out)
+        bar.addWidget(lbl_zoom)
+        bar.addWidget(btn_zoom_in)
+        bar.addWidget(btn_reset)
+        bar.addStretch()
+
+        bar_widget = QWidget()
+        bar_widget.setLayout(bar)
+        bar_widget.setStyleSheet("background: #1e1e1e; color: white;")
+        bar_widget.setFixedHeight(40)
+        main_layout.addWidget(bar_widget)
+
+        # ── Zone image scrollable ──────────────────────────────
+        scroll = QScrollArea()
+        scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        scroll.setStyleSheet("background: #121212; border: none;")
+        scroll.setWidgetResizable(False)
+
+        lbl_img = QLabel()
+        lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl_img.setStyleSheet("background: #121212;")
+        scroll.setWidget(lbl_img)
+        main_layout.addWidget(scroll)
+
+        # ── État du zoom ───────────────────────────────────────
+        zoom_state = {"factor": 1.0}
+        ZOOM_STEP = 0.15
+        ZOOM_MIN = 0.1
+        ZOOM_MAX = 10.0
+
+        dpr = lbl_img.devicePixelRatio()
+
+        def render(factor):
+            w = int(dpr * screen.width() * factor)
+            h = int(dpr * screen.height() * factor)
+            scaled = pixmap_current.scaled(
+                w, h,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            scaled.setDevicePixelRatio(dpr)
+            lbl_img.setPixmap(scaled)
+            lbl_img.resize(scaled.width() // int(dpr),
+                           scaled.height() // int(dpr))
+            lbl_zoom.setText(f"{int(factor * 100)}%")
+
+        def zoom_in():
+            zoom_state["factor"] = min(
+                ZOOM_MAX, zoom_state["factor"] + ZOOM_STEP)
+            render(zoom_state["factor"])
+
+        def zoom_out():
+            zoom_state["factor"] = max(
+                ZOOM_MIN, zoom_state["factor"] - ZOOM_STEP)
+            render(zoom_state["factor"])
+
+        def zoom_reset():
+            zoom_state["factor"] = 1.0
+            render(1.0)
+
+        # ── Zoom molette ───────────────────────────────────────
+        def on_wheel(event: QWheelEvent):
+            if event.angleDelta().y() > 0:
+                zoom_in()
+            else:
+                zoom_out()
+
+        scroll.wheelEvent = on_wheel
+
+        # ── Connexions ─────────────────────────────────────────
+        btn_zoom_in.clicked.connect(zoom_in)
+        btn_zoom_out.clicked.connect(zoom_out)
+        btn_reset.clicked.connect(zoom_reset)
+
+        # ── Rendu initial ──────────────────────────────────────
+        render(.75)
+
+        self.fullscreen_window = dialog
+        dialog.exec()
+
+    def open_fullscreen_preview_demo(self):
+        """Version de démonstration pour comparer les différentes sources de thumbnails."""
+        pixmap_thumb = self.image_preview.pixmap()
+        pixmap_current = getattr(self, "_current_pixmap", None)
+
+        if pixmap_current is None or pixmap_current.isNull():
+            return
+
+        path = os.path.join(self.current_folder, self.selected_image)
+        pixmap_fresh = QPixmap(path)
+
+        self.fullscreen_window = QDialog(self)
+        self.fullscreen_window.setWindowTitle("Comparaison 4 sources")
+        self.fullscreen_window.resize(1800, 650)
+
+        main_layout = QHBoxLayout(self.fullscreen_window)
+
+        sources = [
+            (pixmap_thumb,   "Thumbnail (aperçu dock)",      False),
+            (pixmap_current, "_current_pixmap (stocké)",     False),
+            (pixmap_fresh,   "Neuf + DPI scaling",           True),
+            (pixmap_fresh,   "Chargement neuf (disque)",     False),
+        ]
+
+        for pixmap, title, use_dpi in sources:
+            side = QVBoxLayout()
+
+            lbl_title = QLabel(title)
+            lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl_title.setStyleSheet("font-weight: bold; margin-bottom: 4px;")
+
+            lbl_img = QLabel()
+            lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            if pixmap and not pixmap.isNull():
+                if use_dpi:
+                    dpr = lbl_img.devicePixelRatio()
+                    scaled = pixmap.scaled(
+                        int(dpr * 360), int(dpr * 520),
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation,
+                    )
+                    scaled.setDevicePixelRatio(dpr)
+                else:
+                    scaled = pixmap.scaled(
+                        360, 520,
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation,
+                    )
+                lbl_img.setPixmap(scaled)
+                size_txt = f"{pixmap.width()} × {pixmap.height()} px"
+            else:
+                lbl_img.setText("(aucun pixmap)")
+                size_txt = "—"
+
+            lbl_size = QLabel(size_txt)
+            lbl_size.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            lbl_size.setStyleSheet("color: #888; font-size: 11px;")
+
+            side.addWidget(lbl_title)
+            side.addWidget(lbl_img)
+            side.addWidget(lbl_size)
+            main_layout.addLayout(side)
+
+        self.fullscreen_window.exec()
 
     # ═════════════════════════════════════════════════════════
     #  Repaint demandé par le delegate
@@ -772,23 +1015,34 @@ class ImageExplorer(QMainWindow):
             pixmap = QPixmap(path)
             if pixmap.isNull():
                 continue
-            pixmap = pixmap.scaled(
+
+            # Pixmap pleine résolution pour le gros plan
+            pixmap_full = QPixmap(path)
+
+            pixmap_scaled = pixmap.scaled(
                 THUMB, THUMB,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
+
             cell = QWidget()
             cell_layout = QVBoxLayout()
             cell_layout.setContentsMargins(2, 2, 2, 2)
             cell_layout.setSpacing(2)
 
-            thumb = QLabel()
-            thumb.setPixmap(pixmap)
+            # Thumbnail
+            thumb = ClickableLabel()
+            thumb.setPixmap(pixmap_scaled)
             thumb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             thumb.setStyleSheet("border: 1px solid #ccc; border-radius: 3px;")
-            thumb.mousePressEvent = lambda e, n=neighbor_name: self._select_image(
-                n)
             thumb.setCursor(Qt.CursorShape.PointingHandCursor)
+
+            # Clic gauche -> sélectionner l'image
+            thumb.leftClicked = lambda n=neighbor_name: self._select_image(n)
+
+            # Clic droit -> gros plan de ce voisin
+            thumb.rightClicked = lambda p=pixmap_full: self.open_fullscreen_preview(
+                p)
 
             score_label = QLabel(f"{score:.2f}")
             score_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
