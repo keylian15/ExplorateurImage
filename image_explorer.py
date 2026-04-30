@@ -163,6 +163,7 @@ class ImageExplorer(QMainWindow):
             Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list_view.setVerticalScrollMode(
             QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.list_view.setToolTip("Clic gauche : sélectionner une image | Clic droit : voir en plein écran")
 
         # Clic gauche -> sélection
         self.list_view.clicked.connect(self._on_item_clicked)
@@ -232,16 +233,10 @@ class ImageExplorer(QMainWindow):
         self.image_preview.setFixedHeight(200)
         self.image_preview.setStyleSheet("border: 1px solid #ccc;")
         self.image_preview.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.image_preview.rightClicked = self.open_fullscreen_preview
-
-        # Bouton plein écran
-        self.fullscreen_btn = QPushButton("⛶ Plein écran")
-        self.fullscreen_btn.setFixedHeight(24)
-        self.fullscreen_btn.setStyleSheet("font-size: 11px; color: #555;")
-        self.fullscreen_btn.clicked.connect(self.open_fullscreen_preview)
+        self.image_preview.rightClicked = self.image_preview.leftClicked = self.open_fullscreen_preview
+        self.image_preview.setToolTip("Cliquer pour voir en plein écran")
 
         preview_layout.addWidget(self.image_preview)
-        preview_layout.addWidget(self.fullscreen_btn)
         right_layout.addWidget(preview_container)
 
         self.desc_edit = QTextEdit()
@@ -1036,6 +1031,7 @@ class ImageExplorer(QMainWindow):
             thumb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             thumb.setStyleSheet("border: 1px solid #ccc; border-radius: 3px;")
             thumb.setCursor(Qt.CursorShape.PointingHandCursor)
+            thumb.setToolTip("Clic gauche : sélectionner | Clic droit : voir en plein écran")
 
             # Clic gauche -> sélectionner l'image
             thumb.leftClicked = lambda n=neighbor_name: self._select_image(n)
