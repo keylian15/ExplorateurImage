@@ -220,3 +220,6 @@ __marimo__/
 
 # Dataset
 Dataset/**
+# Ignore tous les thumbanils.
+.thumbnails/
+map_cache.pkl

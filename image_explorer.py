@@ -1,9 +1,10 @@
 import json
 import sys
 import os
+from map_widget import MapTab
 
 from PyQt6.QtWidgets import (
-    QApplication, QDialog, QSpinBox, QWidget, QPushButton, QFileDialog,
+    QApplication, QDialog, QSpinBox, QTabWidget, QWidget, QPushButton, QFileDialog,
     QVBoxLayout, QLabel, QScrollArea, QGridLayout,
     QHBoxLayout, QTextEdit, QLineEdit, QProgressBar,
     QListView, QAbstractItemView, QDockWidget, QMainWindow,
@@ -24,8 +25,6 @@ from workers import (
 from image_model import ImageListModel, ImageGridDelegate, IMG_NAME_ROLE
 
 # ─────────────────────────────────────────────────────────────
-client = OllamaWrapper()
-
 DEFAULT_THUMB_SIZE = 192
 SIZE_LEVELS = [48, 64, 96, 128, 192, 256, 384, 512]
 SIZE_INDEX_DEFAULT = 4   # 192 px
@@ -60,6 +59,8 @@ class ClickableLabel(QLabel):
 class ImageExplorer(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.client = OllamaWrapper()
+        
         self.setWindowTitle("Explorateur d'images")
         screen = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen)
@@ -191,7 +192,11 @@ class ImageExplorer(QMainWindow):
         self.progress_label.setVisible(False)
         main_layout.addWidget(self.progress_label)
 
-        self.setCentralWidget(central_widget)
+        self.tabs = QTabWidget()
+        self.tabs.addTab(central_widget, "Galerie")
+        self.map_tab = MapTab(self)
+        self.tabs.addTab(self.map_tab, "Carte 2D")
+        self.setCentralWidget(self.tabs)
 
         # ── Dock droit ────────────────────────────────────────
         self.dock = QDockWidget("Détails de l'image", self)
@@ -400,7 +405,7 @@ class ImageExplorer(QMainWindow):
         """
 
         ft = filter_text.lower().strip()
-        query_embedding = client.embed(model=MODEL_EMBEDDING, text=ft)
+        query_embedding = self.client.embed(model=MODEL_EMBEDDING, text=ft)
 
         if images is None:
             images = list(self.index.keys())
@@ -411,7 +416,7 @@ class ImageExplorer(QMainWindow):
             data = self.index[key]
 
             # 1. Score embedding
-            sim = client.similarite_cosinus(query_embedding, data["embedding"])
+            sim = self.client.similarite_cosinus(query_embedding, data["embedding"])
 
             # 2. Score texte (booléen)
             text_match = (ft in data.get("description", "").lower()
@@ -525,6 +530,9 @@ class ImageExplorer(QMainWindow):
         self.keywords_edit.blockSignals(False)
 
         self._display_neighbors(img_name)
+        
+        if hasattr(self, "map_tab"):
+            self.map_tab.on_image_selected(img_name)
 
     def open_fullscreen_preview(self, pixmap_override: QPixmap | None = None):
         """Ouvre le gros plan. Si pixmap_override est fourni, affiche cette image
@@ -780,7 +788,7 @@ class ImageExplorer(QMainWindow):
 
         self.loading_label.setVisible(True)
         self.save_worker = SaveMetadataWorker(
-            self.selected_image, self.current_folder, desc, keywords, client
+            self.selected_image, self.current_folder, desc, keywords, self.client
         )
         self.save_worker.finished.connect(self._on_save_done)
         self.save_worker.error.connect(self._on_save_error)
@@ -808,7 +816,7 @@ class ImageExplorer(QMainWindow):
         self.auto_complete_button.setEnabled(False)
         self.loading_label.setVisible(True)
 
-        self.worker = AutoCompleteWorker(path, client)
+        self.worker = AutoCompleteWorker(path, self.client)
         self.worker.finished.connect(self._on_auto_complete_done)
         self.worker.error.connect(self._on_auto_complete_error)
         self.worker.start()
@@ -857,7 +865,7 @@ class ImageExplorer(QMainWindow):
         self.cancel_button.setEnabled(True)
 
         self.batch_worker = AutoCompleteAllWorker(
-            self.current_folder, images, client)
+            self.current_folder, images, self.client)
         self.batch_worker.image_done.connect(self._on_batch_image_done)
         self.batch_worker.image_error.connect(self._on_batch_image_error)
         self.batch_worker.all_done.connect(self._on_batch_all_done)
@@ -867,9 +875,9 @@ class ImageExplorer(QMainWindow):
         desc = result["description"]
         keywords = result["keywords"]
 
-        embedding = client.embed(
+        embedding = self.client.embed(
             model=MODEL_EMBEDDING,
-            text=client.build_embedding(desc, keywords)
+            text=self.client.build_embedding(desc, keywords)
         )
         self.index[img_name] = {
             "id":          img_name,
@@ -978,7 +986,7 @@ class ImageExplorer(QMainWindow):
         for key, data in self.index.items():
             if key == img_name or "embedding" not in data:
                 continue
-            scores[key] = client.similarite_cosinus(
+            scores[key] = self.client.similarite_cosinus(
                 entry["embedding"], data["embedding"]
             )
         return dict(sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_k])

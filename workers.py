@@ -279,3 +279,146 @@ class SaveMetadataWorker(QThread):
 
         except Exception as e:
             self.error.emit(str(e))
+            
+
+# ──────────────────────────────────────────────
+#  MAP WORKER  (UMAP + HDBSCAN + nommage cluster)
+# ──────────────────────────────────────────────
+
+class MapWorker(QThread):
+
+    finished = pyqtSignal(list, list, list, dict)  # points, labels, names, cluster_names
+    cluster_named = pyqtSignal(int, str)  # cluster_id, nouveau_nom
+    progress = pyqtSignal(str)
+    error    = pyqtSignal(str)
+
+    def __init__(
+        self,
+        index: dict,
+        client,                          # OllamaWrapper — pour le nommage
+        umap_n_neighbors:    int   = 15,
+        umap_min_dist:       float = 0.1,
+        hdbscan_min_cluster: int   = 15,
+        parent=None,
+    ):
+        super().__init__(parent)
+        self.index               = index
+        self.client              = client
+        self.umap_n_neighbors    = umap_n_neighbors
+        self.umap_min_dist       = umap_min_dist
+        self.hdbscan_min_cluster = hdbscan_min_cluster
+
+    def run(self):
+        try:
+            self._compute()
+        except Exception as exc:
+            self.error.emit(str(exc))
+
+    def _compute(self):
+        import numpy as np
+
+        # ── 1. Embeddings ─────────────────────────────────────
+        self.progress.emit("Extraction des embeddings…")
+        names, vectors = [], []
+        for name, data in self.index.items():
+            emb = data.get("embedding")
+            if emb:
+                names.append(name)
+                vectors.append(emb)
+
+        if len(vectors) < 2:
+            self.error.emit(f"Pas assez d'embeddings ({len(vectors)} / min 2).")
+            return
+
+        X = np.array(vectors, dtype=np.float32)
+
+        # ── 2. UMAP ───────────────────────────────────────────
+        self.progress.emit(f"UMAP sur {len(names)} images…")
+        import umap
+        
+        embedding_2d = umap.UMAP(
+            n_neighbors=min(self.umap_n_neighbors, len(names) - 1),
+            min_dist=self.umap_min_dist,
+            metric="cosine",
+            random_state=42,
+            n_components=2,
+            verbose=False,
+        ).fit_transform(X)
+
+        # ── 3. HDBSCAN ────────────────────────────────────────
+        self.progress.emit("Clustering HDBSCAN…")
+        try:
+            import hdbscan
+            labels: list[int] = hdbscan.HDBSCAN(
+                min_cluster_size=max(2, self.hdbscan_min_cluster),
+                metric="euclidean",   # cohérent avec l'espace 2D projeté
+            ).fit_predict(embedding_2d).tolist()
+        except ImportError:
+            self.progress.emit("hdbscan absent -> pas de clustering")
+            labels = [0] * len(names)
+
+        # ── 4. Pas de nommage bloquant ────────────────
+        cluster_names = {}
+
+        # ── 5. Émettre immédiatement ─────────────────
+        points = [(float(x), float(y)) for x, y in embedding_2d]
+        self.progress.emit("Carte prête.")
+        self.finished.emit(points, labels, names, cluster_names)
+
+        # ── 6. Nommage en arrière-plan ───────────────
+        # self._name_clusters_async(names, labels)
+
+    # ─────────────────────────────────────────────────────────
+    def _name_clusters_async(self, names: list[str], labels: list[int]):
+        from collections import defaultdict
+        import random
+
+        unique = sorted(c for c in set(labels) if c >= 0)
+        if not unique:
+            return
+
+        cluster_members: dict[int, list[str]] = defaultdict(list)
+        for name, label in zip(names, labels):
+            if label >= 0:
+                cluster_members[label].append(name)
+
+        total = len(unique)
+
+        for i, cid in enumerate(unique):
+            self.progress.emit(f"Nommage cluster {i+1}/{total}…")
+
+            members = cluster_members[cid]
+            sample = random.sample(members, min(8, len(members)))
+
+            descriptions = []
+            for name in sample:
+                data = self.index.get(name, {})
+                desc = data.get("description", "")
+                kws  = data.get("keywords", [])
+                if desc:
+                    descriptions.append(desc)
+                elif kws:
+                    descriptions.append(", ".join(kws))
+
+            if not descriptions:
+                self.cluster_named.emit(cid, f"Cluster {cid}")
+                continue
+
+            prompt = (
+                "Voici des descriptions d'images appartenant au même groupe :\n"
+                + "\n".join(f"- {d}" for d in descriptions)
+                + "\n\nDonne un nom de groupe court (2-3 mots max, français)."
+            )
+
+            try:
+                result = self.client.generate_text(
+                    model="qwen2.5vl:7b",
+                    prompt=prompt,
+                    options={"temperature": 0.3},
+                )
+                name = result.response.strip().splitlines()[0][:40]
+            except Exception:
+                name = f"Cluster {cid}"
+
+            # update UI en direct
+            self.cluster_named.emit(cid, name)
