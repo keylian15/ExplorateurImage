@@ -22,7 +22,7 @@ THUMB_FOLDER = ".thumbnails"
 
 
 class ThumbnailCache:
-    def __init__(self, folder: str, thumb_size: int = 192, max_memory: int = 500) -> None:
+    def __init__(self, folder: str, thumb_size: int = 192, max_memory: int = 500):
         """
         Deux niveaux de cache pour les thumbnails :
         - Niveau 1 : LRU en mémoire (OrderedDict, taille configurable)
@@ -43,7 +43,7 @@ class ThumbnailCache:
     # Dossier courant
     # ──────────────────────────────────────────────
 
-    def set_folder(self, folder: str) -> None:
+    def set_folder(self, folder: str):
         """Définit le dossier source des images et met à jour le dossier de cache des thumbnails. Réinitialise le cache mémoire.
 
         Args:
@@ -54,19 +54,21 @@ class ThumbnailCache:
         self.thumb_folder = os.path.join(folder, THUMB_FOLDER)
         self._memory.clear()
 
-    def _ensure_thumb_dir(self):
+    def ensure_thumb_dir(self):
         """Crée le dossier de stockage des thumbnails s'il n'existe pas déjà."""
+
         os.makedirs(self.thumb_folder, exist_ok=True)
 
     # ──────────────────────────────────────────────
     # Clé disque
     # ──────────────────────────────────────────────
 
-    def _disk_key(self, img_name: str) -> str:
+    def disk_key(self, img_name: str) -> str:
         """Génère un chemin de fichier unique et stable pour le thumbnail associé à une image.
 
         Args:
             img_name (str): Nom de l'image.
+
         Returns:
             str: Chemin du fichier thumbnail sur disque.
         """
@@ -95,11 +97,11 @@ class ThumbnailCache:
             return self._memory[img_name]
 
         # Niveau 2 : disque
-        disk_path = self._disk_key(img_name)
+        disk_path = self.disk_key(img_name)
         if os.path.exists(disk_path):
             pixmap = QPixmap(disk_path)
             if not pixmap.isNull():
-                self._store_memory(img_name, pixmap)
+                self.store_memory(img_name, pixmap)
                 return pixmap
 
         return None
@@ -113,8 +115,8 @@ class ThumbnailCache:
         """
         if pixmap.isNull():
             return
-        self._store_memory(img_name, pixmap)
-        self._store_disk(img_name, pixmap)
+        self.store_memory(img_name, pixmap)
+        self.store_disk(img_name, pixmap)
 
     def invalidate(self, img_name: str):
         """Supprime une entrée des deux niveaux (ex : après renommage).
@@ -123,7 +125,7 @@ class ThumbnailCache:
             img_name (str): Nom de l'image.
         """
         self._memory.pop(img_name, None)
-        disk_path = self._disk_key(img_name)
+        disk_path = self.disk_key(img_name)
         if os.path.exists(disk_path):
             try:
                 os.remove(disk_path)
@@ -146,23 +148,24 @@ class ThumbnailCache:
         self._memory.clear()
 
     # ──────────────────────────────────────────────
-    # Helpers privés
+    # Helpers
     # ──────────────────────────────────────────────
 
-    def _store_memory(self, img_name: str, pixmap: QPixmap):
+    def store_memory(self, img_name: str, pixmap: QPixmap):
         """Stocke le thumbnail en mémoire et applique l'éviction LRU si nécessaire.
 
         Args:
             img_name (str): Nom de l'image.
             pixmap (QPixmap): Thumbnail.
         """
+
         self._memory[img_name] = pixmap
         self._memory.move_to_end(img_name)
         # Éviction LRU si dépassement
         while len(self._memory) > self.max_memory:
             self._memory.popitem(last=False)
 
-    def _store_disk(self, img_name: str, pixmap: QPixmap):
+    def store_disk(self, img_name: str, pixmap: QPixmap):
         """Stocke le thumbnail sur le disque.
 
         Args:
@@ -170,8 +173,8 @@ class ThumbnailCache:
             pixmap (QPixmap): Thumbnail.
         """
 
-        self._ensure_thumb_dir()
-        disk_path = self._disk_key(img_name)
+        self.ensure_thumb_dir()
+        disk_path = self.disk_key(img_name)
         if not os.path.exists(disk_path):
             pixmap.save(disk_path, "JPEG", THUMB_QUALITY)
 

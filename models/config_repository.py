@@ -44,7 +44,7 @@ def load() -> dict:
     return dict(_DEFAULTS)
 
 
-def save(config: dict) -> None:
+def save(config: dict):
     """Enregistre la configuration dans le fichier config.json.
 
     Args:

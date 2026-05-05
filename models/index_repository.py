@@ -36,7 +36,7 @@ def load(folder: str) -> dict:
     return {}
 
 
-def save(folder: str, index: dict) -> None:
+def save(folder: str, index: dict):
     """Écrit index.json dans le dossier donné.
 
     Args:

@@ -47,13 +47,13 @@ _COL_LOADING_TXT = QColor(COLORS["thumb_loading_text"])
 class ImageListModel(QAbstractListModel):
     """Stocke une liste ordonnée de noms de fichiers images."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None):
         super().__init__(parent)
         self._images: list[str] = []
         self._indexed: set[str] = set()
         self._selected: str | None = None
 
-    def set_images(self, images: list[str]) -> None:
+    def set_images(self, images: list[str]):
         """Remplace la liste d'images par une nouvelle. Réinitialise la sélection.
 
         Args:
@@ -64,7 +64,7 @@ class ImageListModel(QAbstractListModel):
         self._images = list(images)
         self.endResetModel()
 
-    def set_indexed(self, indexed: set[str]) -> None:
+    def set_indexed(self, indexed: set[str]):
         """Met à jour la liste des images indexées. Émet un signal de changement de données pour les images concernées.
 
         Args:
@@ -75,7 +75,7 @@ class ImageListModel(QAbstractListModel):
         if self._images:
             self.dataChanged.emit(self.index(0), self.index(len(self._images) - 1), [INDEXED_ROLE])
 
-    def set_selected(self, img_name: str | None) -> None:
+    def set_selected(self, img_name: str | None):
         """Met à jour l'image sélectionnée. Émet un signal de changement de données pour l'ancienne et la nouvelle image sélectionnée.
 
         Args:
@@ -113,7 +113,7 @@ class ImageListModel(QAbstractListModel):
         except ValueError:
             return None
 
-    def notify_image_updated(self, img_name: str) -> None:
+    def notify_image_updated(self, img_name: str):
         """Indique que l'image donnée a été mise à jour. Émet un signal de changement de données pour cette image.
 
         Args:
@@ -198,7 +198,7 @@ class ImageGridDelegate(QStyledItemDelegate):
         self.cell_size = cell_size
         self.scheduler.thumbnail_ready.connect(self.on_thumbnail_ready)
 
-    def set_cell_size(self, size: int) -> None:
+    def set_cell_size(self, size: int):
         """Met à jour la taille des cellules.
 
         Args:
@@ -209,7 +209,7 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         self.cell_size = size
 
-    def paint(self, painter: QPainter, option, index: QModelIndex) -> None:
+    def paint(self, painter: QPainter, option, index: QModelIndex):
         """Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée.
 
         Args:
@@ -255,7 +255,7 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         painter.restore()
 
-    def on_thumbnail_ready(self, img_name: str) -> None:
+    def on_thumbnail_ready(self, img_name: str):
         """Emet un signal pour indiquer que le thumbnail d'une image est prêt, afin que la cellule correspondante soit redessinée.
 
         Args:
