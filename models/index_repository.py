@@ -1,7 +1,13 @@
 """
-index_repository.py — Lecture / écriture de index.json.
+Module d'accès au fichier d'index de l'application (index.json).
 
-Aucune dépendance Qt. Toute la logique d'accès au fichier d'index est ici.
+Ce composant centralise toute la logique de lecture, écriture et mise à jour
+de l'index associé à un dossier d'images. Il permet de stocker des métadonnées
+par image (chemin, description, mots-clés, embeddings) sans dépendre de Qt
+ni d'aucune couche UI.
+
+Il sert de couche persistante simple entre le système de traitement d'images
+et le reste de l'application.
 """
 
 from __future__ import annotations
@@ -20,7 +26,7 @@ def load(folder: str) -> dict:
         dict: Contenu de index.json.
     """
 
-    path = _path(folder)
+    path = get_path(folder)
     if os.path.exists(path):
         try:
             with open(path, encoding="utf-8") as f:
@@ -38,7 +44,7 @@ def save(folder: str, index: dict) -> None:
         index (dict): Contenu à écrire.
     """
 
-    with open(_path(folder), "w", encoding="utf-8") as f:
+    with open(get_path(folder), "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2, ensure_ascii=False)
 
 
@@ -106,7 +112,7 @@ def build_entry(img_name: str, folder: str, description: str, keywords: list[str
     }
 
 
-def _path(folder: str) -> str:
+def get_path(folder: str) -> str:
     """Retourne le chemin du fichier d'index.
 
     Args:

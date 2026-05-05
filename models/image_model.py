@@ -196,7 +196,7 @@ class ImageGridDelegate(QStyledItemDelegate):
         self.cache = cache
         self.scheduler = scheduler
         self.cell_size = cell_size
-        self.scheduler.thumbnail_ready.connect(self._on_thumbnail_ready)
+        self.scheduler.thumbnail_ready.connect(self.on_thumbnail_ready)
 
     def set_cell_size(self, size: int) -> None:
         """Met à jour la taille des cellules.
@@ -255,7 +255,7 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         painter.restore()
 
-    def _on_thumbnail_ready(self, img_name: str) -> None:
+    def on_thumbnail_ready(self, img_name: str) -> None:
         """Emet un signal pour indiquer que le thumbnail d'une image est prêt, afin que la cellule correspondante soit redessinée.
 
         Args:
