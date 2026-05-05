@@ -1,11 +1,12 @@
 """
-models/image_model.py
+Modèle et delegate Qt pour l'affichage d'une grille d'images avec thumbnails.
 
-ImageListModel   — QAbstractListModel stockant uniquement des noms de fichiers.
-ImageGridDelegate — QStyledItemDelegate dessinant thumbnails + indicateur d'index.
+Le module fournit un modèle léger basé sur les noms de fichiers (sans charger les images en mémoire)
+et un delegate responsable du rendu des cellules : affichage des thumbnails via cache, gestion du chargement
+asynchrone, indication des éléments sélectionnés et marqués comme indexés.
 
-Inchangé fonctionnellement par rapport à la version d'origine.
-Les couleurs et dimensions viennent de styles.py.
+Il s'appuie sur un cache de thumbnails et un scheduler pour générer les images manquantes à la demande,
+afin de garantir de bonnes performances même avec un grand nombre d'images.
 """
 
 from __future__ import annotations
