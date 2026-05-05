@@ -1,0 +1,1 @@
+::: views.map_widget

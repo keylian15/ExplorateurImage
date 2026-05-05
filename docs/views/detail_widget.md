@@ -1,0 +1,1 @@
+::: views.detail_widget

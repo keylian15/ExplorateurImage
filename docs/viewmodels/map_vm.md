@@ -1,0 +1,1 @@
+::: viewmodels.map_vm

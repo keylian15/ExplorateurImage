@@ -1,0 +1,1 @@
+::: views.components.clickable_label

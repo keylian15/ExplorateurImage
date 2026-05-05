@@ -1,0 +1,1 @@
+::: viewmodels.detail_vm

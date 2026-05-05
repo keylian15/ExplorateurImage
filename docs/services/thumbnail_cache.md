@@ -1,0 +1,1 @@
+::: services.thumbnail_cache

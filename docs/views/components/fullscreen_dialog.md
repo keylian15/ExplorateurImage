@@ -1,0 +1,1 @@
+::: views.components.fullscreen_dialog

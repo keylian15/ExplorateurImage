@@ -1,0 +1,1 @@
+::: models.image_model
