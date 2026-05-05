@@ -5,6 +5,7 @@ repos:
       # 1. Corrige automatiquement
       - id: ruff
         args: [--fix]
+        pass_filenames: false
 
       # 2. Vérifie strictement
       - id: ruff
