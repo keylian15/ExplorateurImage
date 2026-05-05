@@ -6,7 +6,9 @@ Logique de la carte 2D sémantique :
   - lancement du MapWorker (UMAP + HDBSCAN)
   - paramètres UMAP/HDBSCAN (lu/écrit via config_repository)
 """
+
 from __future__ import annotations
+
 import os
 import pickle
 
@@ -21,17 +23,17 @@ _MAP_CACHE_FILE = "map_cache.pkl"
 
 class MapViewModel(QObject):
     # ── Signaux vers la View ──────────────────────────────────────────────────
-    compute_started   = pyqtSignal()
-    compute_progress  = pyqtSignal(str)
-    compute_finished  = pyqtSignal(list, list, list, dict)  # points, labels, names, cluster_names
-    cluster_named     = pyqtSignal(int, str)
-    compute_error     = pyqtSignal(str)
-    params_changed    = pyqtSignal(dict)
+    compute_started = pyqtSignal()
+    compute_progress = pyqtSignal(str)
+    compute_finished = pyqtSignal(list, list, list, dict)  # points, labels, names, cluster_names
+    cluster_named = pyqtSignal(int, str)
+    compute_error = pyqtSignal(str)
+    params_changed = pyqtSignal(dict)
 
     def __init__(self, client: OllamaWrapper, config: dict, gallery_vm, parent=None):
         super().__init__(parent)
-        self._client     = client
-        self._config     = config
+        self._client = client
+        self._config = config
         self._gallery_vm = gallery_vm
         self._worker: MapWorker | None = None
         self._params = config_repository.get_map_params(config)
@@ -55,19 +57,15 @@ class MapViewModel(QObject):
         if self._worker and self._worker.isRunning():
             return
 
-        indexed = {
-            k: v for k, v in self._gallery_vm.index.items()
-            if v.get("embedding") and len(v["embedding"]) > 0
-        }
+        indexed = {k: v for k, v in self._gallery_vm.index.items() if v.get("embedding") and len(v["embedding"]) > 0}
         if len(indexed) < 2:
-            self.compute_error.emit(
-                f"Pas assez d'embeddings ({len(indexed)} / min 2)."
-            )
+            self.compute_error.emit(f"Pas assez d'embeddings ({len(indexed)} / min 2).")
             return
 
         self.compute_started.emit()
         self._worker = MapWorker(
-            indexed, self._client,
+            indexed,
+            self._client,
             umap_n_neighbors=self._params["umap_n_neighbors"],
             umap_min_dist=self._params["umap_min_dist"],
             hdbscan_min_cluster=self._params["hdbscan_min_cluster"],
@@ -83,8 +81,10 @@ class MapViewModel(QObject):
         cache = self._load_cache()
         if cache:
             self.compute_finished.emit(
-                cache["points"], cache["labels"],
-                cache["names"],  cache["cluster_names"],
+                cache["points"],
+                cache["labels"],
+                cache["names"],
+                cache["cluster_names"],
             )
         else:
             self.compute()
@@ -98,8 +98,7 @@ class MapViewModel(QObject):
     # ── Cache pickle ──────────────────────────────────────────────────────────
 
     def _save_cache(self, points, labels, names, cluster_names):
-        data = {"points": points, "labels": labels,
-                "names": names, "cluster_names": cluster_names}
+        data = {"points": points, "labels": labels, "names": names, "cluster_names": cluster_names}
         with open(_MAP_CACHE_FILE, "wb") as f:
             pickle.dump(data, f)
 

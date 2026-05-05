@@ -3,9 +3,11 @@ views/components/clickable_label.py
 
 QLabel avec callbacks clic gauche et droit.
 """
+
 from __future__ import annotations
-from PyQt6.QtWidgets import QLabel, QWidget
+
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QLabel, QWidget
 
 
 class ClickableLabel(QLabel):
@@ -17,7 +19,7 @@ class ClickableLabel(QLabel):
         else:
             super().__init__(parent)
         self.rightClicked = None
-        self.leftClicked  = None
+        self.leftClicked = None
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.RightButton:

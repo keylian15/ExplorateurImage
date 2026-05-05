@@ -10,13 +10,20 @@ Tous les QThread / QRunnable de l'application.
   SaveMetadataWorker    QThread   - embedding + écriture index.json
   MapWorker             QThread   - UMAP + HDBSCAN + nommage cluster
 """
+
 from __future__ import annotations
-import os
+
 import json
+import os
 
 from PyQt6.QtCore import (
-    QObject, QRunnable, QThreadPool, QMutex, QMutexLocker,
-    pyqtSignal, QThread,
+    QMutex,
+    QMutexLocker,
+    QObject,
+    QRunnable,
+    QThread,
+    QThreadPool,
+    pyqtSignal,
 )
 from PyQt6.QtGui import QPixmap
 
@@ -30,8 +37,9 @@ MODEL_EMBED = "nomic-embed-text:v1.5"
 #  THUMBNAIL LOADER
 # ═══════════════════════════════════════════════════════════
 
+
 class _TaskSignals(QObject):
-    done  = pyqtSignal(str, QPixmap)
+    done = pyqtSignal(str, QPixmap)
     error = pyqtSignal(str)
 
 
@@ -39,8 +47,8 @@ class ThumbnailTask(QRunnable):
     def __init__(self, img_name: str, cache: ThumbnailCache):
         super().__init__()
         self.img_name = img_name
-        self.cache    = cache
-        self.signals  = _TaskSignals()
+        self.cache = cache
+        self.signals = _TaskSignals()
         self.setAutoDelete(True)
 
     def run(self):
@@ -53,14 +61,14 @@ class ThumbnailTask(QRunnable):
 
 class ThumbnailScheduler(QObject):
     thumbnail_ready = pyqtSignal(str, QPixmap)
-    POOL_THREADS    = 4
+    POOL_THREADS = 4
 
     def __init__(self, cache: ThumbnailCache, parent=None):
         super().__init__(parent)
-        self.cache   = cache
-        self._pool   = QThreadPool()
+        self.cache = cache
+        self._pool = QThreadPool()
         self._pool.setMaxThreadCount(self.POOL_THREADS)
-        self._mutex  = QMutex()
+        self._mutex = QMutex()
         self._pending: set[str] = set()
 
     def set_cache(self, cache: ThumbnailCache):
@@ -101,14 +109,15 @@ class ThumbnailScheduler(QObject):
 #  AUTO-COMPLETE (une image)
 # ═══════════════════════════════════════════════════════════
 
+
 class AutoCompleteWorker(QThread):
     finished = pyqtSignal(dict)
-    error    = pyqtSignal(str)
+    error = pyqtSignal(str)
 
     def __init__(self, image_path: str, client: OllamaWrapper):
         super().__init__()
         self.image_path = image_path
-        self.client     = client
+        self.client = client
 
     def run(self):
         try:
@@ -122,16 +131,17 @@ class AutoCompleteWorker(QThread):
 #  AUTO-COMPLETE BATCH
 # ═══════════════════════════════════════════════════════════
 
+
 class AutoCompleteAllWorker(QThread):
-    image_done  = pyqtSignal(int, str, dict)
+    image_done = pyqtSignal(int, str, dict)
     image_error = pyqtSignal(int, str, str)
-    all_done    = pyqtSignal()
+    all_done = pyqtSignal()
 
     def __init__(self, folder: str, images: list[str], client: OllamaWrapper):
         super().__init__()
-        self.folder     = folder
-        self.images     = images
-        self.client     = client
+        self.folder = folder
+        self.images = images
+        self.client = client
         self._cancelled = False
 
     def cancel(self):
@@ -154,18 +164,18 @@ class AutoCompleteAllWorker(QThread):
 #  SAVE METADATA
 # ═══════════════════════════════════════════════════════════
 
+
 class SaveMetadataWorker(QThread):
     finished = pyqtSignal()
-    error    = pyqtSignal(str)
+    error = pyqtSignal(str)
 
-    def __init__(self, image_name: str, folder: str,
-                 desc: str, keywords: list[str], client: OllamaWrapper):
+    def __init__(self, image_name: str, folder: str, desc: str, keywords: list[str], client: OllamaWrapper):
         super().__init__()
         self.image_name = image_name
-        self.folder     = folder
-        self.desc       = desc
-        self.keywords   = keywords
-        self.client     = client
+        self.folder = folder
+        self.desc = desc
+        self.keywords = keywords
+        self.client = client
 
     def run(self):
         try:
@@ -176,15 +186,15 @@ class SaveMetadataWorker(QThread):
             index_path = os.path.join(self.folder, "index.json")
             index = {}
             if os.path.exists(index_path):
-                with open(index_path, "r", encoding="utf-8") as f:
+                with open(index_path, encoding="utf-8") as f:
                     index = json.load(f)
 
             index[self.image_name] = {
-                "id":          self.image_name,
-                "path":        os.path.join(self.folder, self.image_name),
+                "id": self.image_name,
+                "path": os.path.join(self.folder, self.image_name),
                 "description": self.desc,
-                "keywords":    self.keywords,
-                "embedding":   embedding,
+                "keywords": self.keywords,
+                "embedding": embedding,
             }
             with open(index_path, "w", encoding="utf-8") as f:
                 json.dump(index, f, indent=2, ensure_ascii=False)
@@ -198,20 +208,27 @@ class SaveMetadataWorker(QThread):
 #  MAP WORKER  (UMAP + HDBSCAN)
 # ═══════════════════════════════════════════════════════════
 
-class MapWorker(QThread):
-    finished      = pyqtSignal(list, list, list, dict)
-    cluster_named = pyqtSignal(int, str)
-    progress      = pyqtSignal(str)
-    error         = pyqtSignal(str)
 
-    def __init__(self, index: dict, client: OllamaWrapper,
-                 umap_n_neighbors: int = 15, umap_min_dist: float = 0.1,
-                 hdbscan_min_cluster: int = 15, parent=None):
+class MapWorker(QThread):
+    finished = pyqtSignal(list, list, list, dict)
+    cluster_named = pyqtSignal(int, str)
+    progress = pyqtSignal(str)
+    error = pyqtSignal(str)
+
+    def __init__(
+        self,
+        index: dict,
+        client: OllamaWrapper,
+        umap_n_neighbors: int = 15,
+        umap_min_dist: float = 0.1,
+        hdbscan_min_cluster: int = 15,
+        parent=None,
+    ):
         super().__init__(parent)
-        self.index               = index
-        self.client              = client
-        self.umap_n_neighbors    = umap_n_neighbors
-        self.umap_min_dist       = umap_min_dist
+        self.index = index
+        self.client = client
+        self.umap_n_neighbors = umap_n_neighbors
+        self.umap_min_dist = umap_min_dist
         self.hdbscan_min_cluster = hdbscan_min_cluster
 
     def run(self):
@@ -239,6 +256,7 @@ class MapWorker(QThread):
 
         self.progress.emit(f"UMAP sur {len(names)} images…")
         import umap
+
         embedding_2d = umap.UMAP(
             n_neighbors=min(self.umap_n_neighbors, len(names) - 1),
             min_dist=self.umap_min_dist,
@@ -251,10 +269,15 @@ class MapWorker(QThread):
         self.progress.emit("Clustering HDBSCAN…")
         try:
             import hdbscan
-            labels: list[int] = hdbscan.HDBSCAN(
-                min_cluster_size=max(2, self.hdbscan_min_cluster),
-                metric="euclidean",
-            ).fit_predict(embedding_2d).tolist()
+
+            labels: list[int] = (
+                hdbscan.HDBSCAN(
+                    min_cluster_size=max(2, self.hdbscan_min_cluster),
+                    metric="euclidean",
+                )
+                .fit_predict(embedding_2d)
+                .tolist()
+            )
         except ImportError:
             self.progress.emit("hdbscan absent → pas de clustering")
             labels = [0] * len(names)
@@ -264,28 +287,28 @@ class MapWorker(QThread):
         self.finished.emit(points, labels, names, {})
 
     def _name_clusters_async(self, names: list[str], labels: list[int]):
-        from collections import defaultdict
         import random
+        from collections import defaultdict
 
         unique = sorted(c for c in set(labels) if c >= 0)
         if not unique:
             return
 
         cluster_members: dict[int, list[str]] = defaultdict(list)
-        for name, label in zip(names, labels):
+        for name, label in zip(names, labels, strict=False):
             if label >= 0:
                 cluster_members[label].append(name)
 
         for i, cid in enumerate(unique):
-            self.progress.emit(f"Nommage cluster {i+1}/{len(unique)}…")
+            self.progress.emit(f"Nommage cluster {i + 1}/{len(unique)}…")
             members = cluster_members[cid]
-            sample  = random.sample(members, min(8, len(members)))
+            sample = random.sample(members, min(8, len(members)))
 
             descriptions = []
             for name in sample:
                 data = self.index.get(name, {})
                 desc = data.get("description", "")
-                kws  = data.get("keywords", [])
+                kws = data.get("keywords", [])
                 if desc:
                     descriptions.append(desc)
                 elif kws:
@@ -295,14 +318,11 @@ class MapWorker(QThread):
                 self.cluster_named.emit(cid, f"Cluster {cid}")
                 continue
 
-            prompt = (
-                "Voici des descriptions d'images appartenant au même groupe :\n"
-                + "\n".join(f"- {d}" for d in descriptions)
-                + "\n\nDonne un nom de groupe court (2-3 mots max, français)."
-            )
+            prompt = "Voici des descriptions d'images appartenant au même groupe :\n" + "\n".join(f"- {d}" for d in descriptions) + "\n\nDonne un nom de groupe court (2-3 mots max, français)."
             try:
                 result = self.client.generate_text(
-                    model="qwen2.5vl:7b", prompt=prompt,
+                    model="qwen2.5vl:7b",
+                    prompt=prompt,
                     options={"temperature": 0.3},
                 )
                 name = result.response.strip().splitlines()[0][:40]

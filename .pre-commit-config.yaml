@@ -1,14 +1,26 @@
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+  - repo: local
     hooks:
-      # 1. Corrige automatiquement
-      - id: ruff
-        args: [--fix]
+      - id: ruff-fix
+        name: ruff (auto-fix)
+        entry: ruff check --fix .
+        language: python
         pass_filenames: false
+        always_run: true
+        additional_dependencies: [ruff]
 
-      # 2. Vérifie strictement
-      - id: ruff
-        name: ruff-check
-        args: []
+      - id: ruff-format
+        name: ruff (format)
+        entry: ruff format .
+        language: python
         pass_filenames: false
+        always_run: true
+        additional_dependencies: [ruff]
+
+      - id: ruff-check
+        name: ruff (check strict)
+        entry: ruff check .
+        language: python
+        pass_filenames: false
+        always_run: true
+        additional_dependencies: [ruff]

@@ -7,32 +7,37 @@ barre de progression pour le batch, contrôle du zoom (Ctrl+molette).
 Ne contient aucune logique métier : tout passe par GalleryViewModel
 et AutocompleteViewModel.
 """
+
 from __future__ import annotations
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLineEdit, QProgressBar, QLabel,
-    QListView, QAbstractItemView,
-)
-from PyQt6.QtCore import Qt, QSize, QTimer, QModelIndex
+from PyQt6.QtCore import QModelIndex, QSize, Qt, QTimer
 from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListView,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
-from viewmodels.gallery_vm import GalleryViewModel
-from viewmodels.autocomplete_vm import AutocompleteViewModel
 from models.image_model import IMG_NAME_ROLE
 from styles import THUMB
+from viewmodels.autocomplete_vm import AutocompleteViewModel
+from viewmodels.gallery_vm import GalleryViewModel
 from views.components.fullscreen_dialog import FullscreenDialog
 
 PREFETCH_ROWS = THUMB["prefetch_rows"]
 
 
 class GalleryWidget(QWidget):
-    def __init__(self, gallery_vm: GalleryViewModel,
-                 autocomplete_vm: AutocompleteViewModel,
-                 parent=None):
+    def __init__(self, gallery_vm: GalleryViewModel, autocomplete_vm: AutocompleteViewModel, parent=None):
         super().__init__(parent)
-        self._gvm  = gallery_vm
-        self._avm  = autocomplete_vm
+        self._gvm = gallery_vm
+        self._avm = autocomplete_vm
 
         self._build_ui()
         self._connect_vm()
@@ -80,9 +85,7 @@ class GalleryWidget(QWidget):
         self.list_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list_view.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.list_view.setToolTip(
-            "Clic gauche : sélectionner | Clic droit : voir en plein écran"
-        )
+        self.list_view.setToolTip("Clic gauche : sélectionner | Clic droit : voir en plein écran")
         layout.addWidget(self.list_view)
 
         # ── Progression batch ─────────────────────────────────────────────────
@@ -107,9 +110,7 @@ class GalleryWidget(QWidget):
         self.btn_cancel.clicked.connect(self._on_cancel)
         self.list_view.clicked.connect(self._on_item_clicked)
         self.list_view.customContextMenuRequested.connect(self._on_right_click)
-        self.list_view.verticalScrollBar().valueChanged.connect(
-            lambda: self._prefetch_timer.start()
-        )
+        self.list_view.verticalScrollBar().valueChanged.connect(lambda: self._prefetch_timer.start())
 
         # ViewModel → View
         self._gvm.cell_size_changed.connect(self._on_cell_size_changed)
@@ -133,6 +134,7 @@ class GalleryWidget(QWidget):
         if not img_name or not self._gvm.current_folder:
             return
         import os
+
         pixmap = QPixmap(os.path.join(self._gvm.current_folder, img_name))
         if not pixmap.isNull():
             dlg = FullscreenDialog(pixmap, img_name, self)
@@ -166,15 +168,16 @@ class GalleryWidget(QWidget):
 
     def _on_batch_finished(self, cancelled: bool):
         total = self.progress_bar.maximum()
-        self.progress_label.setText(
-            "⛔ Annulé" if cancelled else f"✅ Terminé — {total} images traitées"
-        )
+        self.progress_label.setText("⛔ Annulé" if cancelled else f"✅ Terminé — {total} images traitées")
         self.btn_batch.setEnabled(True)
         self.btn_cancel.setVisible(False)
-        QTimer.singleShot(4000, lambda: (
-            self.progress_bar.setVisible(False),
-            self.progress_label.setVisible(False),
-        ))
+        QTimer.singleShot(
+            4000,
+            lambda: (
+                self.progress_bar.setVisible(False),
+                self.progress_label.setVisible(False),
+            ),
+        )
 
     # ── Zoom (Ctrl + molette) ─────────────────────────────────────────────────
 
@@ -190,7 +193,7 @@ class GalleryWidget(QWidget):
     # ── Prefetch ──────────────────────────────────────────────────────────────
 
     def _prefetch_visible(self):
-        vp   = self.list_view.viewport()
+        vp = self.list_view.viewport()
         rect = vp.rect()
         size = self._gvm.cell_size
         extra = PREFETCH_ROWS * (size + 8)

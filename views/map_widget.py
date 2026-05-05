@@ -5,42 +5,68 @@ Onglet carte 2D sémantique.
 Toute la logique de calcul est dans MapViewModel.
 Ce fichier ne contient que les widgets Qt et leur câblage.
 """
+
 from __future__ import annotations
 
+from PyQt6.QtCore import QRectF, Qt, QTimer
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPen, QWheelEvent
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGraphicsView, QGraphicsScene, QGraphicsEllipseItem,
-    QGraphicsItem, QScrollArea, QSizePolicy, QToolTip,
-    QDockWidget, QDoubleSpinBox, QSpinBox, QFormLayout, QFrame,
+    QDockWidget,
+    QDoubleSpinBox,
+    QFormLayout,
+    QFrame,
+    QGraphicsEllipseItem,
+    QGraphicsItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSpinBox,
+    QToolTip,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtGui import QBrush, QColor, QPen, QWheelEvent, QPainter
-from PyQt6.QtCore import Qt, QRectF, QTimer
 
 from viewmodels.map_vm import MapViewModel
-from models import config_repository
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 _CLUSTER_COLORS = [
-    "#5488C8", "#4CB87A", "#E07B4A", "#A86EC9", "#D95A5A",
-    "#4BBEC2", "#D4A82A", "#B05070", "#6DA87C", "#8888CC",
-    "#CC8844", "#44AACC", "#AA4488", "#88CC44", "#CC4444",
+    "#5488C8",
+    "#4CB87A",
+    "#E07B4A",
+    "#A86EC9",
+    "#D95A5A",
+    "#4BBEC2",
+    "#D4A82A",
+    "#B05070",
+    "#6DA87C",
+    "#8888CC",
+    "#CC8844",
+    "#44AACC",
+    "#AA4488",
+    "#88CC44",
+    "#CC4444",
 ]
-_NOISE_COLOR   = "#888888"
-_SELECT_COLOR  = "#FFFFFF"
-_POINT_RADIUS  = 1
-_HOVER_RADIUS  = 0.5
+_NOISE_COLOR = "#888888"
+_SELECT_COLOR = "#FFFFFF"
+_POINT_RADIUS = 1
+_HOVER_RADIUS = 0.5
 
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  Nœud interactif
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class _MapNode(QGraphicsEllipseItem):
     def __init__(self, img_name: str, cluster: int, color: QColor, callback_select):
         r = _POINT_RADIUS
         super().__init__(-r, -r, 2 * r, 2 * r)
         self.img_name = img_name
-        self.cluster  = cluster
+        self.cluster = cluster
         self.setBrush(QBrush(color))
         self.setPen(QPen(Qt.GlobalColor.transparent))
         self.setAcceptHoverEvents(True)
@@ -61,10 +87,7 @@ class _MapNode(QGraphicsEllipseItem):
     def hoverLeaveEvent(self, event):
         r = _POINT_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
-        self.setPen(
-            QPen(QColor(_SELECT_COLOR), 2) if self.isSelected()
-            else QPen(Qt.GlobalColor.transparent)
-        )
+        self.setPen(QPen(QColor(_SELECT_COLOR), 2) if self.isSelected() else QPen(Qt.GlobalColor.transparent))
         self.setZValue(5 if self.isSelected() else 1)
         super().hoverLeaveEvent(event)
 
@@ -76,16 +99,14 @@ class _MapNode(QGraphicsEllipseItem):
     def mark_selected(self, selected: bool):
         r = _POINT_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
-        self.setPen(
-            QPen(QColor(_SELECT_COLOR), 2) if selected
-            else QPen(Qt.GlobalColor.transparent)
-        )
+        self.setPen(QPen(QColor(_SELECT_COLOR), 2) if selected else QPen(Qt.GlobalColor.transparent))
         self.setZValue(5 if selected else 1)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  Vue zoomable
 # ═════════════════════════════════════════════════════════════════════════════
+
 
 class _MapView(QGraphicsView):
     ZOOM_FACTOR = 1.15
@@ -115,23 +136,16 @@ class _MapView(QGraphicsView):
 #  Dock paramètres (View pure)
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class _SettingsDock(QDockWidget):
     def __init__(self, params: dict, on_apply, parent=None):
         super().__init__("Paramètres de la carte", parent)
         self.on_apply = on_apply
-        self.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea |
-            Qt.DockWidgetArea.RightDockWidgetArea |
-            Qt.DockWidgetArea.BottomDockWidgetArea
-        )
-        self.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable |
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable |
-            QDockWidget.DockWidgetFeature.DockWidgetClosable
-        )
+        self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
+        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
 
         content = QWidget()
-        layout  = QVBoxLayout(content)
+        layout = QVBoxLayout(content)
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(10)
 
@@ -177,8 +191,8 @@ class _SettingsDock(QDockWidget):
 
     def current_params(self) -> dict:
         return {
-            "umap_n_neighbors":    self._spin_neighbors.value(),
-            "umap_min_dist":       self._spin_min_dist.value(),
+            "umap_n_neighbors": self._spin_neighbors.value(),
+            "umap_min_dist": self._spin_min_dist.value(),
             "hdbscan_min_cluster": self._spin_hdbscan.value(),
         }
 
@@ -192,16 +206,17 @@ class _SettingsDock(QDockWidget):
 #  Onglet carte 2D
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class MapTab(QWidget):
     def __init__(self, map_vm: MapViewModel, main_window, parent=None):
         super().__init__(parent)
-        self._vm               = map_vm
-        self._main_window      = main_window
-        self._nodes:           dict[str, _MapNode] = {}
+        self._vm = map_vm
+        self._main_window = main_window
+        self._nodes: dict[str, _MapNode] = {}
         self._current_selected: str | None = None
-        self._cluster_rects:   dict[int, QRectF] = {}
-        self._legend_labels:   dict[int, QLabel] = {}
-        self._cluster_names:   dict[int, str] = {}
+        self._cluster_rects: dict[int, QRectF] = {}
+        self._legend_labels: dict[int, QLabel] = {}
+        self._cluster_names: dict[int, str] = {}
 
         self._build_ui()
 
@@ -213,9 +228,7 @@ class MapTab(QWidget):
         )
         main_window.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._settings_dock)
         self._settings_dock.setVisible(False)
-        self._settings_dock.visibilityChanged.connect(
-            lambda v: self._btn_settings.setChecked(v)
-        )
+        self._settings_dock.visibilityChanged.connect(lambda v: self._btn_settings.setChecked(v))
 
         # Câblage ViewModel → View
         self._vm.compute_started.connect(self._on_compute_started)
@@ -242,8 +255,7 @@ class MapTab(QWidget):
 
         self._btn_settings = QPushButton("⚙ Paramètres")
         self._btn_settings.setCheckable(True)
-        self._btn_settings.clicked.connect(
-            lambda checked: self._settings_dock.setVisible(checked))
+        self._btn_settings.clicked.connect(lambda checked: self._settings_dock.setVisible(checked))
         bar.addWidget(self._btn_settings)
 
         self._btn_reset_filter = QPushButton("Réinitialiser le filtre")
@@ -261,7 +273,7 @@ class MapTab(QWidget):
         h.setSpacing(8)
 
         self._scene = QGraphicsScene(self)
-        self._view  = _MapView(self._scene, self)
+        self._view = _MapView(self._scene, self)
         self._view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         h.addWidget(self._view, stretch=5)
 
@@ -300,12 +312,9 @@ class MapTab(QWidget):
 
     def _on_finished(self, points, labels, names, cluster_names):
         self._build_scene(points, labels, names, cluster_names)
-        n_clusters = len({l for l in labels if l >= 0})
-        n_noise    = labels.count(-1)
-        self._lbl_status.setText(
-            f"{len(names)} images — {n_clusters} clusters"
-            + (f" — {n_noise} bruit" if n_noise else "")
-        )
+        n_clusters = len({label for label in labels if label >= 0})
+        n_noise = labels.count(-1)
+        self._lbl_status.setText(f"{len(names)} images — {n_clusters} clusters" + (f" — {n_noise} bruit" if n_noise else ""))
         self._btn_compute.setEnabled(True)
         self._btn_reset_filter.setEnabled(True)
         if self._current_selected:
@@ -337,16 +346,14 @@ class MapTab(QWidget):
         color_map: dict[int, QColor] = {}
         pi = 0
         for c in unique:
-            color_map[c] = QColor(_NOISE_COLOR) if c == -1 else QColor(
-                _CLUSTER_COLORS[pi % len(_CLUSTER_COLORS)])
+            color_map[c] = QColor(_NOISE_COLOR) if c == -1 else QColor(_CLUSTER_COLORS[pi % len(_CLUSTER_COLORS)])
             if c != -1:
                 pi += 1
 
         cluster_points: dict[int, list] = {}
-        for name, (px, py), label in zip(names, points, labels):
+        for name, (px, py), label in zip(names, points, labels, strict=False):
             sx, sy = sp(px, py)
-            node = _MapNode(name, label, color_map[label],
-                            callback_select=self._on_node_clicked)
+            node = _MapNode(name, label, color_map[label], callback_select=self._on_node_clicked)
             node.setPos(sx, sy)
             self._scene.addItem(node)
             self._nodes[name] = node
@@ -356,7 +363,8 @@ class MapTab(QWidget):
             xs2 = [p[0] for p in pts]
             ys2 = [p[1] for p in pts]
             self._cluster_rects[cid] = QRectF(
-                min(xs2), min(ys2),
+                min(xs2),
+                min(ys2),
                 max(xs2) - min(xs2) or 1,
                 max(ys2) - min(ys2) or 1,
             )
@@ -381,11 +389,12 @@ class MapTab(QWidget):
 
     def _build_legend(self, color_map, labels, cluster_names):
         from collections import Counter
+
         counts = Counter(labels)
         for cid in sorted(color_map.keys()):
             color = color_map[cid]
             label_text = cluster_names.get(cid, f"Cluster {cid}")
-            display    = f"{label_text} ({counts.get(cid, 0)})"
+            display = f"{label_text} ({counts.get(cid, 0)})"
 
             row = QHBoxLayout()
             dot = QLabel()
@@ -439,9 +448,7 @@ class MapTab(QWidget):
     def reset_opacity(self):
         for node in self._nodes.values():
             node.setOpacity(1.0)
-        self._view.fitInView(
-            QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio
-        )
+        self._view.fitInView(QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio)
 
     # ── API externe ───────────────────────────────────────────────────────────
 

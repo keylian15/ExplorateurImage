@@ -3,7 +3,9 @@ index_repository.py — Lecture / écriture de index.json.
 
 Aucune dépendance Qt. Toute la logique d'accès au fichier d'index est ici.
 """
+
 from __future__ import annotations
+
 import json
 import os
 
@@ -13,7 +15,7 @@ def load(folder: str) -> dict:
     path = _path(folder)
     if os.path.exists(path):
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 return json.load(f)
         except Exception:
             pass
@@ -46,15 +48,14 @@ def rename_entry(folder: str, old_name: str, new_name: str, new_path: str) -> di
     return index
 
 
-def build_entry(img_name: str, folder: str, description: str,
-                keywords: list[str], embedding: list[float]) -> dict:
+def build_entry(img_name: str, folder: str, description: str, keywords: list[str], embedding: list[float]) -> dict:
     """Construit un dict d'entrée standardisé."""
     return {
-        "id":          img_name,
-        "path":        os.path.join(folder, img_name),
+        "id": img_name,
+        "path": os.path.join(folder, img_name),
         "description": description,
-        "keywords":    keywords,
-        "embedding":   embedding,
+        "keywords": keywords,
+        "embedding": embedding,
     }
 
 

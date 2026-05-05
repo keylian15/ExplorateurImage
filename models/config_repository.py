@@ -3,7 +3,9 @@ config_repository.py — Lecture / écriture de config.json.
 
 Aucune dépendance Qt. Peut être remplacé sans toucher au reste.
 """
+
 from __future__ import annotations
+
 import json
 import os
 
@@ -23,7 +25,7 @@ _DEFAULTS = {
 def load() -> dict:
     if os.path.exists(CONFIG_FILE):
         try:
-            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            with open(CONFIG_FILE, encoding="utf-8") as f:
                 data = json.load(f)
             # Fusionne avec les défauts pour les clés manquantes
             merged = dict(_DEFAULTS)
@@ -43,8 +45,8 @@ def get_map_params(config: dict) -> dict:
     raw = config.get("map_params", {})
     defaults = _DEFAULTS["map_params"]
     return {
-        "umap_n_neighbors":    int(raw.get("umap_n_neighbors",    defaults["umap_n_neighbors"])),
-        "umap_min_dist":       float(raw.get("umap_min_dist",     defaults["umap_min_dist"])),
+        "umap_n_neighbors": int(raw.get("umap_n_neighbors", defaults["umap_n_neighbors"])),
+        "umap_min_dist": float(raw.get("umap_min_dist", defaults["umap_min_dist"])),
         "hdbscan_min_cluster": int(raw.get("hdbscan_min_cluster", defaults["hdbscan_min_cluster"])),
     }
 

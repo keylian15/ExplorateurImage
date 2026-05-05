@@ -3,13 +3,20 @@ views/components/fullscreen_dialog.py
 
 Dialog de visualisation plein écran avec zoom molette et boutons.
 """
+
 from __future__ import annotations
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QScrollArea, QWidget,
-)
-from PyQt6.QtGui import QPixmap, QWheelEvent
+
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from styles import fullscreen_bar_style
 
@@ -21,6 +28,7 @@ class FullscreenDialog(QDialog):
         self.setWindowTitle(title)
 
         from PyQt6.QtWidgets import QApplication
+
         screen = QApplication.primaryScreen().availableGeometry()
         self.resize(screen.width(), screen.height())
 
@@ -32,10 +40,10 @@ class FullscreenDialog(QDialog):
         bar = QHBoxLayout()
         bar.setContentsMargins(8, 4, 8, 4)
 
-        self._btn_out   = QPushButton("🔍 -")
-        self._btn_in    = QPushButton("🔍 +")
+        self._btn_out = QPushButton("🔍 -")
+        self._btn_in = QPushButton("🔍 +")
         self._btn_reset = QPushButton("↺ Reset")
-        self._lbl_zoom  = QLabel("100%")
+        self._lbl_zoom = QLabel("100%")
         self._lbl_zoom.setFixedWidth(55)
         self._lbl_zoom.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -73,15 +81,12 @@ class FullscreenDialog(QDialog):
         dpr = self._lbl_img.devicePixelRatio()
 
         def render(f):
-            w = int(dpr * screen.width()  * f)
+            w = int(dpr * screen.width() * f)
             h = int(dpr * screen.height() * f)
-            scaled = pixmap.scaled(w, h,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation)
+            scaled = pixmap.scaled(w, h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
             scaled.setDevicePixelRatio(dpr)
             self._lbl_img.setPixmap(scaled)
-            self._lbl_img.resize(scaled.width() // int(dpr),
-                                  scaled.height() // int(dpr))
+            self._lbl_img.resize(scaled.width() // int(dpr), scaled.height() // int(dpr))
             self._lbl_zoom.setText(f"{int(f * 100)}%")
 
         def zoom_in():

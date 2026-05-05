@@ -9,24 +9,35 @@ Contenu du dock "Détails de l'image" :
 
 Pure View : toute la logique est dans DetailViewModel.
 """
+
 from __future__ import annotations
+
 import os
 
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QTextEdit, QLineEdit,
-    QScrollArea, QGridLayout, QSpinBox,
-)
-from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtWidgets import (
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
+from styles import (
+    image_preview_style,
+    neighbor_thumb_style,
+    score_label_style,
+    section_title_style,
+)
 from viewmodels.detail_vm import DetailViewModel
 from views.components.clickable_label import ClickableLabel
 from views.components.fullscreen_dialog import FullscreenDialog
-from styles import (
-    image_preview_style, neighbor_thumb_style,
-    score_label_style, section_title_style,
-)
 
 
 class DetailWidget(QWidget):
@@ -64,7 +75,7 @@ class DetailWidget(QWidget):
         self.preview.setStyleSheet(image_preview_style())
         self.preview.setCursor(Qt.CursorShape.PointingHandCursor)
         self.preview.setToolTip("Cliquer pour voir en plein écran")
-        self.preview.leftClicked  = self._open_fullscreen
+        self.preview.leftClicked = self._open_fullscreen
         self.preview.rightClicked = self._open_fullscreen
         layout.addWidget(self.preview)
 
@@ -104,7 +115,7 @@ class DetailWidget(QWidget):
         scroll.setFixedHeight(220)
         scroll.setWidgetResizable(True)
         self._neighbors_widget = QWidget()
-        self._neighbors_grid   = QGridLayout()
+        self._neighbors_grid = QGridLayout()
         self._neighbors_grid.setSpacing(4)
         self._neighbors_widget.setLayout(self._neighbors_grid)
         scroll.setWidget(self._neighbors_widget)
@@ -112,9 +123,7 @@ class DetailWidget(QWidget):
 
     def _connect_vm(self):
         # View → ViewModel
-        self.btn_rename.clicked.connect(
-            lambda: self._vm.rename(self.title_edit.text().strip())
-        )
+        self.btn_rename.clicked.connect(lambda: self._vm.rename(self.title_edit.text().strip()))
         self.btn_autocomplete.clicked.connect(self._vm.auto_complete)
         self.spin_k.valueChanged.connect(self._on_k_changed)
 
@@ -133,10 +142,12 @@ class DetailWidget(QWidget):
         self._vm.neighbors_ready.connect(self._display_neighbors)
         self._vm.save_started.connect(lambda: self.lbl_loading.setVisible(True))
         self._vm.save_finished.connect(lambda: self.lbl_loading.setVisible(False))
-        self._vm.save_error.connect(lambda msg: (
-            self.lbl_loading.setVisible(False),
-            print(f"[SAVE ERROR] {msg}"),
-        ))
+        self._vm.save_error.connect(
+            lambda msg: (
+                self.lbl_loading.setVisible(False),
+                print(f"[SAVE ERROR] {msg}"),
+            )
+        )
         self._vm.autocomplete_started.connect(self._on_autocomplete_started)
         self._vm.autocomplete_finished.connect(self._on_autocomplete_finished)
         self._vm.autocomplete_error.connect(self._on_autocomplete_error)
@@ -183,20 +194,21 @@ class DetailWidget(QWidget):
 
         self.lbl_neighbors.setText(f"Images similaires (top {len(neighbors)})")
         folder = self._vm._folder
-        THUMB  = 80
+        THUMB = 80
         col, row = 0, 0
 
         for neighbor_name, score in neighbors.items():
             if not folder:
                 continue
-            path   = os.path.join(folder, neighbor_name)
+            path = os.path.join(folder, neighbor_name)
             pixmap = QPixmap(path)
             if pixmap.isNull():
                 continue
 
-            pixmap_full   = QPixmap(path)
+            pixmap_full = QPixmap(path)
             pixmap_scaled = pixmap.scaled(
-                THUMB, THUMB,
+                THUMB,
+                THUMB,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
@@ -212,7 +224,7 @@ class DetailWidget(QWidget):
             thumb.setStyleSheet(neighbor_thumb_style())
             thumb.setCursor(Qt.CursorShape.PointingHandCursor)
             thumb.setToolTip("Clic gauche : sélectionner | Clic droit : plein écran")
-            thumb.leftClicked  = lambda n=neighbor_name: self._vm._gallery_vm.select_image(n)
+            thumb.leftClicked = lambda n=neighbor_name: self._vm._gallery_vm.select_image(n)
             thumb.rightClicked = lambda p=pixmap_full: self._open_fullscreen_with(p)
 
             score_lbl = QLabel(f"{score:.2f}")
@@ -265,12 +277,12 @@ class DetailWidget(QWidget):
         if not pixmap or pixmap.isNull():
             return
         title = self.title_edit.text()
-        dlg   = FullscreenDialog(pixmap, title, self)
+        dlg = FullscreenDialog(pixmap, title, self)
         dlg.exec()
 
     # ── Sauvegarde déclenchée par l'UI ────────────────────────────────────────
 
     def _schedule_vm_save(self):
-        desc     = self.desc_edit.toPlainText()
+        desc = self.desc_edit.toPlainText()
         keywords = [k.strip() for k in self.keywords_edit.text().split(",") if k.strip()]
         self._vm.schedule_save(desc, keywords)

@@ -7,14 +7,20 @@ ImageGridDelegate — QStyledItemDelegate dessinant thumbnails + indicateur d'in
 Inchangé fonctionnellement par rapport à la version d'origine.
 Les couleurs et dimensions viennent de styles.py.
 """
+
 from __future__ import annotations
 
 from PyQt6.QtCore import (
-    Qt, QAbstractListModel, QModelIndex, QSize, QRect, QPoint,
+    QAbstractListModel,
+    QModelIndex,
+    QPoint,
+    QRect,
+    QSize,
+    Qt,
     pyqtSignal,
 )
-from PyQt6.QtGui import QPixmap, QPainter, QColor, QPen, QBrush
-from PyQt6.QtWidgets import QStyledItemDelegate, QStyle
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPen, QPixmap
+from PyQt6.QtWidgets import QStyle, QStyledItemDelegate
 
 from services.thumbnail_cache import ThumbnailCache
 from services.workers import ThumbnailScheduler
@@ -37,13 +43,14 @@ _COL_LOADING_TXT = QColor(COLORS["thumb_loading_text"])
 #  Modèle
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class ImageListModel(QAbstractListModel):
     """Stocke une liste ordonnée de noms de fichiers images."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._images:   list[str] = []
-        self._indexed:  set[str] = set()
+        self._images: list[str] = []
+        self._indexed: set[str] = set()
         self._selected: str | None = None
 
     def set_images(self, images: list[str]):
@@ -54,8 +61,7 @@ class ImageListModel(QAbstractListModel):
     def set_indexed(self, indexed: set[str]):
         self._indexed = indexed
         if self._images:
-            self.dataChanged.emit(self.index(0), self.index(
-                len(self._images) - 1), [INDEXED_ROLE])
+            self.dataChanged.emit(self.index(0), self.index(len(self._images) - 1), [INDEXED_ROLE])
 
     def set_selected(self, img_name: str | None):
         old = self._selected
@@ -82,7 +88,7 @@ class ImageListModel(QAbstractListModel):
 
     # ── Interface QAbstractListModel ──────────────────────────────────────────
 
-    def rowCount(self, _parent=QModelIndex()) -> int:
+    def rowCount(self, _parent: QModelIndex | None = None) -> int:
         return len(self._images)
 
     def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
@@ -104,6 +110,7 @@ class ImageListModel(QAbstractListModel):
 #  Delegate
 # ═════════════════════════════════════════════════════════════════════════════
 
+
 class ImageGridDelegate(QStyledItemDelegate):
     """Dessine chaque cellule : thumbnail, bordure de sélection, point indexé."""
 
@@ -113,8 +120,13 @@ class ImageGridDelegate(QStyledItemDelegate):
     DOT_RADIUS = THUMB["dot_radius"]
     PADDING = THUMB["padding"]
 
-    def __init__(self, cache: ThumbnailCache, scheduler: ThumbnailScheduler,
-                 cell_size: int = 192, parent=None):
+    def __init__(
+        self,
+        cache: ThumbnailCache,
+        scheduler: ThumbnailScheduler,
+        cell_size: int = 192,
+        parent=None,
+    ):
         super().__init__(parent)
         self.cache = cache
         self.scheduler = scheduler
@@ -132,12 +144,10 @@ class ImageGridDelegate(QStyledItemDelegate):
         if not img_name:
             return
 
-        is_selected = index.data(SELECTED_ROLE) or bool(
-            option.state & QStyle.StateFlag.State_Selected)
+        is_selected = index.data(SELECTED_ROLE) or bool(option.state & QStyle.StateFlag.State_Selected)
         is_indexed = index.data(INDEXED_ROLE)
         rect: QRect = option.rect
-        inner = rect.adjusted(self.BORDER, self.BORDER, -
-                              self.BORDER, -self.BORDER)
+        inner = rect.adjusted(self.BORDER, self.BORDER, -self.BORDER, -self.BORDER)
 
         painter.save()
         painter.fillRect(rect, _COL_PLACEHOLDER)
@@ -155,8 +165,7 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         border_color = _COL_BORDER_SEL if is_selected else _COL_BORDER_NORM
         painter.setPen(QPen(border_color, self.BORDER))
-        painter.drawRect(rect.adjusted(self.BORDER // 2, self.BORDER // 2,
-                                       -self.BORDER // 2, -self.BORDER // 2))
+        painter.drawRect(rect.adjusted(self.BORDER // 2, self.BORDER // 2, -self.BORDER // 2, -self.BORDER // 2))
 
         if is_indexed:
             painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -164,8 +173,7 @@ class ImageGridDelegate(QStyledItemDelegate):
             painter.setPen(Qt.PenStyle.NoPen)
             cx = rect.right() - self.DOT_RADIUS - 4
             cy = rect.bottom() - self.DOT_RADIUS - 4
-            painter.drawEllipse(
-                QPoint(cx, cy), self.DOT_RADIUS, self.DOT_RADIUS)
+            painter.drawEllipse(QPoint(cx, cy), self.DOT_RADIUS, self.DOT_RADIUS)
 
         painter.restore()
 

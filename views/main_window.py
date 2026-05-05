@@ -4,34 +4,40 @@ views/main_window.py
 QMainWindow : assemble les widgets, gère le dock détail et les onglets.
 Ne contient aucune logique métier.
 """
+
 from __future__ import annotations
 
-from PyQt6.QtWidgets import (
-    QMainWindow, QTabWidget, QWidget, QDockWidget, QFileDialog, QApplication,
-)
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QApplication,
+    QDockWidget,
+    QFileDialog,
+    QMainWindow,
+    QTabWidget,
+)
 
-from viewmodels.gallery_vm import GalleryViewModel
-from viewmodels.detail_vm import DetailViewModel
 from viewmodels.autocomplete_vm import AutocompleteViewModel
+from viewmodels.detail_vm import DetailViewModel
+from viewmodels.gallery_vm import GalleryViewModel
 from viewmodels.map_vm import MapViewModel
-
-from views.gallery_widget import GalleryWidget
 from views.detail_widget import DetailWidget
+from views.gallery_widget import GalleryWidget
 from views.map_widget import MapTab
 
 
 class MainWindow(QMainWindow):
-    def __init__(self,
-                 gallery_vm:      GalleryViewModel,
-                 detail_vm:       DetailViewModel,
-                 autocomplete_vm: AutocompleteViewModel,
-                 map_vm:          MapViewModel):
+    def __init__(
+        self,
+        gallery_vm: GalleryViewModel,
+        detail_vm: DetailViewModel,
+        autocomplete_vm: AutocompleteViewModel,
+        map_vm: MapViewModel,
+    ):
         super().__init__()
-        self._gvm  = gallery_vm
-        self._dvm  = detail_vm
-        self._avm  = autocomplete_vm
-        self._mvm  = map_vm
+        self._gvm = gallery_vm
+        self._dvm = detail_vm
+        self._avm = autocomplete_vm
+        self._mvm = map_vm
 
         self.setWindowTitle("Explorateur d'images")
         screen = QApplication.primaryScreen().availableGeometry()
@@ -45,8 +51,8 @@ class MainWindow(QMainWindow):
     def _build_ui(self):
         # ── Widgets principaux ────────────────────────────────────────────────
         self._gallery_widget = GalleryWidget(self._gvm, self._avm, self)
-        self._detail_widget  = DetailWidget(self._dvm, self)
-        self._map_tab        = MapTab(self._mvm, self, self)
+        self._detail_widget = DetailWidget(self._dvm, self)
+        self._map_tab = MapTab(self._mvm, self, self)
 
         # Bouton "Ouvrir" dans la galerie → dialog ici car besoin de la fenêtre
         self._gallery_widget.btn_open.clicked.connect(self._open_folder_dialog)
@@ -59,15 +65,8 @@ class MainWindow(QMainWindow):
 
         # ── Dock détail ───────────────────────────────────────────────────────
         self._dock = QDockWidget("Détails de l'image", self)
-        self._dock.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea |
-            Qt.DockWidgetArea.RightDockWidgetArea
-        )
-        self._dock.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetMovable |
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable |
-            QDockWidget.DockWidgetFeature.DockWidgetClosable
-        )
+        self._dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        self._dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
         self._dock.setWidget(self._detail_widget)
         self._dock.setMinimumWidth(280)
         self._dock.setVisible(False)

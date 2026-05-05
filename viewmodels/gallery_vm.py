@@ -8,29 +8,31 @@ Logique de présentation de la galerie :
 
 Émet des signaux Qt que la View connecte ; ne touche jamais aux widgets.
 """
+
 from __future__ import annotations
+
 import os
 
-from PyQt6.QtCore import QObject, pyqtSignal, QTimer
+from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from models.image_model import ImageListModel, ImageGridDelegate
-from models import index_repository, config_repository
+from models import config_repository, index_repository
+from models.image_model import ImageGridDelegate, ImageListModel
+from services.ollama_wrapper import OllamaWrapper
 from services.thumbnail_cache import ThumbnailCache
 from services.workers import ThumbnailScheduler
-from services.ollama_wrapper import OllamaWrapper
 from styles import THUMB
 
-EXTENSIONS    = (".png", ".jpg", ".jpeg", ".bmp")
-MODEL_EMBED   = "nomic-embed-text:v1.5"
+EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp")
+MODEL_EMBED = "nomic-embed-text:v1.5"
 
 
 class GalleryViewModel(QObject):
     # ── Signaux émis vers la View ─────────────────────────────────────────────
-    images_changed    = pyqtSignal(list)          # nouvelle liste de noms
-    cell_size_changed = pyqtSignal(int)           # zoom modifié
-    folder_changed    = pyqtSignal(str)           # dossier courant
-    index_changed     = pyqtSignal(set)           # ensemble des noms indexés
-    image_selected    = pyqtSignal(str)           # image cliquée
+    images_changed = pyqtSignal(list)  # nouvelle liste de noms
+    cell_size_changed = pyqtSignal(int)  # zoom modifié
+    folder_changed = pyqtSignal(str)  # dossier courant
+    index_changed = pyqtSignal(set)  # ensemble des noms indexés
+    image_selected = pyqtSignal(str)  # image cliquée
 
     def __init__(self, client: OllamaWrapper, config: dict, parent=None):
         super().__init__(parent)
@@ -42,17 +44,17 @@ class GalleryViewModel(QObject):
 
         # Cache + scheduler
         _dummy = os.path.expanduser("~")
-        self.cache     = ThumbnailCache(_dummy, THUMB["default_size"], THUMB["lru_max_memory"])
+        self.cache = ThumbnailCache(_dummy, THUMB["default_size"], THUMB["lru_max_memory"])
         self.scheduler = ThumbnailScheduler(self.cache)
 
         # Modèle + delegate
-        self.model    = ImageListModel()
+        self.model = ImageListModel()
         self.delegate = ImageGridDelegate(self.cache, self.scheduler, THUMB["default_size"])
         self.delegate.repaint_requested.connect(self._on_repaint_requested)
 
         # Taille cellule
         self._size_index = THUMB["size_index_default"]
-        self._cell_size  = THUMB["size_levels"][self._size_index]
+        self._cell_size = THUMB["size_levels"][self._size_index]
 
         # Timer recherche (debounce)
         self._search_timer = QTimer()
@@ -96,10 +98,7 @@ class GalleryViewModel(QObject):
     def _refresh(self, images: list[str] | None):
         if images is None:
             try:
-                images = [
-                    f for f in os.listdir(self.current_folder)
-                    if f.lower().endswith(EXTENSIONS)
-                ]
+                images = [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
             except (FileNotFoundError, TypeError):
                 images = []
         self.model.set_images(images)
@@ -107,10 +106,7 @@ class GalleryViewModel(QObject):
 
     def all_images(self) -> list[str]:
         try:
-            return [
-                f for f in os.listdir(self.current_folder)
-                if f.lower().endswith(EXTENSIONS)
-            ]
+            return [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
         except (FileNotFoundError, TypeError):
             return []
 
@@ -136,10 +132,7 @@ class GalleryViewModel(QObject):
         scores = {}
         for key, data in self.index.items():
             sim = self._client.similarite_cosinus(query_emb, data["embedding"])
-            text_match = (
-                ft in data.get("description", "").lower()
-                or ft in " ".join(data.get("keywords", [])).lower()
-            )
+            text_match = ft in data.get("description", "").lower() or ft in " ".join(data.get("keywords", [])).lower()
             score = sim * 1.0
             if text_match:
                 score += 0.3

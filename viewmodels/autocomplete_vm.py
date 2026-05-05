@@ -4,10 +4,10 @@ viewmodels/autocomplete_vm.py
 Logique du batch d'auto-complétion (toutes les images non-indexées).
 Séparé de detail_vm pour garder les fichiers courts.
 """
-from __future__ import annotations
-import os
 
-from PyQt6.QtCore import QObject, pyqtSignal, QTimer
+from __future__ import annotations
+
+from PyQt6.QtCore import QObject, pyqtSignal
 
 from models import index_repository
 from services.ollama_wrapper import OllamaWrapper
@@ -18,15 +18,18 @@ MODEL_EMBED = "nomic-embed-text:v1.5"
 
 class AutocompleteViewModel(QObject):
     # ── Signaux vers la View ──────────────────────────────────────────────────
-    started = pyqtSignal(int)              # total d'images à traiter
-    image_done = pyqtSignal(int, str)         # (idx, img_name)
-    image_error = pyqtSignal(int, str, str)    # (idx, img_name, msg)
-    finished = pyqtSignal(bool)             # cancelled=True/False
-    progress = pyqtSignal(int, int, str)    # (done, total, label)
+    started = pyqtSignal(int)  # total d'images à traiter
+    image_done = pyqtSignal(int, str)  # (idx, img_name)
+    image_error = pyqtSignal(int, str, str)  # (idx, img_name, msg)
+    finished = pyqtSignal(bool)  # cancelled=True/False
+    progress = pyqtSignal(int, int, str)  # (done, total, label)
 
-    def __init__(self, client: OllamaWrapper,
-                 gallery_vm,   # GalleryViewModel
-                 parent=None):
+    def __init__(
+        self,
+        client: OllamaWrapper,
+        gallery_vm,  # GalleryViewModel
+        parent=None,
+    ):
         super().__init__(parent)
         self._client = client
         self._gallery_vm = gallery_vm
@@ -43,9 +46,7 @@ class AutocompleteViewModel(QObject):
             return
 
         self.started.emit(len(images))
-        self._worker = AutoCompleteAllWorker(
-            self._gallery_vm.current_folder, images, self._client
-        )
+        self._worker = AutoCompleteAllWorker(self._gallery_vm.current_folder, images, self._client)
         self._worker.image_done.connect(self._on_image_done)
         self._worker.image_error.connect(self._on_image_error)
         self._worker.all_done.connect(self._on_all_done)
@@ -69,8 +70,7 @@ class AutocompleteViewModel(QObject):
             model=MODEL_EMBED,
             text=self._client.build_embedding(desc, keywords),
         )
-        entry = index_repository.build_entry(
-            img_name, folder, desc, keywords, embedding)
+        entry = index_repository.build_entry(img_name, folder, desc, keywords, embedding)
         index_repository.upsert_entry(folder, img_name, entry)
         self._gallery_vm.reload_index()
 

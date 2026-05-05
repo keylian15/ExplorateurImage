@@ -10,13 +10,12 @@ Usage :
     cache.clear_memory()           # vide uniquement le LRU mémoire
 """
 
-import os
 import hashlib
+import os
 from collections import OrderedDict
 
-from PyQt6.QtGui import QPixmap, QImage
 from PyQt6.QtCore import Qt
-
+from PyQt6.QtGui import QImage, QPixmap
 
 THUMB_QUALITY = 85  # qualité JPEG du cache disque
 THUMB_FOLDER = ".thumbnails"
@@ -83,10 +82,10 @@ class ThumbnailCache:
         """
         Retourne le QPixmap mis en cache, ou None s'il est absent.
         Promotionne automatiquement depuis le disque vers la mémoire.
-        
+
         Args:
             img_name (str): Nom de l'image.
-            
+
         Returns:
             QPixmap | None: Le thumbnail en mémoire ou None s'il n'existe pas.
         """
@@ -107,7 +106,7 @@ class ThumbnailCache:
 
     def put(self, img_name: str, pixmap: QPixmap):
         """Stocke le thumbnail dans les deux niveaux.
-        
+
         Args:
             img_name (str): Nom de l'image.
             pixmap (QPixmap): Le thumbnail à stocker.
@@ -119,7 +118,7 @@ class ThumbnailCache:
 
     def invalidate(self, img_name: str):
         """Supprime une entrée des deux niveaux (ex : après renommage).
-        
+
         Args:
             img_name (str): Nom de l'image.
         """
@@ -139,7 +138,7 @@ class ThumbnailCache:
         """
         Change la taille des thumbnails. Vide la mémoire.
         Le cache disque de l'ancienne taille reste intact (autre nom de fichier).
-        
+
         Args:
             new_size (int): Nouvelle taille des thumbnails.
         """
@@ -167,10 +166,10 @@ class ThumbnailCache:
         """Stocke le thumbnail sur le disque.
 
         Args:
-            img_name (str): Nom de l'image. 
+            img_name (str): Nom de l'image.
             pixmap (QPixmap): Thumbnail.
         """
-        
+
         self._ensure_thumb_dir()
         disk_path = self._disk_key(img_name)
         if not os.path.exists(disk_path):
@@ -185,7 +184,7 @@ class ThumbnailCache:
         Charge l'image source, la redimensionne et la met en cache.
         Retourne le QPixmap ou None si le fichier est illisible.
         Pensé pour être appelé depuis un thread secondaire.
-        
+
         Args:
             img_name (str): Nom de l'image.
         """
@@ -195,7 +194,8 @@ class ThumbnailCache:
             return None
 
         image = image.scaled(
-            self.thumb_size, self.thumb_size,
+            self.thumb_size,
+            self.thumb_size,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )

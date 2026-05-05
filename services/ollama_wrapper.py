@@ -1,4 +1,3 @@
-
 # ------------------------------
 # Exceptions spécifiques (pédagogie + robustesse)
 # ------------------------------
@@ -11,14 +10,15 @@ import shutil  # Pour trouver l'exécutable "ollama" dans le PATH
 import socket  # Pour tester rapidement si un port TCP est ouvert
 import subprocess  # Pour lancer "ollama serve"
 import time  # Pour boucler avec un timeout lors du démarrage serveur
+from collections.abc import Mapping  # Types
 from dataclasses import dataclass  # Modèles de données simples et typés
 from pathlib import Path  # Manipulation robuste des chemins
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Union  # Types
-
+from typing import Any
 
 # ------------------------------
 # Exceptions spécifiques (pédagogie + robustesse)
 # ------------------------------
+
 
 class OllamaError(RuntimeError):
     """Erreur générique pour les opérations Ollama."""
@@ -40,41 +40,46 @@ class OllamaServerStartError(OllamaError):
 # Dataclasses pour structurer les réponses (lisible + typé)
 # ------------------------------
 
+
 @dataclass(frozen=True, slots=True)
 class OllamaModelDetails:
     """Détails d'un modèle, tels que renvoyés dans /api/tags."""
-    format: Optional[str] = None
-    family: Optional[str] = None
-    families: Optional[List[str]] = None
-    parameter_size: Optional[str] = None
-    quantization_level: Optional[str] = None
+
+    format: str | None = None
+    family: str | None = None
+    families: list[str] | None = None
+    parameter_size: str | None = None
+    quantization_level: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class OllamaModelInfo:
     """Informations de base sur un modèle installé (issu de /api/tags)."""
+
     name: str
-    modified_at: Optional[str] = None
-    size: Optional[int] = None
-    digest: Optional[str] = None
-    details: Optional[OllamaModelDetails] = None
+    modified_at: str | None = None
+    size: int | None = None
+    digest: str | None = None
+    details: OllamaModelDetails | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class OllamaGenerateResult:
     """Résultat simplifié de /api/generate en mode stream=false."""
+
     response: str
-    model: Optional[str] = None
-    done: Optional[bool] = None
-    total_duration: Optional[int] = None  # ns (souvent)
-    load_duration: Optional[int] = None
-    prompt_eval_count: Optional[int] = None
-    eval_count: Optional[int] = None
+    model: str | None = None
+    done: bool | None = None
+    total_duration: int | None = None  # ns (souvent)
+    load_duration: int | None = None
+    prompt_eval_count: int | None = None
+    eval_count: int | None = None
 
 
 # ------------------------------
 # Wrapper principal
 # ------------------------------
+
 
 class OllamaWrapper:
     """
@@ -94,8 +99,7 @@ class OllamaWrapper:
         base_url: str = "http://10.22.28.190:11434",
         timeout_s: float = 240.0,
     ) -> None:
-        self._base_url: str = base_url.rstrip(
-            "/")  # Normalise : pas de "/" final
+        self._base_url: str = base_url.rstrip("/")  # Normalise : pas de "/" final
         self._timeout_s: float = timeout_s  # Timeout réseau pour les requêtes HTTP
 
     # --------------------------
@@ -122,7 +126,7 @@ class OllamaWrapper:
         *,
         wait: bool = True,
         wait_timeout_s: float = 10.0,
-        extra_env: Optional[Mapping[str, str]] = None,
+        extra_env: Mapping[str, str] | None = None,
     ) -> subprocess.Popen[bytes]:
         """
         Lance `ollama serve` via subprocess.
@@ -139,14 +143,12 @@ class OllamaWrapper:
             OllamaServerStartError: si ollama n'est pas trouvé ou ne démarre pas.
         """
         # Vérifie que l'exécutable "ollama" est présent dans le PATH.
-        ollama_path: Optional[str] = shutil.which("ollama")
+        ollama_path: str | None = shutil.which("ollama")
         if ollama_path is None:
-            raise OllamaServerStartError(
-                "Exécutable 'ollama' introuvable. Installe Ollama et/ou ajoute-le au PATH."
-            )
+            raise OllamaServerStartError("Exécutable 'ollama' introuvable. Installe Ollama et/ou ajoute-le au PATH.")
 
         # Prépare l'environnement du processus.
-        env: Dict[str, str] = dict(**(extra_env or {}))  # Copie défensive
+        env: dict[str, str] = dict(**(extra_env or {}))  # Copie défensive
         # Note : on laisse le reste de l'environnement hérité du parent (comportement standard).
 
         # Lance le serveur : stdout/stderr sont capturés pour debug/enseignement.
@@ -170,16 +172,11 @@ class OllamaWrapper:
             if process.poll() is not None:
                 # Process terminé -> on récupère stderr pour diagnostic.
                 stderr: bytes = process.stderr.read() if process.stderr else b""
-                raise OllamaServerStartError(
-                    "Le serveur Ollama s'est arrêté pendant le démarrage.\n"
-                    f"stderr:\n{stderr.decode(errors='replace')}"
-                )
+                raise OllamaServerStartError(f"Le serveur Ollama s'est arrêté pendant le démarrage.\nstderr:\n{stderr.decode(errors='replace')}")
             time.sleep(0.1)  # Petite attente avant de retester
 
         # Timeout : serveur non accessible à temps.
-        raise OllamaServerStartError(
-            f"Le serveur Ollama ne répond pas après {wait_timeout_s:.1f}s."
-        )
+        raise OllamaServerStartError(f"Le serveur Ollama ne répond pas après {wait_timeout_s:.1f}s.")
 
     def _is_port_open(self) -> bool:
         """
@@ -200,9 +197,9 @@ class OllamaWrapper:
         # (pédagogiquement : clair ; production : on pourrait utiliser urllib.parse).
         url: str = self._base_url
         if url.startswith("http://"):
-            url = url[len("http://"):]
+            url = url[len("http://") :]
         elif url.startswith("https://"):
-            url = url[len("https://"):]
+            url = url[len("https://") :]
         # Si pas de port explicite, Ollama utilise 11434.
         if ":" in url:
             host, port_str = url.split(":", 1)
@@ -221,21 +218,19 @@ class OllamaWrapper:
         # La doc renvoie typiquement { "version": "x.y.z" }.
         version = payload.get("version")
         if not isinstance(version, str):
-            raise OllamaResponseError(
-                f"Réponse /api/version inattendue: {payload!r}")
+            raise OllamaResponseError(f"Réponse /api/version inattendue: {payload!r}")
         return version
 
-    def list_models(self) -> List[OllamaModelInfo]:
+    def list_models(self) -> list[OllamaModelInfo]:
         """
         Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}
         """
         payload = self._http_request_json("GET", "/api/tags", body=None)
         raw_models = payload.get("models")
         if not isinstance(raw_models, list):
-            raise OllamaResponseError(
-                f"Réponse /api/tags inattendue: {payload!r}")
+            raise OllamaResponseError(f"Réponse /api/tags inattendue: {payload!r}")
 
-        models: List[OllamaModelInfo] = []
+        models: list[OllamaModelInfo] = []
         for item in raw_models:
             # Chaque entrée doit être un dict.
             if not isinstance(item, dict):
@@ -247,30 +242,22 @@ class OllamaWrapper:
 
             # Détails optionnels.
             raw_details = item.get("details")
-            details: Optional[OllamaModelDetails] = None
+            details: OllamaModelDetails | None = None
             if isinstance(raw_details, dict):
                 details = OllamaModelDetails(
-                    format=raw_details.get("format") if isinstance(
-                        raw_details.get("format"), str) else None,
-                    family=raw_details.get("family") if isinstance(
-                        raw_details.get("family"), str) else None,
-                    families=raw_details.get("families") if isinstance(
-                        raw_details.get("families"), list) else None,
-                    parameter_size=raw_details.get("parameter_size") if isinstance(
-                        raw_details.get("parameter_size"), str) else None,
-                    quantization_level=raw_details.get("quantization_level") if isinstance(
-                        raw_details.get("quantization_level"), str) else None,
+                    format=raw_details.get("format") if isinstance(raw_details.get("format"), str) else None,
+                    family=raw_details.get("family") if isinstance(raw_details.get("family"), str) else None,
+                    families=raw_details.get("families") if isinstance(raw_details.get("families"), list) else None,
+                    parameter_size=raw_details.get("parameter_size") if isinstance(raw_details.get("parameter_size"), str) else None,
+                    quantization_level=raw_details.get("quantization_level") if isinstance(raw_details.get("quantization_level"), str) else None,
                 )
 
             models.append(
                 OllamaModelInfo(
                     name=name,
-                    modified_at=item.get("modified_at") if isinstance(
-                        item.get("modified_at"), str) else None,
-                    size=item.get("size") if isinstance(
-                        item.get("size"), int) else None,
-                    digest=item.get("digest") if isinstance(
-                        item.get("digest"), str) else None,
+                    modified_at=item.get("modified_at") if isinstance(item.get("modified_at"), str) else None,
+                    size=item.get("size") if isinstance(item.get("size"), int) else None,
+                    digest=item.get("digest") if isinstance(item.get("digest"), str) else None,
                     details=details,
                 )
             )
@@ -286,8 +273,8 @@ class OllamaWrapper:
         *,
         model: str,
         prompt: str,
-        system: Optional[str] = None,
-        options: Optional[Mapping[str, Any]] = None,
+        system: str | None = None,
+        options: Mapping[str, Any] | None = None,
     ) -> OllamaGenerateResult:
         """
         Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}
@@ -301,10 +288,10 @@ class OllamaWrapper:
         Returns:
             OllamaGenerateResult : réponse texte + quelques métriques si présentes.
         """
-        body: Dict[str, Any] = {
-            "model": model,       # Modèle ciblé
-            "prompt": prompt,     # Prompt texte
-            "stream": False,      # On veut une réponse complète en une fois
+        body: dict[str, Any] = {
+            "model": model,  # Modèle ciblé
+            "prompt": prompt,  # Prompt texte
+            "stream": False,  # On veut une réponse complète en une fois
         }
 
         # Ajoute le système si fourni.
@@ -320,23 +307,16 @@ class OllamaWrapper:
         # Extrait la réponse principale.
         response_text = payload.get("response")
         if not isinstance(response_text, str):
-            raise OllamaResponseError(
-                f"Réponse /api/generate inattendue: {payload!r}")
+            raise OllamaResponseError(f"Réponse /api/generate inattendue: {payload!r}")
 
         return OllamaGenerateResult(
             response=response_text,
-            model=payload.get("model") if isinstance(
-                payload.get("model"), str) else None,
-            done=payload.get("done") if isinstance(
-                payload.get("done"), bool) else None,
-            total_duration=payload.get("total_duration") if isinstance(
-                payload.get("total_duration"), int) else None,
-            load_duration=payload.get("load_duration") if isinstance(
-                payload.get("load_duration"), int) else None,
-            prompt_eval_count=payload.get("prompt_eval_count") if isinstance(
-                payload.get("prompt_eval_count"), int) else None,
-            eval_count=payload.get("eval_count") if isinstance(
-                payload.get("eval_count"), int) else None,
+            model=payload.get("model") if isinstance(payload.get("model"), str) else None,
+            done=payload.get("done") if isinstance(payload.get("done"), bool) else None,
+            total_duration=payload.get("total_duration") if isinstance(payload.get("total_duration"), int) else None,
+            load_duration=payload.get("load_duration") if isinstance(payload.get("load_duration"), int) else None,
+            prompt_eval_count=payload.get("prompt_eval_count") if isinstance(payload.get("prompt_eval_count"), int) else None,
+            eval_count=payload.get("eval_count") if isinstance(payload.get("eval_count"), int) else None,
         )
 
     def generate_with_image(
@@ -344,10 +324,10 @@ class OllamaWrapper:
         *,
         model: str,
         prompt: str,
-        image: Union[str, Path, bytes],
-        image_mime_hint: Optional[str] = None,
-        system: Optional[str] = None,
-        options: Optional[Mapping[str, Any]] = None,
+        image: str | Path | bytes,
+        image_mime_hint: str | None = None,
+        system: str | None = None,
+        options: Mapping[str, Any] | None = None,
     ) -> OllamaGenerateResult:
         """
         Appelle POST /api/generate avec une image (multimodal).
@@ -372,18 +352,17 @@ class OllamaWrapper:
         elif isinstance(image, (bytes, bytearray)):
             image_bytes = bytes(image)  # Normalise en bytes
         else:
-            raise TypeError(
-                "image doit être un chemin (str/Path) ou des bytes.")
+            raise TypeError("image doit être un chemin (str/Path) ou des bytes.")
 
         # Encode en base64 (ASCII) comme attendu par l'API.
         image_b64: str = base64.b64encode(image_bytes).decode("ascii")
 
-        body: Dict[str, Any] = {
-            "model": model,           # Modèle multimodal
-            "prompt": prompt,         # Prompt
+        body: dict[str, Any] = {
+            "model": model,  # Modèle multimodal
+            "prompt": prompt,  # Prompt
             # Liste base64 (même pour une seule image)
             "images": [image_b64],
-            "stream": False,          # Réponse complète
+            "stream": False,  # Réponse complète
         }
 
         # Ajoute le système si fourni.
@@ -401,23 +380,16 @@ class OllamaWrapper:
 
         response_text = payload.get("response")
         if not isinstance(response_text, str):
-            raise OllamaResponseError(
-                f"Réponse /api/generate (image) inattendue: {payload!r}")
+            raise OllamaResponseError(f"Réponse /api/generate (image) inattendue: {payload!r}")
 
         return OllamaGenerateResult(
             response=response_text,
-            model=payload.get("model") if isinstance(
-                payload.get("model"), str) else None,
-            done=payload.get("done") if isinstance(
-                payload.get("done"), bool) else None,
-            total_duration=payload.get("total_duration") if isinstance(
-                payload.get("total_duration"), int) else None,
-            load_duration=payload.get("load_duration") if isinstance(
-                payload.get("load_duration"), int) else None,
-            prompt_eval_count=payload.get("prompt_eval_count") if isinstance(
-                payload.get("prompt_eval_count"), int) else None,
-            eval_count=payload.get("eval_count") if isinstance(
-                payload.get("eval_count"), int) else None,
+            model=payload.get("model") if isinstance(payload.get("model"), str) else None,
+            done=payload.get("done") if isinstance(payload.get("done"), bool) else None,
+            total_duration=payload.get("total_duration") if isinstance(payload.get("total_duration"), int) else None,
+            load_duration=payload.get("load_duration") if isinstance(payload.get("load_duration"), int) else None,
+            prompt_eval_count=payload.get("prompt_eval_count") if isinstance(payload.get("prompt_eval_count"), int) else None,
+            eval_count=payload.get("eval_count") if isinstance(payload.get("eval_count"), int) else None,
         )
 
     # --------------------------
@@ -429,14 +401,14 @@ class OllamaWrapper:
         *,
         model: str,
         text: str,
-    ) -> List[float]:
+    ) -> list[float]:
         """
         Génère un embedding.
 
         Note doc : l'endpoint "Generate Embedding" a été supersédé par /api/embed
         (selon docs/api.md). :contentReference[oaicite:7]{index=7}
         """
-        body: Dict[str, Any] = {"model": model, "input": text}
+        body: dict[str, Any] = {"model": model, "input": text}
         payload = self._http_request_json("POST", "/api/embed", body=body)
 
         # Selon versions, la forme peut varier ; on vise un cas courant : {"embeddings":[[...]]} ou {"embedding":[...]}.
@@ -450,8 +422,7 @@ class OllamaWrapper:
             if isinstance(first, list) and all(isinstance(x, (int, float)) for x in first):
                 return [float(x) for x in first]
 
-        raise OllamaResponseError(
-            f"Réponse /api/embed inattendue: {payload!r}")
+        raise OllamaResponseError(f"Réponse /api/embed inattendue: {payload!r}")
 
     def build_embedding(self, description, keywords):
         return f"{description}\n\nConcepts clés : {', '.join(keywords)}"
@@ -465,8 +436,8 @@ class OllamaWrapper:
         method: str,
         path: str,
         *,
-        body: Optional[Mapping[str, Any]],
-    ) -> Dict[str, Any]:
+        body: Mapping[str, Any] | None,
+    ) -> dict[str, Any]:
         """
         Exécute une requête HTTP et retourne un dict JSON.
 
@@ -481,13 +452,13 @@ class OllamaWrapper:
         url: str = urljoin(self._base_url + "/", path.lstrip("/"))
 
         # Prépare les headers.
-        headers: Dict[str, str] = {
-            "Accept": "application/json",            # On attend du JSON
-            "Content-Type": "application/json",      # Si body présent
+        headers: dict[str, str] = {
+            "Accept": "application/json",  # On attend du JSON
+            "Content-Type": "application/json",  # Si body présent
         }
 
         # Sérialise le body en JSON si nécessaire.
-        data: Optional[bytes]
+        data: bytes | None
         if body is None:
             data = None
         else:
@@ -507,12 +478,10 @@ class OllamaWrapper:
                 raw: bytes = response.read()  # Lit tout le corps
         except urllib.error.URLError as e:
             # Typiquement : connection refused, host unreachable, timeout, etc.
-            raise OllamaConnectionError(
-                f"Impossible de joindre Ollama à {url}: {e}") from e
+            raise OllamaConnectionError(f"Impossible de joindre Ollama à {url}: {e}") from e
         except Exception as e:
             # Autres erreurs réseau inattendues.
-            raise OllamaConnectionError(
-                f"Erreur réseau vers {url}: {e}") from e
+            raise OllamaConnectionError(f"Erreur réseau vers {url}: {e}") from e
 
         # Décode en texte.
         text = raw.decode("utf-8", errors="replace")
@@ -521,14 +490,11 @@ class OllamaWrapper:
         try:
             payload = json.loads(text)
         except json.JSONDecodeError as e:
-            raise OllamaResponseError(
-                f"Réponse non-JSON depuis {url} (début): {text[:200]!r}"
-            ) from e
+            raise OllamaResponseError(f"Réponse non-JSON depuis {url} (début): {text[:200]!r}") from e
 
         # On attend un dict JSON.
         if not isinstance(payload, dict):
-            raise OllamaResponseError(
-                f"JSON inattendu depuis {url}: {payload!r}")
+            raise OllamaResponseError(f"JSON inattendu depuis {url}: {payload!r}")
 
         return payload
 
@@ -540,7 +506,7 @@ class OllamaWrapper:
         import math
 
         # Produit scalaire
-        dot_product = sum(a * b for a, b in zip(vec_a, vec_b))
+        dot_product = sum(a * b for a, b in zip(vec_a, vec_b, strict=False))
 
         # Normes des vecteurs
         norm_a = math.sqrt(sum(a * a for a in vec_a))
@@ -558,35 +524,27 @@ class OllamaWrapper:
         images = []
 
         for file_name in os.listdir(folder_path):
-            if file_name.endswith('.jpg') or file_name.endswith('.png'):
+            if file_name.endswith(".jpg") or file_name.endswith(".png"):
                 images.append(os.path.join(folder_path, file_name))
         return images
 
     def get_description_and_keywords_from_image(self, image_path: str):
-        question = (
-            "Décris cette image pour un moteur de recherche. "
-            "Réponds uniquement dans ce format :\n\n"
-            "Description: <2 à 4 phrases>\n"
-            "Keywords: <mot1>, <mot2>, <mot3>, <mot4>, <mot5>"
-        )
+        question = "Décris cette image pour un moteur de recherche. Réponds uniquement dans ce format :\n\nDescription: <2 à 4 phrases>\nKeywords: <mot1>, <mot2>, <mot3>, <mot4>, <mot5>"
 
         system_prompt = (
             "Tu es un système d'indexation d'images pour la recherche sémantique.\n\n"
-
             "DESCRIPTION — 2 à 4 phrases, pas plus :\n"
             "- Sujet principal : qui/quoi, nombre, couleur, race/espèce si identifiable\n"
             "- Contexte : lieu, environnement, moment de la journée si visible\n"
             "- Actions ou interactions visibles\n"
             "- Un seul détail d'ambiance utile (météo, lumière, saison)\n"
             "- Pas de suppositions, pas de métaphores, pas d'émotions prêtées\n\n"
-
             "MOTS-CLÉS — exactement 5 :\n"
             "- Noms uniquement (pas d'adjectifs, pas de verbes)\n"
             "- Ordre : sujet -> environnement -> détails distinctifs\n"
             "- Privilégier les termes de recherche qu'un utilisateur taperait\n"
             "- Pas de doublons avec les premiers mots de la description\n"
             "- Éviter les génériques inutiles : 'lumière', 'image', 'photo', 'nature', 'atmosphère'\n\n"
-
             "FORMAT STRICT — aucun autre texte :\n"
             "Description: <texte>\n"
             "Keywords: <mot1>, <mot2>, <mot3>, <mot4>, <mot5>"
@@ -594,28 +552,19 @@ class OllamaWrapper:
 
         model = "qwen2.5vl:7b"
 
-        r = self.generate_with_image(
-            model=model,
-            prompt=question,
-            image=image_path,
-            system=system_prompt
-        )
+        r = self.generate_with_image(model=model, prompt=question, image=image_path, system=system_prompt)
 
         response = r.response.strip()
 
         try:
-            desc_part = response.split("Description:")[
-                1].split("Keywords:")[0].strip()
+            desc_part = response.split("Description:")[1].split("Keywords:")[0].strip()
             keywords_part = response.split("Keywords:")[1].strip()
             keywords = [k.strip() for k in keywords_part.split(",")]
-        except:
+        except Exception:
             desc_part = response
             keywords = []
 
-        return {
-            "description": desc_part,
-            "keywords": keywords
-        }
+        return {"description": desc_part, "keywords": keywords}
 
     def get_description_and_keywords(self, folder_path: str):
         images = self.get_images_from_folder(folder_path)
@@ -623,15 +572,16 @@ class OllamaWrapper:
         data = []
 
         for i, image_path in enumerate(images):
-
             result = self.get_description_and_keywords_from_image(image_path)
 
-            data.append({
-                "id": f"img_{i}",
-                "path": image_path,
-                "description": result["description"],
-                "keywords": result["keywords"]
-            })
+            data.append(
+                {
+                    "id": f"img_{i}",
+                    "path": image_path,
+                    "description": result["description"],
+                    "keywords": result["keywords"],
+                }
+            )
 
         return data
 
