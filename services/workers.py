@@ -342,7 +342,7 @@ class MapWorker(QThread):
         X = np.array(vectors, dtype=np.float32)
 
         self.progress.emit(f"UMAP sur {len(names)} images…")
-        import umap
+        import umap  # type: ignore
 
         embedding_2d = umap.UMAP(
             n_neighbors=min(self.umap_n_neighbors, len(names) - 1),
@@ -355,7 +355,7 @@ class MapWorker(QThread):
 
         self.progress.emit("Clustering HDBSCAN…")
         try:
-            import hdbscan
+            import hdbscan  # type: ignore
 
             labels: list[int] = (
                 hdbscan.HDBSCAN(

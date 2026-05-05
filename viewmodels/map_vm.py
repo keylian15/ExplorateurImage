@@ -22,15 +22,25 @@ _MAP_CACHE_FILE = "map_cache.pkl"
 
 
 class MapViewModel(QObject):
+    """Class qui représente la carte 2D sémantique."""
+
     # ── Signaux vers la View ──────────────────────────────────────────────────
     compute_started = pyqtSignal()
     compute_progress = pyqtSignal(str)
-    compute_finished = pyqtSignal(list, list, list, dict)  # points, labels, names, cluster_names
+    # points, labels, names, cluster_names
+    compute_finished = pyqtSignal(list, list, list, dict)
     cluster_named = pyqtSignal(int, str)
     compute_error = pyqtSignal(str)
     params_changed = pyqtSignal(dict)
 
     def __init__(self, client: OllamaWrapper, config: dict, gallery_vm, parent=None):
+        """
+        Args:
+            client (OllamaWrapper): client Ollama
+            config (dict): configuration
+            gallery_vm (GalleryViewModel): ViewModel de la gallerie
+        """
+
         super().__init__(parent)
         self._client = client
         self._config = config
@@ -42,9 +52,18 @@ class MapViewModel(QObject):
 
     @property
     def params(self) -> dict:
+        """Renvoie les paramètres de la carte
+
+        Returns:
+            dict: paramètres."""
         return dict(self._params)
 
     def apply_params(self, params: dict):
+        """Modifie les paramètres de la carte
+
+        Args:
+            params (dict): Nouveaux paramètres.
+        """
         self._params = params
         self._config = config_repository.set_map_params(self._config, params)
         config_repository.save(self._config)
@@ -54,6 +73,7 @@ class MapViewModel(QObject):
     # ── Calcul ────────────────────────────────────────────────────────────────
 
     def compute(self):
+        """Démarre le calcul de la carte."""
         if self._worker and self._worker.isRunning():
             return
 
@@ -72,13 +92,13 @@ class MapViewModel(QObject):
         )
         self._worker.progress.connect(self.compute_progress)
         self._worker.cluster_named.connect(self.cluster_named)
-        self._worker.finished.connect(self._on_finished)
+        self._worker.finished.connect(self.on_finished)
         self._worker.error.connect(self.compute_error)
         self._worker.start()
 
     def autoload(self):
         """Lance depuis le cache si disponible, sinon calcule."""
-        cache = self._load_cache()
+        cache = self.load_cache()
         if cache:
             self.compute_finished.emit(
                 cache["points"],
@@ -89,20 +109,39 @@ class MapViewModel(QObject):
         else:
             self.compute()
 
-    # ── Slots privés ──────────────────────────────────────────────────────────
+    def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
+        """Callback du worker.
 
-    def _on_finished(self, points, labels, names, cluster_names):
-        self._save_cache(points, labels, names, cluster_names)
+        Args:
+            points (list[tuple[float, float]]): Les points de la carte.
+            names (list[str]): Les noms des images.
+            cluster_names (dict[int, str]): Les noms des clusters.
+        """
+
+        self.save_cache(points, labels, names, cluster_names)
         self.compute_finished.emit(points, labels, names, cluster_names)
 
     # ── Cache pickle ──────────────────────────────────────────────────────────
 
-    def _save_cache(self, points, labels, names, cluster_names):
+    def save_cache(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
+        """Sauvegarde le cache.
+
+        Args:
+            points (list[tuple[float, float]]): Les points de la carte.
+            labels (list[int]): Les labels des points.
+            names (list[str]): Les noms des images.
+            cluster_names (dict[int, str]): Les noms des clusters.
+        """
         data = {"points": points, "labels": labels, "names": names, "cluster_names": cluster_names}
         with open(_MAP_CACHE_FILE, "wb") as f:
             pickle.dump(data, f)
 
-    def _load_cache(self) -> dict | None:
+    def load_cache(self) -> dict | None:
+        """Charge le cache.
+
+        Returns:
+            dict | None: Le cache ou None si il n'existe pas.
+        """
         if not os.path.exists(_MAP_CACHE_FILE):
             return None
         try:
