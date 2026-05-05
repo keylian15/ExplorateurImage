@@ -1,12 +1,12 @@
 """
-viewmodels/gallery_vm.py
+ViewModel de la galerie d'images.
 
-Logique de présentation de la galerie :
-  - chargement du dossier
-  - filtrage / recherche sémantique
-  - gestion du zoom (taille des cellules)
+Il gère la logique de présentation et d'interaction avec un dossier d'images :
+chargement des fichiers, synchronisation avec l'index, gestion du cache de thumbnails,
+sélection d'images, zoom dynamique de la grille et recherche sémantique basée sur embeddings.
 
-Émet des signaux Qt que la View connecte ; ne touche jamais aux widgets.
+Il fait le lien entre les modèles (index, liste d'images), les services (IA, cache, workers)
+et la vue via des signaux Qt, tout en restant totalement découplé de l'interface graphique.
 """
 
 from __future__ import annotations
@@ -27,6 +27,8 @@ MODEL_EMBED = "nomic-embed-text:v1.5"
 
 
 class GalleryViewModel(QObject):
+    """Class qui gère la logique de la vue de la galerie."""
+
     # ── Signaux émis vers la View ─────────────────────────────────────────────
     images_changed = pyqtSignal(list)  # nouvelle liste de noms
     cell_size_changed = pyqtSignal(int)  # zoom modifié
@@ -35,6 +37,13 @@ class GalleryViewModel(QObject):
     image_selected = pyqtSignal(str)  # image cliquée
 
     def __init__(self, client: OllamaWrapper, config: dict, parent=None):
+        """
+        Args:
+            client (OllamaWrapper): client Ollama
+            config (dict): configuration
+            parent (QObject, optional): parent. Defaults to None.
+        """
+
         super().__init__(parent)
         self._client = client
         self._config = config
@@ -50,7 +59,7 @@ class GalleryViewModel(QObject):
         # Modèle + delegate
         self.model = ImageListModel()
         self.delegate = ImageGridDelegate(self.cache, self.scheduler, THUMB["default_size"])
-        self.delegate.repaint_requested.connect(self._on_repaint_requested)
+        self.delegate.repaint_requested.connect(self.on_repaint_requested)
 
         # Taille cellule
         self._size_index = THUMB["size_index_default"]
@@ -60,18 +69,27 @@ class GalleryViewModel(QObject):
         self._search_timer = QTimer()
         self._search_timer.setInterval(200)
         self._search_timer.setSingleShot(True)
-        self._search_timer.timeout.connect(self._do_search)
+        self._search_timer.timeout.connect(self.do_search)
         self._search_text = ""
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
     @property
     def cell_size(self) -> int:
+        """Renvoi la taille de la cellule en pixels.
+
+        Returns:
+            int: Taille de la cellule en pixels."""
         return self._cell_size
 
     # ── Dossier ───────────────────────────────────────────────────────────────
 
     def open_folder(self, folder: str):
+        """Ouvre un dossier.
+
+        Args:
+            folder (str): Chemin du dossier.
+        """
         self.current_folder = folder
         self._config["default_folder"] = folder
         config_repository.save(self._config)
@@ -80,22 +98,28 @@ class GalleryViewModel(QObject):
         self.cache.resize(self._cell_size)
         self.scheduler.set_cache(self.cache)
 
-        self._load_index()
-        self._refresh(None)
+        self.load_index()
+        self.refresh(None)
         self.folder_changed.emit(folder)
 
-    def _load_index(self):
+    def load_index(self):
+        """Charge l'index du dossier courant."""
         self.index = index_repository.load(self.current_folder)
         self.model.set_indexed(set(self.index.keys()))
         self.index_changed.emit(set(self.index.keys()))
 
     def reload_index(self):
-        """Appelé après une sauvegarde externe (save_worker)."""
-        self._load_index()
+        """Recharge l'index du dossier courant."""
+        self.load_index()
 
     # ── Images ────────────────────────────────────────────────────────────────
 
-    def _refresh(self, images: list[str] | None):
+    def refresh(self, images: list[str] | None):
+        """Rafraîchit la liste des images.
+
+        Args:
+            images (list[str] | None): Liste des images à charger.
+        """
         if images is None:
             try:
                 images = [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
@@ -105,28 +129,51 @@ class GalleryViewModel(QObject):
         self.images_changed.emit(images)
 
     def all_images(self) -> list[str]:
+        """Renvoie la liste de toutes les images du dossier courant.
+
+        Returns:
+            list[str]: Liste des images.
+        """
         try:
             return [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
         except (FileNotFoundError, TypeError):
             return []
 
     def unindexed_images(self) -> list[str]:
+        """Renvoie la liste des images non indexées du dossier courant."""
         return [f for f in self.all_images() if f not in self.index]
+
+    def indexed_images(self) -> list[str]:
+        """Renvoie la liste des images indexées du dossier courant."""
+        return [f for f in self.all_images() if f in self.index]
 
     # ── Recherche ─────────────────────────────────────────────────────────────
 
     def schedule_search(self, text: str):
+        """Lance la recherche après un delai.
+
+        Args:
+            text (str): Mot à rechercher."""
         self._search_text = text
         self._search_timer.start()
 
-    def _do_search(self):
+    def do_search(self):
+        """Fait la recherche."""
         text = self._search_text.strip()
         if text:
-            self._refresh(self._filtered_images(text))
+            self.refresh(self.filtered_images(text))
         else:
-            self._refresh(None)
+            self.refresh(None)
 
-    def _filtered_images(self, filter_text: str) -> list[str]:
+    def filtered_images(self, filter_text: str) -> list[str]:
+        """Renvoi les 100 images les plus proches de la requête.
+
+        Args:
+            filter_text (str): Requête de recherche.
+
+        Returns:
+            list[str]: Liste des images.
+        """
         ft = filter_text.lower().strip()
         query_emb = self._client.embed(model=MODEL_EMBED, text=ft)
         scores = {}
@@ -145,23 +192,31 @@ class GalleryViewModel(QObject):
     # ── Sélection ─────────────────────────────────────────────────────────────
 
     def select_image(self, img_name: str):
+        """Selectionne l'image.
+
+        Args:
+            img_name (str): Nom de l'image.
+        """
         self.model.set_selected(img_name)
         self.image_selected.emit(img_name)
 
     # ── Zoom ──────────────────────────────────────────────────────────────────
 
     def zoom_in(self):
+        """Zoom in sur les images."""
         levels = THUMB["size_levels"]
         if self._size_index < len(levels) - 1:
             self._size_index += 1
-            self._apply_zoom()
+            self.apply_zoom()
 
     def zoom_out(self):
+        """Zoom out sur les images."""
         if self._size_index > 0:
             self._size_index -= 1
-            self._apply_zoom()
+            self.apply_zoom()
 
-    def _apply_zoom(self):
+    def apply_zoom(self):
+        """Applique le zoom."""
         self._cell_size = THUMB["size_levels"][self._size_index]
         self.cache.resize(self._cell_size)
         self.scheduler.flush_pending()
@@ -170,5 +225,9 @@ class GalleryViewModel(QObject):
 
     # ── Repaint ───────────────────────────────────────────────────────────────
 
-    def _on_repaint_requested(self, img_name: str):
+    def on_repaint_requested(self, img_name: str):
+        """Notifie quand une image a été modifiée.
+
+        Args:
+            img_name (str): Nom de l'image modifiée."""
         self.model.notify_image_updated(img_name)
