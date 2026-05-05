@@ -3,7 +3,7 @@
   "k_neighbors": 6,
   "map_params": {
     "umap_n_neighbors": 15,
-    "umap_min_dist": 0.8,
+    "umap_min_dist": 0.3,
     "hdbscan_min_cluster": 15
   }
 }
