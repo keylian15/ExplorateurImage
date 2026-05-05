@@ -22,6 +22,8 @@ from styles import fullscreen_bar_style
 
 
 class FullscreenDialog(QDialog):
+    """Class qui represente un dialog de visualisation plein écran."""
+
     def __init__(self, pixmap: QPixmap, title: str = "", parent=None):
         super().__init__(parent)
         self._pixmap = pixmap
@@ -81,6 +83,7 @@ class FullscreenDialog(QDialog):
         dpr = self._lbl_img.devicePixelRatio()
 
         def render(f):
+            """Affiche l'image à l'échelle f."""
             w = int(dpr * screen.width() * f)
             h = int(dpr * screen.height() * f)
             scaled = pixmap.scaled(w, h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
@@ -90,14 +93,17 @@ class FullscreenDialog(QDialog):
             self._lbl_zoom.setText(f"{int(f * 100)}%")
 
         def zoom_in():
+            """Zoom in."""
             self._factor = min(MAX, self._factor + STEP)
             render(self._factor)
 
         def zoom_out():
+            "Zoom out."
             self._factor = max(MIN, self._factor - STEP)
             render(self._factor)
 
         def zoom_reset():
+            """Réinitialise le zoom."""
             self._factor = 1.0
             render(1.0)
 
