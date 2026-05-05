@@ -61,8 +61,15 @@ _HOVER_RADIUS = 0.5
 # ═════════════════════════════════════════════════════════════════════════════
 
 
-class _MapNode(QGraphicsEllipseItem):
+class MapNode(QGraphicsEllipseItem):
     def __init__(self, img_name: str, cluster: int, color: QColor, callback_select):
+        """
+        Args:
+            img_name (str): Nom de l'image
+            cluster (int): Numéro du cluster
+            color (QColor): Couleur du cluster
+            callback_select (function): Fonction de sélection
+        """
         r = _POINT_RADIUS
         super().__init__(-r, -r, 2 * r, 2 * r)
         self.img_name = img_name
@@ -77,6 +84,11 @@ class _MapNode(QGraphicsEllipseItem):
         self._cb_sel = callback_select
 
     def hoverEnterEvent(self, event):
+        """Surcharge l'évènement de survol
+
+        Args:
+            event (QGraphicsSceneHoverEvent): Evènement de survol
+        """
         r = _HOVER_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
         self.setPen(QPen(QColor(_SELECT_COLOR), 2))
@@ -85,6 +97,11 @@ class _MapNode(QGraphicsEllipseItem):
         super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
+        """Surcharge l'évènement de survol
+
+        Args:
+            event (QGraphicsSceneHoverEvent): Evènement de survol
+        """
         r = _POINT_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
         self.setPen(QPen(QColor(_SELECT_COLOR), 2) if self.isSelected() else QPen(Qt.GlobalColor.transparent))
@@ -92,11 +109,20 @@ class _MapNode(QGraphicsEllipseItem):
         super().hoverLeaveEvent(event)
 
     def mousePressEvent(self, event):
+        """Surcharge l'évènement de clic
+
+        Args:
+            event (QGraphicsSceneMouseEvent): Evènement de clic
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self._cb_sel(self.img_name)
         super().mousePressEvent(event)
 
     def mark_selected(self, selected: bool):
+        """Marque selectionné le noeud.
+
+        Args:
+            selected (bool): True si le noeud est sélectionné"""
         r = _POINT_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
         self.setPen(QPen(QColor(_SELECT_COLOR), 2) if selected else QPen(Qt.GlobalColor.transparent))
@@ -108,10 +134,15 @@ class _MapNode(QGraphicsEllipseItem):
 # ═════════════════════════════════════════════════════════════════════════════
 
 
-class _MapView(QGraphicsView):
+class MapView(QGraphicsView):
     ZOOM_FACTOR = 1.15
 
     def __init__(self, scene: QGraphicsScene, parent=None):
+        """
+        Args:
+            scene (QGraphicsScene): Scene à afficher.
+            parent (QWidget, optional): Parent. Defaults to None.
+        """
         super().__init__(scene, parent)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
@@ -121,14 +152,26 @@ class _MapView(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def wheelEvent(self, event: QWheelEvent):
+        """Gere l'évènement de roulette de souris.
+
+        Args:
+            event (QWheelEvent): Evènement de roulette de souris.
+        """
         factor = self.ZOOM_FACTOR if event.angleDelta().y() > 0 else 1 / self.ZOOM_FACTOR
         self.scale(factor, factor)
 
     def zoom_to_rect(self, rect: QRectF, margin: float = 60.0):
+        """Zoom à une zone.
+
+        Args:
+            rect (QRectF): Zone à zoomer.
+            margin (float, optional): Marge. Defaults to 60.0.
+        """
         padded = rect.adjusted(-margin, -margin, margin, margin)
         self.fitInView(padded, Qt.AspectRatioMode.KeepAspectRatio)
 
     def reset_zoom(self):
+        """Réinitialise le zoom."""
         self.resetTransform()
 
 
@@ -137,8 +180,15 @@ class _MapView(QGraphicsView):
 # ═════════════════════════════════════════════════════════════════════════════
 
 
-class _SettingsDock(QDockWidget):
-    def __init__(self, params: dict, on_apply, parent=None):
+class SettingsDock(QDockWidget):
+    def __init__(self, params: dict[str, int], on_apply, parent=None):
+        """
+        Args:
+            params (dict[str, int]): Paramètres de la carte.
+            on_apply (function): Fonction à appeler lors de l'application des paramètres.
+            parent (QWidget, optional): Parent. Defaults to None.
+        """
+
         super().__init__("Paramètres de la carte", parent)
         self.on_apply = on_apply
         self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -179,24 +229,33 @@ class _SettingsDock(QDockWidget):
         layout.addWidget(sep)
 
         btn = QPushButton("Appliquer et recalculer")
-        btn.clicked.connect(self._apply)
+        btn.clicked.connect(self.apply)
         layout.addWidget(btn)
         layout.addStretch()
 
         self.setWidget(content)
         self.setMinimumWidth(240)
 
-    def _apply(self):
+    def apply(self):
+        """Applique les paramètres."""
         self.on_apply(self.current_params())
 
-    def current_params(self) -> dict:
+    def current_params(self) -> dict[str, int]:
+        """Renvoi les parametres actuels.
+
+        Returns:
+            dict[str, int]: Les parametres actuels."""
         return {
             "umap_n_neighbors": self._spin_neighbors.value(),
             "umap_min_dist": self._spin_min_dist.value(),
             "hdbscan_min_cluster": self._spin_hdbscan.value(),
         }
 
-    def set_params(self, params: dict):
+    def set_params(self, params: dict[str, int]):
+        """Change les parametres.
+
+        Args:
+            params (dict[str, int]): Les parametres."""
         self._spin_neighbors.setValue(params["umap_n_neighbors"])
         self._spin_min_dist.setValue(params["umap_min_dist"])
         self._spin_hdbscan.setValue(params["hdbscan_min_cluster"])
@@ -209,19 +268,26 @@ class _SettingsDock(QDockWidget):
 
 class MapTab(QWidget):
     def __init__(self, map_vm: MapViewModel, main_window, parent=None):
+        """
+        Args:
+            map_vm (MapViewModel): Le view model de la carte.
+            main_window (MainWindow): La fenetre principale.
+            parent (QWidget, optional): Le parent. Defaults to None.
+        """
+
         super().__init__(parent)
         self._vm = map_vm
         self._main_window = main_window
-        self._nodes: dict[str, _MapNode] = {}
+        self._nodes: dict[str, MapNode] = {}
         self._current_selected: str | None = None
         self._cluster_rects: dict[int, QRectF] = {}
         self._legend_labels: dict[int, QLabel] = {}
         self._cluster_names: dict[int, str] = {}
 
-        self._build_ui()
+        self.build_ui()
 
         # Dock paramètres
-        self._settings_dock = _SettingsDock(
+        self._settings_dock = SettingsDock(
             self._vm.params,
             on_apply=self._vm.apply_params,
             parent=main_window,
@@ -231,18 +297,19 @@ class MapTab(QWidget):
         self._settings_dock.visibilityChanged.connect(lambda v: self._btn_settings.setChecked(v))
 
         # Câblage ViewModel → View
-        self._vm.compute_started.connect(self._on_compute_started)
+        self._vm.compute_started.connect(self.on_compute_started)
         self._vm.compute_progress.connect(self._lbl_status.setText)
-        self._vm.compute_finished.connect(self._on_finished)
-        self._vm.cluster_named.connect(self._on_cluster_named)
-        self._vm.compute_error.connect(self._on_error)
+        self._vm.compute_finished.connect(self.on_finished)
+        self._vm.cluster_named.connect(self.on_cluster_named)
+        self._vm.compute_error.connect(self.on_error)
         self._vm.params_changed.connect(self._settings_dock.set_params)
 
         QTimer.singleShot(500, self._vm.autoload)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
-    def _build_ui(self):
+    def build_ui(self):
+        """Construit le widget."""
         root = QVBoxLayout(self)
         root.setContentsMargins(8, 8, 8, 8)
         root.setSpacing(6)
@@ -273,7 +340,7 @@ class MapTab(QWidget):
         h.setSpacing(8)
 
         self._scene = QGraphicsScene(self)
-        self._view = _MapView(self._scene, self)
+        self._view = MapView(self._scene, self)
         self._view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         h.addWidget(self._view, stretch=5)
 
@@ -299,19 +366,32 @@ class MapTab(QWidget):
 
     # ── Slots ─────────────────────────────────────────────────────────────────
 
-    def _on_compute_started(self):
+    def on_compute_started(self):
+        """Callback pour tout nettoyer"""
         self._btn_compute.setEnabled(False)
         self._scene.clear()
         self._nodes.clear()
         self._cluster_rects.clear()
         self._btn_reset_filter.setEnabled(False)
 
-    def _on_error(self, msg: str):
+    def on_error(self, msg: str):
+        """Callback pour afficher un message d'erreur
+
+        Args:
+            msg (str): Message d'erreur"""
         self._lbl_status.setText(f"❌ {msg}")
         self._btn_compute.setEnabled(True)
 
-    def _on_finished(self, points, labels, names, cluster_names):
-        self._build_scene(points, labels, names, cluster_names)
+    def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
+        """Callback pour afficher les clusters
+
+        Args:
+            points (list[tuple[float, float]]): Coordonnées des points
+            labels (list[int]): Labels des clusters
+            names (list[str]): Noms des images
+            cluster_names (dict[int, str]): Noms des clusters
+        """
+        self.build_scene(points, labels, names, cluster_names)
         n_clusters = len({label for label in labels if label >= 0})
         n_noise = labels.count(-1)
         self._lbl_status.setText(f"{len(names)} images — {n_clusters} clusters" + (f" — {n_noise} bruit" if n_noise else ""))
@@ -320,17 +400,30 @@ class MapTab(QWidget):
         if self._current_selected:
             self.highlight(self._current_selected)
 
-    def _on_cluster_named(self, cid: int, name: str):
+    def on_cluster_named(self, cid: int, name: str):
+        """Callback lors du nommage.
+
+        Args:
+            cid (int): Identifiant du cluster
+            name (str): Nom du cluster"""
         self._cluster_names[cid] = name
-        self._refresh_legend_names()
+        self.refresh_legend_names()
 
     # ── Scène ─────────────────────────────────────────────────────────────────
 
-    def _build_scene(self, points, labels, names, cluster_names):
+    def build_scene(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
+        """Construit la scène.
+
+        Args:
+            points (list[tuple[float, float]]): Points
+            labels (list[int]): Labels
+            names (list[str]): Noms des images
+            cluster_names (dict[int, str]): Noms des clusters
+        """
         self._scene.clear()
         self._nodes.clear()
         self._cluster_rects.clear()
-        self._clear_legend()
+        self.clear_legend()
         self._cluster_names = dict(cluster_names)
 
         xs = [p[0] for p in points]
@@ -340,6 +433,7 @@ class MapTab(QWidget):
         W = H = 800.0
 
         def sp(px, py):
+            """Renvoi les coordonnées de la scène."""
             return (px - min(xs)) / rx * W, (py - min(ys)) / ry * H
 
         unique = sorted(set(labels))
@@ -353,7 +447,7 @@ class MapTab(QWidget):
         cluster_points: dict[int, list] = {}
         for name, (px, py), label in zip(names, points, labels, strict=False):
             sx, sy = sp(px, py)
-            node = _MapNode(name, label, color_map[label], callback_select=self._on_node_clicked)
+            node = MapNode(name, label, color_map[label], callback_select=self.on_node_clicked)
             node.setPos(sx, sy)
             self._scene.addItem(node)
             self._nodes[name] = node
@@ -376,18 +470,26 @@ class MapTab(QWidget):
             QRectF(0, 0, W, H).adjusted(-50, -50, 50, 50),
             Qt.AspectRatioMode.KeepAspectRatio,
         )
-        self._build_legend(color_map, labels, cluster_names)
+        self.build_legend(color_map, labels, cluster_names)
 
     # ── Légende ───────────────────────────────────────────────────────────────
 
-    def _clear_legend(self):
+    def clear_legend(self):
+        """Nettoie la légende."""
         self._legend_labels.clear()
         while self._legend_layout.count() > 1:
             item = self._legend_layout.takeAt(1)
             if item.widget():
                 item.widget().deleteLater()
 
-    def _build_legend(self, color_map, labels, cluster_names):
+    def build_legend(self, color_map: dict[int, QColor], labels: list[int], cluster_names: dict[int, str]):
+        """Construit la légende.
+
+        Args:
+            color_map (dict[int, QColor]): Carte des couleurs.
+            labels (list[int]): Labels des clusters.
+            cluster_names (dict[int, str]): Nom des clusters.
+        """
         from collections import Counter
 
         counts = Counter(labels)
@@ -407,7 +509,7 @@ class MapTab(QWidget):
             lbl.setWordWrap(True)
             lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             lbl.setToolTip("Clic : isoler et zoomer sur ce cluster")
-            lbl.mousePressEvent = lambda _e, c=cid: self._filter_and_zoom_cluster(c)
+            lbl.mousePressEvent = lambda _e, c=cid: self.filter_and_zoom_cluster(c)
             row.addWidget(lbl, stretch=1)
             self._legend_labels[cid] = lbl
 
@@ -415,7 +517,8 @@ class MapTab(QWidget):
             container.setLayout(row)
             self._legend_layout.addWidget(container)
 
-    def _refresh_legend_names(self):
+    def refresh_legend_names(self):
+        """Rafraichi la légende."""
         for cid, lbl in self._legend_labels.items():
             base = self._cluster_names.get(cid, f"Cluster {cid}")
             text = lbl.text()
@@ -425,11 +528,19 @@ class MapTab(QWidget):
 
     # ── Interactions ──────────────────────────────────────────────────────────
 
-    def _on_node_clicked(self, img_name: str):
+    def on_node_clicked(self, img_name: str):
+        """Highlight le node lorsqu'on clique dessus.
+
+        Args:
+            img_name (str): Nom de l'image."""
         self.highlight(img_name)
         self._vm._gallery_vm.select_image(img_name)
 
     def highlight(self, img_name: str):
+        """Highlight un node.
+
+        Args:
+            img_name (str): Nom de l'image."""
         if self._current_selected and self._current_selected in self._nodes:
             self._nodes[self._current_selected].mark_selected(False)
         self._current_selected = img_name
@@ -438,7 +549,12 @@ class MapTab(QWidget):
             node.mark_selected(True)
             self._view.centerOn(node)
 
-    def _filter_and_zoom_cluster(self, cluster_id: int):
+    def filter_and_zoom_cluster(self, cluster_id: int):
+        """Filtre et zoom sur un cluster.
+
+        Args:
+            cluster_id (int): ID du cluster.
+        """
         for node in self._nodes.values():
             node.setOpacity(1.0 if node.cluster == cluster_id else 0.12)
         if cluster_id in self._cluster_rects:
@@ -446,6 +562,7 @@ class MapTab(QWidget):
         self._btn_reset_filter.setEnabled(True)
 
     def reset_opacity(self):
+        """Reset l'opacité des nodes."""
         for node in self._nodes.values():
             node.setOpacity(1.0)
         self._view.fitInView(QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio)
@@ -453,5 +570,9 @@ class MapTab(QWidget):
     # ── API externe ───────────────────────────────────────────────────────────
 
     def on_image_selected(self, img_name: str):
+        """Highlight un node.
+
+        Args:
+            img_name (str): Nom de l'image."""
         if self._nodes:
             self.highlight(img_name)

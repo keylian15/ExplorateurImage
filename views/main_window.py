@@ -33,6 +33,13 @@ class MainWindow(QMainWindow):
         autocomplete_vm: AutocompleteViewModel,
         map_vm: MapViewModel,
     ):
+        """
+        Args:
+            gallery_vm (GalleryViewModel): ViewModel de la vue d'exploration
+            detail_vm (DetailViewModel): ViewModel de la vue de détail
+            autocomplete_vm (AutocompleteViewModel): ViewModel de la vue d'autocomplétion
+            map_vm (MapViewModel): ViewModel de la vue de carte"""
+
         super().__init__()
         self._gvm = gallery_vm
         self._dvm = detail_vm
@@ -43,19 +50,21 @@ class MainWindow(QMainWindow):
         screen = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen)
 
-        self._build_ui()
-        self._connect_vms()
+        self.build_ui()
+        self.connect_vms()
 
     # ── Construction ──────────────────────────────────────────────────────────
 
-    def _build_ui(self):
+    def build_ui(self):
+        """Construit l'interface utilisateur de la fenêtre principale"""
+
         # ── Widgets principaux ────────────────────────────────────────────────
         self._gallery_widget = GalleryWidget(self._gvm, self._avm, self)
         self._detail_widget = DetailWidget(self._dvm, self)
         self._map_tab = MapTab(self._mvm, self, self)
 
         # Bouton "Ouvrir" dans la galerie → dialog ici car besoin de la fenêtre
-        self._gallery_widget.btn_open.clicked.connect(self._open_folder_dialog)
+        self._gallery_widget.btn_open.clicked.connect(self.open_folder_dialog)
 
         # ── Onglets ───────────────────────────────────────────────────────────
         tabs = QTabWidget()
@@ -72,20 +81,27 @@ class MainWindow(QMainWindow):
         self._dock.setVisible(False)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._dock)
 
-    def _connect_vms(self):
+    def connect_vms(self):
+        """Connecter les VMs entre elles"""
         # Sélection dans la galerie → détail + carte
-        self._gvm.image_selected.connect(self._on_image_selected)
+        self._gvm.image_selected.connect(self.on_image_selected)
         # Sélection via carte → galerie
         self._gvm.image_selected.connect(self._map_tab.on_image_selected)
 
     # ── Slots ─────────────────────────────────────────────────────────────────
 
-    def _open_folder_dialog(self):
+    def open_folder_dialog(self):
+        """Ouvre une boîte de dialogue pour choisir un dossier"""
         folder = QFileDialog.getExistingDirectory(self, "Choisir un dossier")
         if folder:
             self._gvm.open_folder(folder)
 
-    def _on_image_selected(self, img_name: str):
+    def on_image_selected(self, img_name: str):
+        """Selectionne l'image.
+
+        Args:
+            img_name (str): Nom de l'image
+        """
         self._dvm.on_image_selected(img_name)
         if not self._dock.isVisible():
             self._dock.setVisible(True)
