@@ -56,6 +56,7 @@ def save(config: dict) -> None:
 
 def get_map_params(config: dict) -> dict:
     """Extrait les paramètres de la carte depuis la configuration, en appliquant les valeurs par défaut pour les clés manquantes.
+
     Args:
         config (dict): La configuration à utiliser.
 
@@ -72,6 +73,7 @@ def get_map_params(config: dict) -> dict:
 
 def set_map_params(config: dict, params: dict) -> dict:
     """Retourne une nouvelle configuration avec les paramètres de la carte mis à jour.
+
     Args:
         config (dict): La configuration à mettre à jour.
         params (dict): Les nouveaux paramètres de la carte.
