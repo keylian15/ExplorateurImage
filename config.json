@@ -1,5 +1,5 @@
 {
-  "default_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Dataset",
+  "default_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
   "k_neighbors": 6,
   "map_params": {
     "umap_n_neighbors": 15,

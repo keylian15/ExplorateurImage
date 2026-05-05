@@ -1,4 +1,4 @@
-pyqt6
-umap-learn 
-hdbscan
-pickle
+PyQt6==6.11.0
+umap-learn==0.5.12
+hdbscan==0.8.42
+ruff==0.15.12

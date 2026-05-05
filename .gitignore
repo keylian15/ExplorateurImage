@@ -219,7 +219,8 @@ __marimo__/
 
 
 # Dataset
-Dataset/**
+Images/Dataset/**
+Images/Dataset/
 # Ignore tous les thumbanils.
 .thumbnails/
 map_cache.pkl
