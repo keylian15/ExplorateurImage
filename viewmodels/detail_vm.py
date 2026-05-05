@@ -46,6 +46,13 @@ class DetailViewModel(QObject):
         gallery_vm,  # GalleryViewModel (évite import circulaire)
         parent=None,
     ):
+        """
+        Args:
+            client (OllamaWrapper): client Ollama
+            config (dict): config
+            gallery_vm (GalleryViewModel): gallery viewmodel
+        """
+
         super().__init__(parent)
         self._client = client
         self._config = config
@@ -59,7 +66,7 @@ class DetailViewModel(QObject):
         self._save_timer = QTimer()
         self._save_timer.setInterval(2000)
         self._save_timer.setSingleShot(True)
-        self._save_timer.timeout.connect(self._do_save)
+        self._save_timer.timeout.connect(self.do_save)
 
         self._pending_desc: str = ""
         self._pending_keywords: list[str] = []
@@ -68,24 +75,48 @@ class DetailViewModel(QObject):
 
     @property
     def k_neighbors(self) -> int:
+        """Donne le nombre de voisins.
+
+        Returns:
+            int: nombre de voisins"""
         return self._config.get("k_neighbors", 5)
 
     @k_neighbors.setter
     def k_neighbors(self, value: int):
+        """Remplace le nombre de voisins.
+
+        Args:
+            value (int): nombre de voisins.
+        """
         self._config["k_neighbors"] = value
         config_repository.save(self._config)
 
     @property
     def _index(self) -> dict:
+        """Renvoie l'index de l'application.
+
+        Returns:
+            dict: index de l'application
+        """
         return self._gallery_vm.index
 
     @property
     def _folder(self) -> str | None:
+        """Renvoie le dossier courant.
+
+        Returns:
+            str | None: dossier courant
+        """
         return self._gallery_vm.current_folder
 
     # ── Sélection ─────────────────────────────────────────────────────────────
 
     def on_image_selected(self, img_name: str):
+        """Callback quand une image est sélectionnée.
+
+        Args:
+            img_name (str): nom de l'image
+        """
         self.selected_image = img_name
 
         # Pixmap
@@ -101,18 +132,25 @@ class DetailViewModel(QObject):
         self.metadata_loaded.emit(img_name, desc, keywords)
 
         # Voisins
-        self._compute_neighbors(img_name)
+        self.compute_neighbors(img_name)
 
     # ── Sauvegarde ────────────────────────────────────────────────────────────
 
     def schedule_save(self, desc: str, keywords: list[str]):
+        """Planifie la sauvegarde des métadonnées.
+
+        Args:
+            desc (str): description de l'image
+            keywords (list[str]): liste de mots-clés de l'image
+        """
         if not self.selected_image:
             return
         self._pending_desc = desc
         self._pending_keywords = keywords
         self._save_timer.start()
 
-    def _do_save(self):
+    def do_save(self):
+        """Sauvegarde les métadonnées de l'image sélectionnée."""
         if not self.selected_image or not self._folder:
             return
         if self._save_worker and self._save_worker.isRunning():
@@ -126,11 +164,12 @@ class DetailViewModel(QObject):
             self._pending_keywords,
             self._client,
         )
-        self._save_worker.finished.connect(self._on_save_done)
+        self._save_worker.finished.connect(self.on_save_done)
         self._save_worker.error.connect(self.save_error)
         self._save_worker.start()
 
-    def _on_save_done(self):
+    def on_save_done(self):
+        """Callback de la fin de la sauvegarde."""
         self._gallery_vm.reload_index()
         self.save_finished.emit()
         self.index_updated.emit(set(self._index.keys()))
@@ -138,6 +177,7 @@ class DetailViewModel(QObject):
     # ── Auto-complétion ───────────────────────────────────────────────────────
 
     def auto_complete(self):
+        """Lance l'auto-complétion des métadonnées."""
         if not self.selected_image or not self._folder:
             return
         if self._worker and self._worker.isRunning():
@@ -146,18 +186,24 @@ class DetailViewModel(QObject):
         path = os.path.join(self._folder, self.selected_image)
         self.autocomplete_started.emit()
         self._worker = AutoCompleteWorker(path, self._client)
-        self._worker.finished.connect(self._on_autocomplete_done)
+        self._worker.finished.connect(self.on_autocomplete_done)
         self._worker.error.connect(self.autocomplete_error)
         self._worker.start()
 
-    def _on_autocomplete_done(self, result: dict):
+    def on_autocomplete_done(self, result: dict):
+        """Callback de la fin de l'auto-complétion."""
         desc = result["description"]
         keywords = result["keywords"]
         self.autocomplete_finished.emit(desc, keywords)
 
     # ── Voisins ───────────────────────────────────────────────────────────────
 
-    def _compute_neighbors(self, img_name: str):
+    def compute_neighbors(self, img_name: str):
+        """Calcule les voisins de l'image.
+
+        Args:
+            img_name (str): Nom de l'image.
+        """
         if img_name not in self._index:
             self.neighbors_ready.emit({})
             return
@@ -175,12 +221,17 @@ class DetailViewModel(QObject):
         self.neighbors_ready.emit(top)
 
     def refresh_neighbors(self):
+        """Rafraichi les voisins de l'image sélectionnée."""
         if self.selected_image:
-            self._compute_neighbors(self.selected_image)
+            self.compute_neighbors(self.selected_image)
 
     # ── Renommage ─────────────────────────────────────────────────────────────
 
     def rename(self, new_name: str):
+        """Renomme l'image sélectionnée.
+
+        Args:
+            new_name (str): Nouveau nom de l'image."""
         if not self.selected_image or not self._folder:
             return
         if not new_name or new_name == self.selected_image:
