@@ -102,6 +102,6 @@ class MainWindow(QMainWindow):
         Args:
             img_name (str): Nom de l'image
         """
-        self._dvm.on_image_selected(img_name)
         if not self._dock.isVisible():
             self._dock.setVisible(True)
+        self._dvm.on_image_selected(img_name)

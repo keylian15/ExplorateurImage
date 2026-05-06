@@ -315,6 +315,7 @@ class MapWorker(QThread):
         self.umap_n_neighbors = umap_n_neighbors
         self.umap_min_dist = umap_min_dist
         self.hdbscan_min_cluster = hdbscan_min_cluster
+        self.cluster_names: dict[int, str] = {}
 
     def run(self):
         """Lance le calcul."""
@@ -327,6 +328,7 @@ class MapWorker(QThread):
         """Calcule les embeddings et les clusters."""
         import numpy as np
 
+        # ── 1. Embeddings ─────────────────────────────────────
         self.progress.emit("Extraction des embeddings…")
         names, vectors = [], []
         for name, data in self.index.items():
@@ -341,6 +343,7 @@ class MapWorker(QThread):
 
         X = np.array(vectors, dtype=np.float32)
 
+        # ── 2. UMAP ───────────────────────────────────────────
         self.progress.emit(f"UMAP sur {len(names)} images…")
         import umap  # type: ignore
 
@@ -353,6 +356,7 @@ class MapWorker(QThread):
             verbose=False,
         ).fit_transform(X)
 
+        # ── 3. HDBSCAN ────────────────────────────────────────
         self.progress.emit("Clustering HDBSCAN…")
         try:
             import hdbscan  # type: ignore
@@ -369,9 +373,16 @@ class MapWorker(QThread):
             self.progress.emit("hdbscan absent → pas de clustering")
             labels = [0] * len(names)
 
+        # ── 4. Affichage Non Bloquant ────────────────────────────────────────
         points = [(float(x), float(y)) for x, y in embedding_2d]
         self.progress.emit("Carte prête.")
-        self.finished.emit(points, labels, names, {})
+        self.finished.emit(points, labels, names, self.cluster_names)
+
+        # ── 5. Nommer les clusters en fond ────────────────────────────────────────
+        self.cluster_names.clear()
+        self.name_clusters_async(names, labels)
+        self.progress.emit("Nommage des clusters terminé, carte prête.")
+        self.finished.emit(points, labels, names, self.cluster_names)
 
     def name_clusters_async(self, names: list[str], labels: list[int]):
         """Nomme les clusters en fonction des descriptions et mots clés des images.
@@ -382,6 +393,7 @@ class MapWorker(QThread):
         import random
         from collections import defaultdict
 
+        # Tri des labels par ordre croissant
         unique = sorted(c for c in set(labels) if c >= 0)
         if not unique:
             return
@@ -391,9 +403,11 @@ class MapWorker(QThread):
             if label >= 0:
                 cluster_members[label].append(name)
 
+        # Pour chaque cluster
         for i, cid in enumerate(unique):
             self.progress.emit(f"Nommage cluster {i + 1}/{len(unique)}…")
             members = cluster_members[cid]
+            # Nombre aléatoire pour eviter de prendre trop d'images
             sample = random.sample(members, min(8, len(members)))
 
             descriptions = []
@@ -410,6 +424,7 @@ class MapWorker(QThread):
                 self.cluster_named.emit(cid, f"Cluster {cid}")
                 continue
 
+            # Prompt
             prompt = "Voici des descriptions d'images appartenant au même groupe :\n" + "\n".join(f"- {d}" for d in descriptions) + "\n\nDonne un nom de groupe court (2-3 mots max, français)."
             try:
                 result = self.client.generate_text(
@@ -421,3 +436,4 @@ class MapWorker(QThread):
             except Exception:
                 name = f"Cluster {cid}"
             self.cluster_named.emit(cid, name)
+            self.cluster_names[cid] = name
