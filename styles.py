@@ -8,36 +8,36 @@ Toutes les couleurs, polices, marges et QSS sont centralisées ici.
 # ── Palette de base ───────────────────────────────────────────────────────────
 
 COLORS = {
-    # Fonds
-    "bg_primary": "#1e1e1e",
-    "bg_secondary": "#252525",
-    "bg_card": "#2b2b2b",
-    "bg_input": "#333333",
-    "bg_hover": "#3a3a3a",
-    # Texte
-    "text_primary": "#e8e8e8",
-    "text_secondary": "#aaaaaa",
-    "text_muted": "#666666",
-    "text_disabled": "#555555",
-    # Accents
-    "accent": "#4a90d9",
-    "accent_hover": "#5ba0e8",
-    "accent_pressed": "#3a7fc8",
-    # États
-    "success": "#4caf50",
-    "warning": "#f0a500",
-    "error": "#e05252",
-    "info": "#4a90d9",
-    # Bordures
-    "border": "#3a3a3a",
-    "border_focus": "#4a90d9",
-    # Thumbnail placeholder
-    "thumb_placeholder": "#2b2b2b",
-    "thumb_loading_text": "#888888",
-    # Sélection dans la grille
-    "selection_border": "#4a90d9",
-    # Point vert "indexé"
-    "indexed_dot": "#4caf50",
+    # ── Fonds ──
+    "bg_primary": "#0f172a",  # bleu nuit profond
+    "bg_secondary": "#111827",  # légèrement plus clair
+    "bg_card": "#1f2937",  # cartes
+    "bg_input": "#111827",
+    "bg_hover": "#1e293b",
+    # ── Texte ──
+    "text_primary": "#e5e7eb",  # blanc doux
+    "text_secondary": "#9ca3af",  # gris moderne
+    "text_muted": "#6b7280",
+    "text_disabled": "#4b5563",
+    # ── Accents ──
+    "accent": "#3b82f6",  # bleu moderne (tailwind blue-500)
+    "accent_hover": "#60a5fa",
+    "accent_pressed": "#2563eb",
+    # ── États ──
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "error": "#ef4444",
+    "info": "#3b82f6",
+    # ── Bordures ──
+    "border": "#1f2937",
+    "border_focus": "#3b82f6",
+    # ── Thumbnails ──
+    "thumb_placeholder": "#1f2937",
+    "thumb_loading_text": "#6b7280",
+    # ── Sélection ──
+    "selection_border": "#3b82f6",
+    # ── Status ──
+    "indexed_dot": "#22c55e",
 }
 
 # ── Typographie ───────────────────────────────────────────────────────────────
@@ -189,9 +189,14 @@ def get_stylesheet() -> str:
     }}
     QSpinBox::up-button, QSpinBox::down-button,
     QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{
-        background-color: {c["bg_hover"]};
+        width: 0px;
+        height: 0px;
         border: none;
-        border-radius: 2px;
+    }}
+
+    QSpinBox::up-arrow, QSpinBox::down-arrow,
+    QDoubleSpinBox::up-arrow, QDoubleSpinBox::down-arrow {{
+        image: none;
     }}
 
     /* ── Scroll ── */
