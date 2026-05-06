@@ -21,6 +21,7 @@ nav:
   - Main: main.md
   - Style: styles.md
   - Models:
+    - color_repository: models/color_repository.md
     - config_repository: models/config_repository.md
     - image_model: models/image_model.md
     - index_repository: models/index_repository.md
@@ -41,3 +42,4 @@ nav:
     - gallery_widget: views/gallery_widget.md
     - main_window: views/main_window.md
     - map_widget: views/map_widget.md
+    - style_tab: views/style_tab.md
