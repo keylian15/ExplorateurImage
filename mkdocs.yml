@@ -18,6 +18,8 @@ plugins:
 
 nav:
   - Accueil: index.md
+  - Main: main.md
+  - Style: styles.md
   - Models:
     - config_repository: models/config_repository.md
     - image_model: models/image_model.md

@@ -3,42 +3,18 @@ styles.py — Thème visuel global de l'application.
 
 C'est le SEUL fichier à modifier pour changer l'apparence.
 Toutes les couleurs, polices, marges et QSS sont centralisées ici.
+
+Les couleurs (COLORS) sont désormais persistées dans colors.json
+et gérées via models/color_repository.py, ce qui permet leur édition
+en direct depuis l'onglet Thème sans redémarrer l'application.
 """
 
-# ── Palette de base ───────────────────────────────────────────────────────────
+from models import color_repository
 
-COLORS = {
-    # ── Fonds ──
-    "bg_primary": "#0f172a",  # bleu nuit profond
-    "bg_secondary": "#111827",  # légèrement plus clair
-    "bg_card": "#1f2937",  # cartes
-    "bg_input": "#111827",
-    "bg_hover": "#1e293b",
-    # ── Texte ──
-    "text_primary": "#e5e7eb",  # blanc doux
-    "text_secondary": "#9ca3af",  # gris moderne
-    "text_muted": "#6b7280",
-    "text_disabled": "#4b5563",
-    # ── Accents ──
-    "accent": "#3b82f6",  # bleu moderne (tailwind blue-500)
-    "accent_hover": "#60a5fa",
-    "accent_pressed": "#2563eb",
-    # ── États ──
-    "success": "#22c55e",
-    "warning": "#f59e0b",
-    "error": "#ef4444",
-    "info": "#3b82f6",
-    # ── Bordures ──
-    "border": "#1f2937",
-    "border_focus": "#3b82f6",
-    # ── Thumbnails ──
-    "thumb_placeholder": "#1f2937",
-    "thumb_loading_text": "#6b7280",
-    # ── Sélection ──
-    "selection_border": "#3b82f6",
-    # ── Status ──
-    "indexed_dot": "#22c55e",
-}
+# ── Palette de base ───────────────────────────────────────────────────────────
+# Chargée depuis colors.json (avec fallback sur les défauts intégrés)
+
+COLORS: dict[str, str] = color_repository.load()
 
 # ── Typographie ───────────────────────────────────────────────────────────────
 
@@ -83,6 +59,7 @@ THUMB = {
 
 # ── QSS global ───────────────────────────────────────────────────────────────
 # Injecté une seule fois dans QApplication.setStyleSheet().
+# Relu à chaque appel → les changements de COLORS sont pris en compte.
 
 
 def get_stylesheet() -> str:
