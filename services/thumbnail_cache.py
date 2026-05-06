@@ -1,13 +1,22 @@
 """
-Deux niveaux de cache pour les thumbnails :
-  - Niveau 1 : LRU en mémoire (OrderedDict, taille configurable)
-  - Niveau 2 : Fichiers JPEG dans .thumbnails/ au côté des images
+Cache de thumbnails à deux niveaux pour optimiser l'affichage des images.
 
-Usage :
-    cache = ThumbnailCache(folder, thumb_size=192, max_memory=500)
-    pixmap = cache.get(img_name)   # None si absent des deux niveaux
-    cache.put(img_name, pixmap)    # écrit les deux niveaux
-    cache.clear_memory()           # vide uniquement le LRU mémoire
+Ce module implémente un système de cache hybride combinant mémoire et disque afin
+d'améliorer les performances de génération et d'affichage des miniatures.
+
+Contenu :
+ - Cache mémoire LRU basé sur OrderedDict
+ - Cache disque persistant au format JPEG
+ - Génération et redimensionnement des thumbnails
+ - Gestion des invalidations et de la taille du cache
+
+Responsabilités :
+ 1. Maintenir un cache mémoire LRU limité en taille
+ 2. Persister les thumbnails sur disque pour réutilisation
+ 3. Charger un thumbnail depuis la mémoire ou le disque
+ 4. Générer un thumbnail à partir d'une image source
+ 5. Gérer l'invalidation et le nettoyage du cache
+ 6. Adapter dynamiquement la taille des thumbnails
 """
 
 import hashlib

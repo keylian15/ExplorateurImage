@@ -1,12 +1,17 @@
 """
-styles.py — Thème visuel global de l'application.
+Ce module centralise l'ensemble du système de style de l'application (QSS, couleurs, typographie et métriques).
+Il constitue l'unique point de configuration de l'apparence graphique et permet une mise à jour dynamique du thème.
 
-C'est le SEUL fichier à modifier pour changer l'apparence.
-Toutes les couleurs, polices, marges et QSS sont centralisées ici.
+Les couleurs sont chargées depuis `colors.json` via `color_repository`, ce qui permet leur modification en temps réel
+depuis l'interface utilisateur sans redémarrage de l'application.
 
-Les couleurs (COLORS) sont désormais persistées dans colors.json
-et gérées via models/color_repository.py, ce qui permet leur édition
-en direct depuis l'onglet Thème sans redémarrer l'application.
+Responsabilités :
+1. Définir et centraliser la palette de couleurs globale (COLORS)
+2. Définir la typographie (polices, tailles, graisses)
+3. Définir les métriques UI (padding, marges, arrondis, espacements)
+4. Générer dynamiquement la feuille de style QSS globale (get_stylesheet)
+5. Fournir des styles réutilisables pour les composants UI (helpers inline)
+6. Assurer la cohérence visuelle entre tous les modules de l'application
 """
 
 from models import color_repository

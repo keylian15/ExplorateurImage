@@ -1,7 +1,22 @@
 """
-views/components/fullscreen_dialog.py
+Dialog de visualisation d'image en plein écran avec contrôle de zoom.
 
-Dialog de visualisation plein écran avec zoom molette et boutons.
+Ce composant affiche une image dans une fenêtre plein écran avec une barre
+d'outils permettant de zoomer, dézoomer et réinitialiser l'affichage. Il gère
+également le zoom à la molette pour une navigation fluide.
+
+Contenu :
+ - Affichage plein écran d'une image (QPixmap)
+ - Barre d'outils de contrôle du zoom
+ - Zoom dynamique avec limites min/max
+ - Support du zoom via molette de souris
+ - Redimensionnement adaptatif de l'image
+
+Responsabilités :
+ 1. Afficher une image en mode plein écran
+ 2. Gérer le zoom avant/arrière et sa réinitialisation
+ 3. Adapter l'affichage de l'image aux dimensions de l'écran
+ 4. Permettre le contrôle du zoom via boutons et molette
 """
 
 from __future__ import annotations

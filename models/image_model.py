@@ -1,12 +1,26 @@
 """
-Modèle et delegate Qt pour l'affichage d'une grille d'images avec thumbnails.
+Affichage et gestion d'une grille d'images avec thumbnails dans Qt.
 
-Le module fournit un modèle léger basé sur les noms de fichiers (sans charger les images en mémoire)
-et un delegate responsable du rendu des cellules : affichage des thumbnails via cache, gestion du chargement
-asynchrone, indication des éléments sélectionnés et marqués comme indexés.
+Ce module fournit :
+ - un modèle léger basé sur les noms de fichiers (sans chargement d'images en mémoire),
+ - un delegate responsable du rendu visuel des cellules (thumbnails, sélection, état indexé),
+ - une gestion performante du chargement asynchrone des images via cache et scheduler.
 
-Il s'appuie sur un cache de thumbnails et un scheduler pour générer les images manquantes à la demande,
-afin de garantir de bonnes performances même avec un grand nombre d'images.
+Responsabilités :
+ 1. Fournir un modèle Qt représentant une liste d'images sans charger les fichiers en mémoire
+ 2. Gérer les états associés aux images (sélection, indexation, mises à jour)
+ 3. Exposer des rôles Qt personnalisés pour l'UI (nom, sélection, indexation)
+ 4. Dessiner chaque cellule de la grille avec un delegate personnalisé (thumbnail, bordure, indicateurs)
+ 5. Interagir avec un cache de thumbnails pour éviter les rechargements inutiles
+ 6. Déclencher la génération asynchrone des thumbnails manquants via un scheduler
+ 7. Notifier la vue lors de la disponibilité d'un nouveau thumbnail
+
+Contenu :
+ - Modèle Qt basé sur QAbstractListModel
+ - Delegate de rendu basé sur QStyledItemDelegate
+ - Rôles Qt personnalisés pour les données d'affichage
+ - Intégration cache + génération asynchrone des thumbnails
+ - Logique de rendu (sélection, indexation, placeholder, bordures)
 """
 
 from __future__ import annotations

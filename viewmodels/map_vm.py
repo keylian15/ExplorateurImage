@@ -1,10 +1,28 @@
 """
-viewmodels/map_vm.py
+ViewModel de la carte 2D sémantique.
 
-Logique de la carte 2D sémantique :
-  - chargement/sauvegarde du cache pickle
-  - lancement du MapWorker (UMAP + HDBSCAN)
-  - paramètres UMAP/HDBSCAN (lu/écrit via config_repository)
+Ce composant gère la génération et l'affichage de la projection 2D des images
+à partir de leurs embeddings. Il orchestre le calcul UMAP + HDBSCAN via un worker,
+tout en assurant la persistance d'un cache pour éviter des recalculs coûteux.
+
+Il sert d'interface entre les données (index + embeddings), les paramètres de
+configuration et la vue, en exposant des signaux de progression et de résultats.
+
+Contenu :
+ - Lancement et supervision du calcul de projection 2D
+ - Gestion des paramètres UMAP et HDBSCAN
+ - Chargement et sauvegarde d'un cache pickle des résultats
+ - Réutilisation du cache pour éviter les recalculs
+ - Communication des clusters nommés et du résultat final
+
+Responsabilités :
+ 1. Charger et filtrer les embeddings depuis l'index des images
+ 2. Déclencher le calcul de la carte via MapWorker
+ 3. Gérer les paramètres de réduction dimensionnelle et clustering
+ 4. Sauvegarder les résultats (points, labels, clusters) dans un cache pickle
+ 5. Restaurer les résultats depuis le cache si disponible
+ 6. Notifier la vue de l'avancement et du résultat final
+ 7. Synchroniser les paramètres avec la configuration persistante
 """
 
 from __future__ import annotations

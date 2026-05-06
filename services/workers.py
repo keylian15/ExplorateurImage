@@ -1,18 +1,24 @@
 """
-Module regroupant l'ensemble des workers (QThread / QRunnable) de l'application.
+Module de gestion des tâches asynchrones de l'application (workers Qt).
 
-Il orchestre toutes les tâches lourdes exécutées en arrière-plan afin de ne pas bloquer l'interface :
+Ce module centralise l'exécution des traitements lourds en arrière-plan afin de
+préserver la réactivité de l'interface utilisateur. Il regroupe les opérations
+liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au clustering.
 
-  ThumbnailTask         QRunnable - charge UN thumbnail (pool)
-  ThumbnailScheduler    QObject   - gère la file de priorité + QThreadPool
-  AutoCompleteWorker    QThread   - décrit une image via OllamaWrapper
-  AutoCompleteAllWorker QThread   - batch auto-complétion
-  SaveMetadataWorker    QThread   - embedding + écriture index.json
-  MapWorker             QThread   - UMAP + HDBSCAN + nommage cluster
+Contenu :
+ - Chargement asynchrone des thumbnails (QRunnable + pool de threads)
+ - Orchestration de la génération de thumbnails (scheduler)
+ - Auto-complétion d'images via IA (single et batch)
+ - Sauvegarde des métadonnées et embeddings
+ - Calcul de projection 2D (UMAP) et clustering (HDBSCAN)
 
-Ce module centralise la logique asynchrone et découple le traitement des données
-(image, IA, clustering) de la couche UI Qt, garantissant une application réactive
-même sur de gros volumes d'images.
+Responsabilités :
+ 1. Exécuter les tâches lourdes en arrière-plan sans bloquer l'UI
+ 2. Gérer la génération et le chargement des thumbnails de manière concurrente
+ 3. Fournir des workers IA pour l'analyse et l'enrichissement des images
+ 4. Sauvegarder les métadonnées et embeddings dans un index persistant
+ 5. Calculer et structurer la projection 2D des images (UMAP)
+ 6. Regrouper et nommer automatiquement les clusters d'images
 """
 
 from __future__ import annotations

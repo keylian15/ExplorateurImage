@@ -1,12 +1,31 @@
 """
 ViewModel de la galerie d'images.
 
-Il gère la logique de présentation et d'interaction avec un dossier d'images :
-chargement des fichiers, synchronisation avec l'index, gestion du cache de thumbnails,
-sélection d'images, zoom dynamique de la grille et recherche sémantique basée sur embeddings.
+Ce composant pilote la logique principale d'affichage et d'interaction avec un dossier
+d'images. Il gère le chargement des fichiers, la synchronisation avec l'index, le cache
+de thumbnails, le zoom de la grille et la recherche sémantique basée sur embeddings.
 
-Il fait le lien entre les modèles (index, liste d'images), les services (IA, cache, workers)
-et la vue via des signaux Qt, tout en restant totalement découplé de l'interface graphique.
+Il agit comme un point de coordination entre les modèles (liste, index), les services
+(IA, cache, workers) et la vue via des signaux Qt, tout en restant indépendant de toute
+logique d'interface graphique.
+
+Contenu :
+ - Gestion du dossier courant et chargement des images
+ - Synchronisation avec l'index persistant
+ - Filtrage et recherche sémantique par embeddings
+ - Gestion du zoom et de la taille des cellules
+ - Sélection d'images et propagation des événements UI
+ - Interaction avec le cache de thumbnails et le scheduler
+
+Responsabilités :
+ 1. Charger et maintenir la liste des images d'un dossier
+ 2. Synchroniser les images avec l'index persistant
+ 3. Fournir les listes d'images (toutes, indexées, non indexées)
+ 4. Gérer la recherche sémantique et le classement des résultats
+ 5. Piloter le zoom et la taille des cellules de la grille
+ 6. Maintenir le cache de thumbnails et son cycle de vie
+ 7. Propager les événements de sélection et de mise à jour vers la vue
+ 8. Assurer le lien entre modèles, services et interface via signaux Qt
 """
 
 from __future__ import annotations

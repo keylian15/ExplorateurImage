@@ -1,9 +1,33 @@
 """
-views/map_widget.py
+Onglet de visualisation de la carte 2D sémantique.
 
-Onglet carte 2D sémantique.
-Toute la logique de calcul est dans MapViewModel.
-Ce fichier ne contient que les widgets Qt et leur câblage.
+Ce widget représente l'interface graphique de la projection 2D des images après réduction
+dimensionnelle (UMAP) et clustering (HDBSCAN). Il permet de visualiser les images sous forme
+de points colorés regroupés par clusters, d'interagir avec la scène (sélection, zoom, filtrage)
+et d'explorer les regroupements sémantiques.
+
+Toute la logique de calcul, de clustering et de transformation des données est entièrement
+déléguée au MapViewModel. Ce composant se limite à l'affichage graphique et à la gestion
+des interactions utilisateur.
+
+Contenu :
+ - Zone de contrôle (lancement du calcul, paramètres, reset filtre, statut)
+ - Vue graphique interactive (QGraphicsView) représentant les points 2D
+ - Légende dynamique des clusters avec noms et effectifs
+ - Dock de paramètres (UMAP / HDBSCAN)
+ - Interaction directe avec les points (hover, sélection, centrage)
+ - Filtrage visuel des clusters et zoom contextuel
+ - Mise à jour dynamique des noms de clusters
+
+Responsabilités :
+ 1. Afficher la projection 2D des images sous forme de points interactifs
+ 2. Représenter visuellement les clusters avec une palette de couleurs dédiée
+ 3. Permettre la sélection et la mise en surbrillance d'une image
+ 4. Gérer les interactions utilisateur (zoom, clic, hover, filtrage)
+ 5. Afficher et mettre à jour la légende des clusters dynamiquement
+ 6. Permettre l'isolation visuelle d'un cluster avec zoom automatique
+ 7. Relayer les actions utilisateur vers le ViewModel sans logique métier
+ 8. Synchroniser l'affichage avec les résultats du calcul du ViewModel
 """
 
 from __future__ import annotations

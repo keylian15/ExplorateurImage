@@ -1,13 +1,22 @@
 """
-main.py — Point d'entrée de l'application.
+Point d'entrée principal de l'application Explorateur d'images.
+
+Ce module initialise l'environnement d'exécution PyQt, charge la configuration globale,
+instancie les services nécessaires ainsi que l'ensemble des ViewModels, puis crée et
+affiche la fenêtre principale de l'application.
+
+Il orchestre uniquement le démarrage de l'application sans contenir de logique métier.
+Toute la logique fonctionnelle est déléguée aux ViewModels et aux services.
 
 Responsabilités :
-  1. Créer QApplication et appliquer le stylesheet global
-  2. Instancier les services (OllamaWrapper)
-  3. Charger la config
-  4. Instancier les ViewModels dans l'ordre (GalleryVM en premier, les autres en dépendent)
-  5. Instancier la MainWindow
-  6. Ouvrir le dossier par défaut si présent dans la config
+ 1. Initialiser l'application Qt (QApplication)
+ 2. Appliquer le stylesheet global de l'interface
+ 3. Charger la configuration applicative (config_repository)
+ 4. Instancier les services externes (OllamaWrapper)
+ 5. Créer les ViewModels dans le bon ordre de dépendance
+ 6. Instancier et afficher la MainWindow
+ 7. Ouvrir automatiquement le dossier par défaut si configuré
+ 8. Lancer la boucle événementielle Qt
 """
 
 import sys

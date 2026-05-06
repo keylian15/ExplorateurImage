@@ -1,13 +1,27 @@
 """
-Module d'accès au fichier d'index de l'application (index.json).
+Gestion de la persistance de l'index des images (index.json).
 
-Ce composant centralise toute la logique de lecture, écriture et mise à jour
-de l'index associé à un dossier d'images. Il permet de stocker des métadonnées
-par image (chemin, description, mots-clés, embeddings) sans dépendre de Qt
-ni d'aucune couche UI.
+Ce module fournit une couche d'accès simple et indépendante de l'UI pour lire,
+écrire et maintenir les métadonnées associées aux images d'un dossier.
 
-Il sert de couche persistante simple entre le système de traitement d'images
-et le reste de l'application.
+Il permet de stocker des informations comme la description, les mots-clés
+et les embeddings, tout en assurant une synchronisation fiable avec le fichier
+index.json.
+
+Contenu :
+ - Chargement et sauvegarde de l'index depuis le disque
+ - Création et mise à jour d'entrées d'images
+ - Gestion des renommages d'images
+ - Construction d'entrées standardisées
+ - Résolution du chemin du fichier d'index
+
+Responsabilités :
+ 1. Charger l'index JSON d'un dossier d'images de manière sécurisée
+ 2. Sauvegarder les modifications dans le fichier index.json
+ 3. Ajouter ou mettre à jour une entrée d'image (upsert)
+ 4. Gérer le renommage cohérent des entrées (clé + métadonnées)
+ 5. Construire des structures d'entrées standardisées (id, path, metadata)
+ 6. Fournir le chemin canonique du fichier index.json pour un dossier donné
 """
 
 from __future__ import annotations

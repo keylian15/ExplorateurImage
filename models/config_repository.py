@@ -1,10 +1,18 @@
 """
-Module de gestion de la configuration globale de l'application.
+Gestion centralisée de la configuration globale de l'application.
 
-Il permet de charger et sauvegarder un fichier de configuration JSON,
-en assurant des valeurs par défaut pour les paramètres manquants.
-Il gère notamment les paramètres de la carte (UMAP / HDBSCAN) et fournit
-des utilitaires pour les extraire ou les mettre à jour proprement.
+Résponsabilités :
+ 1. Charger la configuration depuis un fichier JSON avec fallback sécurisé
+ 2. Sauvegarder les paramètres utilisateur de manière persistante
+ 3. Garantir des valeurs par défaut pour les champs manquants
+ 4. Extraire et typer les paramètres liés à la carte (UMAP / HDBSCAN)
+ 5. Mettre à jour proprement les paramètres sans altérer la structure globale
+
+Contenu :
+ - Valeurs par défaut de configuration (_DEFAULTS)
+ - Lecture / écriture du fichier de configuration
+ - Accès simplifié aux paramètres de la carte
+ - Utilitaires de mise à jour des paramètres
 """
 
 from __future__ import annotations

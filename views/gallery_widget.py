@@ -1,11 +1,29 @@
 """
-views/gallery_widget.py
+Widget principal de la galerie d'images.
 
-Widget galerie : barre de recherche, QListView en mode icônes,
-barre de progression pour le batch, contrôle du zoom (Ctrl+molette).
+Ce composant constitue la vue centrale de navigation des images. Il affiche une grille
+d'images en mode icônes avec recherche, zoom dynamique, préchargement des thumbnails
+et gestion du batch d'auto-complétion.
 
-Ne contient aucune logique métier : tout passe par GalleryViewModel
-et AutocompleteViewModel.
+Toute la logique métier est externalisée dans les ViewModels : ce widget se limite
+à la gestion de l'interface utilisateur et à la propagation des interactions.
+
+Contenu :
+ - Barre de recherche et actions globales (ouvrir dossier, batch IA, annulation)
+ - Affichage des images en grille via QListView en mode icônes
+ - Barre de progression pour les traitements batch
+ - Support du zoom dynamique (Ctrl + molette)
+ - Préchargement intelligent des thumbnails (prefetch)
+ - Ouverture d'images en plein écran
+
+Responsabilités :
+ 1. Afficher la grille d'images du dossier courant
+ 2. Permettre la recherche et le filtrage via le ViewModel
+ 3. Gérer le zoom de la grille (taille des cellules)
+ 4. Lancer et suivre les traitements batch d'auto-complétion
+ 5. Précharger les thumbnails visibles pour fluidifier l'affichage
+ 6. Ouvrir les images en plein écran sur interaction utilisateur
+ 7. Relayer les événements UI vers les ViewModels sans logique métier
 """
 
 from __future__ import annotations

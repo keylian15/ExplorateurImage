@@ -1,13 +1,27 @@
 """
-views/detail_widget.py
+Panneau de détail d'une image dans l'interface de la galerie.
 
-Contenu du dock "Détails de l'image" :
-  - aperçu cliquable (plein écran)
-  - champs description / mots-clés
-  - bouton auto-compléter
-  - grille des images similaires
+Ce composant constitue la vue dédiée à l'inspection et à l'édition des métadonnées
+d'une image sélectionnée. Il permet d'afficher un aperçu, de modifier la description
+et les mots-clés, de déclencher l'auto-complétion, et de visualiser les images similaires.
 
-Pure View : toute la logique est dans DetailViewModel.
+Toute la logique métier est déléguée au ViewModel associé : ce widget ne gère que
+l'affichage et la propagation des interactions utilisateur.
+
+Contenu :
+ - Aperçu cliquable de l'image avec ouverture plein écran
+ - Champs d'édition (description, mots-clés, nom de fichier)
+ - Bouton d'auto-complétion des métadonnées
+ - Grille des images similaires avec scores de proximité
+ - Interaction temps réel avec le ViewModel via signaux Qt
+
+Responsabilités :
+ 1. Afficher les métadonnées de l'image sélectionnée
+ 2. Permettre l'édition de la description, des mots-clés et du nom de fichier
+ 3. Déclencher les actions utilisateur (rename, auto-complétion, sauvegarde)
+ 4. Afficher dynamiquement les images similaires et leurs scores
+ 5. Ouvrir une visualisation plein écran de l'image
+ 6. Refléter l'état du ViewModel sans contenir de logique métier
 """
 
 from __future__ import annotations

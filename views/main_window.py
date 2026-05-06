@@ -1,8 +1,24 @@
 """
-views/main_window.py
+Fenêtre principale de l'application.
 
-QMainWindow : assemble les widgets, gère le dock détail et les onglets.
-Ne contient aucune logique métier.
+Cette classe est le point d'assemblage de l'interface utilisateur. Elle orchestre les différents widgets et centralise leur intégration via des onglets et un dock latéral.
+
+Toute la logique métier est externalisée dans les ViewModels : cette fenêtre se limite à la composition de l'UI, à la navigation globale et à la propagation des événements entre composants.
+
+Contenu :
+ - Gestion des onglets principaux (Galerie, Carte 2D, Thème)
+ - Dock latéral pour l'affichage des détails d'image
+ - Instanciation et intégration des widgets principaux
+ - Dialogue de sélection de dossier
+ - Connexion des ViewModels entre eux via signaux
+ - Gestion de la sélection d'image globale
+
+Responsabilités :
+ 1. Assembler les widgets principaux de l'application dans une interface unifiée
+ 2. Gérer l'ouverture d'un dossier d'images via une boîte de dialogue
+ 3. Afficher ou masquer le panneau de détail selon la sélection
+ 4. Propager les événements de sélection d'image vers les ViewModels concernés
+ 5. Assurer la coordination entre galerie, carte 2D et panneau de détail
 """
 
 from __future__ import annotations

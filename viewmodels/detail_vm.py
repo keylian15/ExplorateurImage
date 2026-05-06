@@ -1,12 +1,28 @@
 """
-viewmodels/detail_vm.py
+ViewModel du panneau de détail d'une image.
 
-Logique du panneau de détail :
-  - affichage des métadonnées de l'image sélectionnée
-  - sauvegarde (description + keywords + embedding)
-  - calcul et affichage des voisins cosinus
-  - auto-complétion unitaire
-  - renommage de fichier
+Ce composant gère toute la logique liée à l'inspection et à la modification
+d'une image sélectionnée : affichage des métadonnées, sauvegarde, auto-complétion,
+calcul des voisins et renommage du fichier.
+
+Il agit comme intermédiaire entre les services (IA, index, cache) et la vue,
+en exposant des signaux Qt pour piloter l'interface de manière réactive.
+
+Contenu :
+ - Gestion de l'image sélectionnée et de ses métadonnées
+ - Calcul des voisins basés sur la similarité cosinus
+ - Sauvegarde des métadonnées avec embeddings
+ - Auto-complétion via modèle IA
+ - Renommage de fichiers et mise à jour de l'index
+
+Responsabilités :
+ 1. Charger et exposer les métadonnées de l'image sélectionnée
+ 2. Générer et afficher un aperçu de l'image
+ 3. Calculer les images voisines via similarité des embeddings
+ 4. Orchestrer la sauvegarde des métadonnées (description, keywords, embedding)
+ 5. Déclencher l'auto-complétion d'une image
+ 6. Gérer le renommage et la cohérence de l'index et du cache
+ 7. Notifier la vue des changements (metadata, save, autocomplete, rename)
 """
 
 from __future__ import annotations

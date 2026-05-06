@@ -1,9 +1,20 @@
 """
-models/color_repository.py
+Gestion centralisée de la palette de couleurs de l'application avec persistance JSON.
 
-Gestion de la palette de couleurs persistée dans colors.json.
-Permet de lire, modifier et sauvegarder les couleurs de l'application
-sans redémarrage (si l'appelant recharge le stylesheet).
+Permet de charger, modifier et sauvegarder dynamiquement les couleurs utilisées
+dans l'interface, tout en garantissant une base cohérente grâce à une fusion
+automatique avec les valeurs par défaut.
+
+Responsabilités :
+ 1. Charger la palette depuis un fichier JSON
+ 2. Assurer la cohérence des clés via une fusion avec les valeurs par défaut
+ 3. Sauvegarder les modifications de la palette
+ 4. Fournir un accès aux couleurs par défaut
+
+Contenu :
+ - Palette par défaut (_DEFAULTS)
+ - Fonctions de chargement, sauvegarde et accès aux valeurs
+ - Gestion du fichier de persistance (colors.json)
 """
 
 from __future__ import annotations

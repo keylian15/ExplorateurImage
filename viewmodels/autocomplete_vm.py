@@ -1,13 +1,24 @@
 """
-ViewModel gérant le processus d'auto-complétion en batch des images non indexées.
+ViewModel orchestrant l'auto-complétion en batch des images non indexées.
 
-Il orchestre l'exécution asynchrone de la génération de descriptions, mots-clés
-et embeddings pour chaque image via un worker dédié, puis met à jour l'index
-persistant au fur et à mesure du traitement.
+Ce composant pilote le processus de génération automatique de métadonnées
+(descriptions, mots-clés et embeddings) pour un ensemble d'images, via un worker
+asynchrone. Il assure la mise à jour progressive de l'index et la communication
+avec la vue grâce à des signaux Qt.
 
-Ce composant fait le lien entre les services (IA, index) et la vue en exposant
-des signaux de progression, d'erreur et de fin, permettant un suivi en temps réel
-et une éventuelle annulation du processus.
+Contenu :
+ - Lancement et gestion d'un worker de traitement batch
+ - Connexion aux services d'IA pour enrichissement des images
+ - Mise à jour de l'index persistant au fil du traitement
+ - Gestion de l'annulation et du suivi de progression
+
+Responsabilités :
+ 1. Identifier les images non indexées à traiter
+ 2. Démarrer et superviser le worker d'auto-complétion batch
+ 3. Générer embeddings et métadonnées via le service IA
+ 4. Mettre à jour l'index persistant image par image
+ 5. Notifier la vue de la progression, des erreurs et de la fin du traitement
+ 6. Gérer l'annulation du processus en cours
 """
 
 from __future__ import annotations

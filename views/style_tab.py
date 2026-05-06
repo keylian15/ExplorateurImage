@@ -1,18 +1,31 @@
 """
-views/style_tab.py
+Onglet d'édition et de personnalisation du thème visuel de l'application.
 
-Onglet "Thème" : éditeur visuel de la palette COLORS.
+Ce widget permet de modifier dynamiquement la palette de couleurs globale utilisée par
+l'interface. Il agit comme un éditeur visuel de thème, offrant à l'utilisateur un contrôle
+fin sur l'apparence de l'application via des champs hexadécimaux, des sélecteurs de couleur
+et des thèmes prédéfinis.
 
-Chaque entrée du dictionnaire COLORS est présentée avec :
-  - un label lisible en français
-  - un aperçu de la couleur actuelle (carré coloré cliquable)
-  - la valeur hexadécimale éditable
-  - un QColorDialog pour choisir graphiquement
+Les couleurs sont chargées depuis le color_repository et peuvent être sauvegardées dans
+colors.json, puis appliquées en temps réel via la mise à jour du stylesheet global Qt.
 
-Les modifications sont appliquées en temps réel au stylesheet Qt
-et persistées dans colors.json via color_repository.
+Contenu :
+ - Sélecteur de thèmes prédéfinis sous forme de cartes visuelles (PresetCard)
+ - Section de personnalisation fine des couleurs par catégories
+ - Éditeur de couleur avec swatch cliquable et champ hexadécimal (ColorRow)
+ - Dialog QColorDialog pour sélection graphique des couleurs
+ - Aperçu instantané des changements de thème
+ - Boutons d'application et de réinitialisation du thème
+ - Persistance des couleurs dans un fichier JSON
 
-Trois thèmes prédéfinis sont disponibles : Bleu nuit (défaut), Noir minuit, Blanc givré.
+Responsabilités :
+ 1. Afficher et organiser la palette de couleurs de l'application
+ 2. Permettre l'édition visuelle et textuelle des couleurs du thème
+ 3. Proposer des thèmes prédéfinis applicables en un clic
+ 4. Synchroniser les modifications avec le color_repository
+ 5. Appliquer dynamiquement le stylesheet Qt global
+ 6. Fournir un retour visuel immédiat des changements de couleurs
+ 7. Gérer la réinitialisation du thème vers un preset par défaut
 """
 
 from __future__ import annotations
