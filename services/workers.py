@@ -431,7 +431,11 @@ class MapWorker(QThread):
                 continue
 
             # Prompt
-            prompt = "Voici des descriptions d'images appartenant au même groupe :\n" + "\n".join(f"- {d}" for d in descriptions) + "\n\nDonne un nom de groupe court (2-3 mots max, français)."
+            prompt = (
+                "Voici des descriptions d'images appartenant au même groupe :\n"
+                + "\n".join(f"- {d}" for d in descriptions)
+                + "\n\nDonne un nom de groupe court (2-3 mots max, français). Ne met pas de guillemets."
+            )
             try:
                 result = self.client.generate_text(
                     model="qwen2.5vl:7b",
