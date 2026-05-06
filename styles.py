@@ -334,3 +334,31 @@ def section_title_style() -> str:
 
 def fullscreen_bar_style() -> str:
     return f"background: {COLORS['bg_primary']}; border-bottom: 1px solid {COLORS['border']};"
+
+
+def fullscreen_scroll_style() -> str:
+    return f"background: {COLORS['bg_card']}; {no_border_style()}"
+
+
+def fullscreen_label_style() -> str:
+    return f"background: {COLORS['bg_card']};"
+
+
+def rename_error_style() -> str:
+    return f"border: 1px solid {COLORS['error']}; border-radius: {METRICS['border_radius']};"
+
+
+def legend_label_style() -> str:
+    return f"font-weight: {FONTS['weight_bold']}; font-size: {FONTS['size_normal']};"
+
+
+def dot_color_style(color_name: str) -> str:
+    return f"background:{color_name.name()}; border-radius: {METRICS['border_radius']};"
+
+
+def dot_label_style() -> str:
+    return f"font-size: {FONTS['size_small']};"
+
+
+def no_border_style() -> str:
+    return "border: none;"

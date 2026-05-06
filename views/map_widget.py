@@ -30,6 +30,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from styles import dot_color_style, dot_label_style, legend_label_style, no_border_style
 from viewmodels.map_vm import MapViewModel
 
 # ── Palette ───────────────────────────────────────────────────────────────────
@@ -352,14 +353,14 @@ class MapTab(QWidget):
         self._legend_layout.setContentsMargins(4, 4, 4, 4)
 
         lbl_leg = QLabel("Clusters")
-        lbl_leg.setStyleSheet("font-weight: bold; font-size: 13px;")
+        lbl_leg.setStyleSheet(legend_label_style())
         self._legend_layout.addWidget(lbl_leg)
 
         legend_scroll = QScrollArea()
         legend_scroll.setWidget(legend_container)
         legend_scroll.setWidgetResizable(True)
         legend_scroll.setFixedWidth(195)
-        legend_scroll.setStyleSheet("border: none;")
+        legend_scroll.setStyleSheet(no_border_style())
         h.addWidget(legend_scroll)
 
         root.addLayout(h)
@@ -494,18 +495,17 @@ class MapTab(QWidget):
 
         counts = Counter(labels)
         for cid in sorted(color_map.keys()):
-            color = color_map[cid]
             label_text = cluster_names.get(cid, f"Cluster {cid}")
             display = f"{label_text} ({counts.get(cid, 0)})"
 
             row = QHBoxLayout()
             dot = QLabel()
             dot.setFixedSize(12, 12)
-            dot.setStyleSheet(f"background:{color.name()}; border-radius:6px;")
+            dot.setStyleSheet(dot_color_style(color_map[cid]))
             row.addWidget(dot)
 
             lbl = QLabel(display)
-            lbl.setStyleSheet("font-size: 12px;")
+            lbl.setStyleSheet(dot_label_style())
             lbl.setWordWrap(True)
             lbl.setCursor(Qt.CursorShape.PointingHandCursor)
             lbl.setToolTip("Clic : isoler et zoomer sur ce cluster")

@@ -32,6 +32,7 @@ from PyQt6.QtWidgets import (
 from styles import (
     image_preview_style,
     neighbor_thumb_style,
+    rename_error_style,
     score_label_style,
     section_title_style,
 )
@@ -302,7 +303,8 @@ class DetailWidget(QWidget):
 
     def on_rename_error(self, msg: str):
         """Indique que la modification du titre a échoué."""
-        self.title_edit.setStyleSheet("border: 1px solid red;")
+        # self.title_edit.setStyleSheet("border: 1px solid red;")
+        self.title_edit.setStyleSheet(rename_error_style())
         self.title_edit.setToolTip(f"❌ {msg}")
 
     def on_k_changed(self, value: int):

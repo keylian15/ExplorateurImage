@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from styles import COLORS, fullscreen_bar_style
+from styles import fullscreen_bar_style, fullscreen_label_style, fullscreen_scroll_style
 
 
 class FullscreenDialog(QDialog):
@@ -67,14 +67,13 @@ class FullscreenDialog(QDialog):
         # ── Zone image ────────────────────────────────────────────────────────
         self._scroll = QScrollArea()
         self._scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        bg = COLORS["bg_card"]
 
-        self._scroll.setStyleSheet(f"background: {bg}; border: none;")
+        self._scroll.setStyleSheet(fullscreen_scroll_style())
         self._scroll.setWidgetResizable(False)
 
         self._lbl_img = QLabel()
         self._lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._lbl_img.setStyleSheet(f"background: {bg};")
+        self._lbl_img.setStyleSheet(fullscreen_label_style())
         self._scroll.setWidget(self._lbl_img)
         layout.addWidget(self._scroll)
 
