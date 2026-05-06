@@ -11,6 +11,8 @@ Chaque entrée du dictionnaire COLORS est présentée avec :
 
 Les modifications sont appliquées en temps réel au stylesheet Qt
 et persistées dans colors.json via color_repository.
+
+Trois thèmes prédéfinis sont disponibles : Bleu nuit (défaut), Noir minuit, Blanc givré.
 """
 
 from __future__ import annotations
@@ -33,12 +35,11 @@ from PyQt6.QtWidgets import (
 )
 
 from models import color_repository
-from styles import get_stylesheet
+from styles import get_stylesheet, style_label_name_style, style_label_subname_style, style_presset_style, style_separator_style, style_tittle_style
 
 # ── Labels lisibles en français ───────────────────────────────────────────────
 
 _LABELS: dict[str, tuple[str, str]] = {
-    # clé: (label affiché, description courte)
     "bg_primary": ("Fond principal", "Arrière-plan de la fenêtre"),
     "bg_secondary": ("Fond secondaire", "Panneaux, barres"),
     "bg_card": ("Fond carte", "Cartes, docks, onglets"),
@@ -48,7 +49,7 @@ _LABELS: dict[str, tuple[str, str]] = {
     "text_secondary": ("Texte secondaire", "Labels, sous-titres"),
     "text_muted": ("Texte atténué", "Placeholders"),
     "text_disabled": ("Texte désactivé", "Boutons désactivés"),
-    "accent": ("Accent", "Bleu principal, focus"),
+    "accent": ("Accent", "Couleur principale, focus"),
     "accent_hover": ("Accent survol", "Hover des accents"),
     "accent_pressed": ("Accent pressé", "Clic sur accents"),
     "success": ("Succès", "Vert, images indexées"),
@@ -60,10 +61,9 @@ _LABELS: dict[str, tuple[str, str]] = {
     "thumb_placeholder": ("Placeholder thumbnail", "Fond cellule en attente"),
     "thumb_loading_text": ("Texte chargement", "« … » pendant le chargement"),
     "selection_border": ("Bordure sélection", "Contour image sélectionnée"),
-    "indexed_dot": ("Point indexé", "Pastille verte « indexé »"),
+    "indexed_dot": ("Point indexé", "Pastille « indexé »"),
 }
 
-# Groupes pour organiser visuellement les lignes
 _GROUPS: list[tuple[str, list[str]]] = [
     ("Fonds", ["bg_primary", "bg_secondary", "bg_card", "bg_input", "bg_hover"]),
     ("Texte", ["text_primary", "text_secondary", "text_muted", "text_disabled"]),
@@ -72,6 +72,164 @@ _GROUPS: list[tuple[str, list[str]]] = [
     ("Bordures", ["border", "border_focus"]),
     ("Thumbnails & Galerie", ["thumb_placeholder", "thumb_loading_text", "selection_border", "indexed_dot"]),
 ]
+
+# ── Thèmes prédéfinis ─────────────────────────────────────────────────────────
+
+PRESETS: dict[str, dict] = {
+    "Bleu nuit": {
+        # Thème par défaut — bleu nuit profond, accent bleu
+        "bg_primary": "#0f172a",
+        "bg_secondary": "#111827",
+        "bg_card": "#1f2937",
+        "bg_input": "#111827",
+        "bg_hover": "#1e293b",
+        "text_primary": "#e5e7eb",
+        "text_secondary": "#9ca3af",
+        "text_muted": "#6b7280",
+        "text_disabled": "#4b5563",
+        "accent": "#3b82f6",
+        "accent_hover": "#60a5fa",
+        "accent_pressed": "#2563eb",
+        "success": "#22c55e",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#3b82f6",
+        "border": "#1f2937",
+        "border_focus": "#3b82f6",
+        "thumb_placeholder": "#1f2937",
+        "thumb_loading_text": "#6b7280",
+        "selection_border": "#3b82f6",
+        "indexed_dot": "#22c55e",
+    },
+    "Noir minuit": {
+        # Thème sombre pur — noir charbon, accent violet
+        "bg_primary": "#0a0a0a",
+        "bg_secondary": "#111111",
+        "bg_card": "#1a1a1a",
+        "bg_input": "#111111",
+        "bg_hover": "#222222",
+        "text_primary": "#f0f0f0",
+        "text_secondary": "#a0a0a0",
+        "text_muted": "#606060",
+        "text_disabled": "#404040",
+        "accent": "#a855f7",
+        "accent_hover": "#c084fc",
+        "accent_pressed": "#7c3aed",
+        "success": "#22c55e",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#a855f7",
+        "border": "#222222",
+        "border_focus": "#a855f7",
+        "thumb_placeholder": "#1a1a1a",
+        "thumb_loading_text": "#505050",
+        "selection_border": "#a855f7",
+        "indexed_dot": "#22c55e",
+    },
+    "Blanc givré": {
+        # Thème clair — fond blanc cassé, accent teal
+        "bg_primary": "#f8fafc",
+        "bg_secondary": "#f1f5f9",
+        "bg_card": "#ffffff",
+        "bg_input": "#ffffff",
+        "bg_hover": "#e2e8f0",
+        "text_primary": "#0f172a",
+        "text_secondary": "#475569",
+        "text_muted": "#94a3b8",
+        "text_disabled": "#cbd5e1",
+        "accent": "#0d9488",
+        "accent_hover": "#0f766e",
+        "accent_pressed": "#115e59",
+        "success": "#16a34a",
+        "warning": "#d97706",
+        "error": "#dc2626",
+        "info": "#0d9488",
+        "border": "#e2e8f0",
+        "border_focus": "#0d9488",
+        "thumb_placeholder": "#e2e8f0",
+        "thumb_loading_text": "#94a3b8",
+        "selection_border": "#0d9488",
+        "indexed_dot": "#16a34a",
+    },
+}
+
+# Métadonnées visuelles pour chaque preset
+_PRESET_META: dict[str, tuple[str, str]] = {
+    "Bleu nuit": ("🌙", "Sombre · Bleu acier"),
+    "Noir minuit": ("⬛", "Sombre · Violet profond"),
+    "Blanc givré": ("☀️", "Clair  · Teal"),
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Carte de preset cliquable
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class PresetCard(QWidget):
+    """Bouton carte représentant un thème prédéfini avec swatches de prévisualisation."""
+
+    clicked = pyqtSignal(str)  # nom du preset
+
+    def __init__(self, name: str, colors: dict[str, str], parent=None):
+        super().__init__(parent)
+        self._name = name
+        emoji, subtitle = _PRESET_META.get(name, ("🎨", ""))
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setToolTip(f"Cliquer pour charger le thème « {name} »")
+        self.setFixedWidth(210)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(6)
+
+        # ── Swatches de prévisualisation ──────────────────────────────────────
+        swatch_row = QHBoxLayout()
+        swatch_row.setSpacing(4)
+        swatch_keys = ["bg_primary", "bg_card", "accent", "success", "text_primary"]
+        for key in swatch_keys:
+            hex_val = colors.get(key, "#888888")
+            dot = QLabel()
+            dot.setFixedSize(20, 20)
+            is_dark = QColor(hex_val).lightness() < 128
+            border = "#444" if is_dark else "#ccc"
+            dot.setStyleSheet(f"background-color: {hex_val}; border-radius: 10px;border: 1px solid {border};")
+            swatch_row.addWidget(dot)
+        swatch_row.addStretch()
+        layout.addLayout(swatch_row)
+
+        # ── Nom ───────────────────────────────────────────────────────────────
+        lbl_name = QLabel(f"{emoji}  {name}")
+        lbl_name.setStyleSheet(style_label_name_style())
+        layout.addWidget(lbl_name)
+
+        # ── Sous-titre ────────────────────────────────────────────────────────
+        lbl_sub = QLabel(subtitle)
+        lbl_sub.setStyleSheet(style_label_subname_style())
+        layout.addWidget(lbl_sub)
+
+        # Style de la carte
+        bg = colors.get("bg_card", "#1f2937")
+        border = colors.get("border", "#374151")
+        self.setProperty("class", "preset-card")
+        self.setStyleSheet(
+            f"""
+            QWidget[class="preset-card"] {{
+                background-color: {bg};
+                border: 1px solid {border};
+                border-radius: 8px;
+            }}
+            QWidget[class="preset-card"]:hover {{
+                border: 1px solid #3b82f6;
+            }}
+            """
+        )
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit(self._name)
+        super().mousePressEvent(event)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -136,8 +294,7 @@ class ColorRow(QWidget):
         initial = QColor(self._hex) if QColor(self._hex).isValid() else QColor("#ffffff")
         color = QColorDialog.getColor(initial, self, "Choisir une couleur")
         if color.isValid():
-            hex_val = color.name()  # "#rrggbb"
-            self._edit.setText(hex_val)  # déclenche on_text_changed
+            self._edit.setText(color.name())
 
     def set_color(self, hex_color: str):
         """Met à jour la couleur depuis l'extérieur.
@@ -182,11 +339,10 @@ class StyleTab(QWidget):
         root.setContentsMargins(16, 12, 16, 12)
         root.setSpacing(10)
 
-        # ── Titre + boutons ───────────────────────────────────────────────────
+        # ── En-tête ───────────────────────────────────────────────────────────
         header = QHBoxLayout()
-
         title = QLabel("Éditeur de thème")
-        title.setStyleSheet("font-size: 15px; font-weight: 600;")
+        title.setStyleSheet(style_tittle_style())
         header.addWidget(title)
         header.addStretch()
 
@@ -202,12 +358,33 @@ class StyleTab(QWidget):
 
         root.addLayout(header)
 
-        # Ligne de séparation
-        sep = QFrame()
-        sep.setFrameShape(QFrame.Shape.HLine)
-        root.addWidget(sep)
+        sep0 = QFrame()
+        sep0.setFrameShape(QFrame.Shape.HLine)
+        root.addWidget(sep0)
 
-        # ── Zone scrollable ───────────────────────────────────────────────────
+        # ── Section thèmes prédéfinis ─────────────────────────────────────────
+        lbl_presets = QLabel("Thèmes prédéfinis")
+        lbl_presets.setStyleSheet(style_presset_style())
+        root.addWidget(lbl_presets)
+
+        presets_row = QHBoxLayout()
+        presets_row.setSpacing(10)
+        for preset_name, preset_colors in PRESETS.items():
+            card = PresetCard(preset_name, preset_colors)
+            card.clicked.connect(self.load_preset)
+            presets_row.addWidget(card)
+        presets_row.addStretch()
+        root.addLayout(presets_row)
+
+        sep1 = QFrame()
+        sep1.setFrameShape(QFrame.Shape.HLine)
+        root.addWidget(sep1)
+
+        # ── Personnalisation fine ─────────────────────────────────────────────
+        lbl_custom = QLabel("Personnalisation fine")
+        lbl_custom.setStyleSheet(style_presset_style())
+        root.addWidget(lbl_custom)
+
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -217,10 +394,8 @@ class StyleTab(QWidget):
         content_layout.setContentsMargins(4, 4, 4, 4)
         content_layout.setSpacing(16)
 
-        # ── Groupes ───────────────────────────────────────────────────────────
         for group_name, keys in _GROUPS:
-            group_widget = self.build_group(group_name, keys)
-            content_layout.addWidget(group_widget)
+            content_layout.addWidget(self.build_group(group_name, keys))
 
         content_layout.addStretch()
         scroll_area.setWidget(content)
@@ -228,7 +403,7 @@ class StyleTab(QWidget):
 
         # ── Barre de statut ───────────────────────────────────────────────────
         self._lbl_status = QLabel("")
-        self._lbl_status.setStyleSheet("color: #9ca3af; font-size: 11px;")
+        self._lbl_status.setStyleSheet(style_label_subname_style())
         self._lbl_status.setAlignment(Qt.AlignmentFlag.AlignRight)
         root.addWidget(self._lbl_status)
 
@@ -247,7 +422,6 @@ class StyleTab(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
 
-        # Titre du groupe
         lbl_title = QLabel(title)
         lbl_title.setStyleSheet("font-weight: 600; font-size: 12px; color: #9ca3af;text-transform: uppercase; letter-spacing: 1px;")
         layout.addWidget(lbl_title)
@@ -286,7 +460,7 @@ class StyleTab(QWidget):
         # Séparateur de groupe
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet("color: #1f2937;")
+        sep.setStyleSheet(style_separator_style())
         layout.addWidget(sep)
 
         return group
@@ -302,8 +476,17 @@ class StyleTab(QWidget):
         self._colors[key] = hex_val
         self._lbl_status.setText(f"Modifié : {_LABELS.get(key, (key,))[0]} → {hex_val}  (non sauvegardé)")
 
+    def load_preset(self, name: str):
+        """Charge un thème prédéfini dans tous les champs sans sauvegarder."""
+        preset = PRESETS.get(name, {})
+        for key, row in self._rows.items():
+            if key in preset:
+                row.set_color(preset[key])
+        self._colors.update(preset)
+        self._lbl_status.setText(f"Thème « {name} » chargé — cliquez « ✓ Appliquer » pour confirmer.")
+
     def apply(self):
-        """Sauvegarde et applique le thème à toute l'application."""
+        """Sauvegarde colors.json et applique le stylesheet Qt en live."""
         color_repository.save(self._colors)
 
         # Recharge le module styles avec les nouvelles couleurs
@@ -319,9 +502,6 @@ class StyleTab(QWidget):
         self._lbl_status.setText("✅ Thème sauvegardé et appliqué.")
 
     def reset_defaults(self):
-        """Réinitialise toutes les couleurs aux valeurs par défaut."""
-        defaults = color_repository.defaults()
-        for key, row in self._rows.items():
-            row.set_color(defaults.get(key, "#000000"))
-        self._colors = dict(defaults)
-        self._lbl_status.setText("Couleurs réinitialisées — cliquez « Appliquer » pour confirmer.")
+        """Charge le thème par défaut (Bleu nuit) sans sauvegarder."""
+        self.load_preset("Bleu nuit")
+        self._lbl_status.setText("Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer.")
