@@ -23,6 +23,7 @@ from viewmodels.map_vm import MapViewModel
 from views.detail_widget import DetailWidget
 from views.gallery_widget import GalleryWidget
 from views.map_widget import MapTab
+from views.style_tab import StyleTab
 
 
 class MainWindow(QMainWindow):
@@ -62,6 +63,7 @@ class MainWindow(QMainWindow):
         self._gallery_widget = GalleryWidget(self._gvm, self._avm, self)
         self._detail_widget = DetailWidget(self._dvm, self)
         self._map_tab = MapTab(self._mvm, self, self)
+        self._style_tab = StyleTab(self)
 
         # Bouton "Ouvrir" dans la galerie → dialog ici car besoin de la fenêtre
         self._gallery_widget.btn_open.clicked.connect(self.open_folder_dialog)
@@ -70,6 +72,7 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         tabs.addTab(self._gallery_widget, "Galerie")
         tabs.addTab(self._map_tab, "Carte 2D")
+        tabs.addTab(self._style_tab, "🎨 Thème")
         self.setCentralWidget(tabs)
 
         # ── Dock détail ───────────────────────────────────────────────────────
