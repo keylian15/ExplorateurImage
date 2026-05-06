@@ -1,0 +1,1 @@
+::: views.gallery_widget

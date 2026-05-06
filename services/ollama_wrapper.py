@@ -98,7 +98,7 @@ class OllamaWrapper:
         self,
         base_url: str = "http://10.22.28.190:11434",
         timeout_s: float = 240.0,
-    ) -> None:
+    ):
         self._base_url: str = base_url.rstrip("/")  # Normalise : pas de "/" final
         self._timeout_s: float = timeout_s  # Timeout réseau pour les requêtes HTTP
 

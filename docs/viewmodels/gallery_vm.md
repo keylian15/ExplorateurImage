@@ -1,0 +1,1 @@
+::: viewmodels.gallery_vm

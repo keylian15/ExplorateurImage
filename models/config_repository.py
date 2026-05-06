@@ -1,7 +1,10 @@
 """
-config_repository.py — Lecture / écriture de config.json.
+Module de gestion de la configuration globale de l'application.
 
-Aucune dépendance Qt. Peut être remplacé sans toucher au reste.
+Il permet de charger et sauvegarder un fichier de configuration JSON,
+en assurant des valeurs par défaut pour les paramètres manquants.
+Il gère notamment les paramètres de la carte (UMAP / HDBSCAN) et fournit
+des utilitaires pour les extraire ou les mettre à jour proprement.
 """
 
 from __future__ import annotations
@@ -15,14 +18,19 @@ _DEFAULTS = {
     "default_folder": None,
     "k_neighbors": 5,
     "map_params": {
-        "umap_n_neighbors": 15,
-        "umap_min_dist": 0.1,
+        "umap_n_neighbors": 30,
+        "umap_min_dist": 0.3,
         "hdbscan_min_cluster": 15,
     },
 }
 
 
 def load() -> dict:
+    """Charge la configuration depuis le fichier config.json, ou retourne les valeurs par défaut si le fichier n'existe pas ou est invalide.
+
+    Returns:
+        dict: Configuration ou les valeurs par défaut."""
+
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, encoding="utf-8") as f:
@@ -36,12 +44,24 @@ def load() -> dict:
     return dict(_DEFAULTS)
 
 
-def save(config: dict) -> None:
+def save(config: dict):
+    """Enregistre la configuration dans le fichier config.json.
+
+    Args:
+        config (dict): La configuration à enregistrer.
+    """
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
 
 
 def get_map_params(config: dict) -> dict:
+    """Extrait les paramètres de la carte depuis la configuration, en appliquant les valeurs par défaut pour les clés manquantes.
+
+    Args:
+        config (dict): La configuration à utiliser.
+
+    Returns:
+        dict: Paramètres de la carte ou les valeurs par défaut."""
     raw = config.get("map_params", {})
     defaults = _DEFAULTS["map_params"]
     return {
@@ -52,6 +72,14 @@ def get_map_params(config: dict) -> dict:
 
 
 def set_map_params(config: dict, params: dict) -> dict:
+    """Retourne une nouvelle configuration avec les paramètres de la carte mis à jour.
+
+    Args:
+        config (dict): La configuration à mettre à jour.
+        params (dict): Les nouveaux paramètres de la carte.
+
+    Returns:
+        dict: Nouvelle configuration avec les paramètres de la carte mis à jour."""
     config = dict(config)
     config["map_params"] = params
     return config

@@ -1,11 +1,12 @@
 """
-models/image_model.py
+Modèle et delegate Qt pour l'affichage d'une grille d'images avec thumbnails.
 
-ImageListModel   — QAbstractListModel stockant uniquement des noms de fichiers.
-ImageGridDelegate — QStyledItemDelegate dessinant thumbnails + indicateur d'index.
+Le module fournit un modèle léger basé sur les noms de fichiers (sans charger les images en mémoire)
+et un delegate responsable du rendu des cellules : affichage des thumbnails via cache, gestion du chargement
+asynchrone, indication des éléments sélectionnés et marqués comme indexés.
 
-Inchangé fonctionnellement par rapport à la version d'origine.
-Les couleurs et dimensions viennent de styles.py.
+Il s'appuie sur un cache de thumbnails et un scheduler pour générer les images manquantes à la demande,
+afin de garantir de bonnes performances même avec un grand nombre d'images.
 """
 
 from __future__ import annotations
@@ -54,16 +55,34 @@ class ImageListModel(QAbstractListModel):
         self._selected: str | None = None
 
     def set_images(self, images: list[str]):
+        """Remplace la liste d'images par une nouvelle. Réinitialise la sélection.
+
+        Args:
+            images (list[str]): La nouvelle liste de noms de fichiers.
+        """
+
         self.beginResetModel()
         self._images = list(images)
         self.endResetModel()
 
     def set_indexed(self, indexed: set[str]):
+        """Met à jour la liste des images indexées. Émet un signal de changement de données pour les images concernées.
+
+        Args:
+            indexed (set[str]): Le nouvel ensemble de noms de fichiers indexés.
+        """
+
         self._indexed = indexed
         if self._images:
             self.dataChanged.emit(self.index(0), self.index(len(self._images) - 1), [INDEXED_ROLE])
 
     def set_selected(self, img_name: str | None):
+        """Met à jour l'image sélectionnée. Émet un signal de changement de données pour l'ancienne et la nouvelle image sélectionnée.
+
+        Args:
+            img_name (str | None): Le nom de fichier de la nouvelle image sélectionnée, ou None pour aucune sélection.
+        """
+
         old = self._selected
         self._selected = img_name
         for name in (old, img_name):
@@ -72,15 +91,36 @@ class ImageListModel(QAbstractListModel):
                 self.dataChanged.emit(mi, mi, [SELECTED_ROLE])
 
     def image_at(self, row: int) -> str:
+        """Retourne le nom de fichier de l'image à la ligne donnée.
+
+        Args:
+            row (int): L'index de la ligne.
+        Returns:
+            str: Le nom de fichier de l'image à la ligne donnée.
+        """
         return self._images[row]
 
     def row_of(self, img_name: str) -> int | None:
+        """Retourne l'index de la ligne de l'image donnée, ou None si elle n'est pas dans la liste.
+
+        Args:
+            img_name (str): Le nom de fichier de l'image.
+        Returns:
+            int | None: L'index de la ligne de l'image, ou None si elle n'est pas dans la liste.
+        """
+
         try:
             return self._images.index(img_name)
         except ValueError:
             return None
 
     def notify_image_updated(self, img_name: str):
+        """Indique que l'image donnée a été mise à jour. Émet un signal de changement de données pour cette image.
+
+        Args:
+            img_name (str): Le nom de fichier de l'image mise à jour.
+        """
+
         row = self.row_of(img_name)
         if row is not None:
             mi = self.index(row)
@@ -89,9 +129,26 @@ class ImageListModel(QAbstractListModel):
     # ── Interface QAbstractListModel ──────────────────────────────────────────
 
     def rowCount(self, _parent: QModelIndex | None = None) -> int:
+        """Retourne le nombre d'images dans la liste.
+
+        Args:
+            _parent (QModelIndex | None): Ignoré, car ce modèle n'est pas hiérarchique.
+        Returns:
+            int: Le nombre d'images dans la liste.
+        """
+
         return len(self._images)
 
-    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole) -> str | bool | None:
+        """Retourne les données pour une cellule donnée et un rôle donné.
+
+        Args:
+            index (QModelIndex): L'index de la cellule.
+            role (Qt.ItemDataRole): Le rôle pour lequel les données sont demandées.
+        Returns:
+            str | bool | None: Les données pour la cellule et le rôle donnés, ou None si l'index n'est pas valide ou si le rôle n'est pas reconnu.
+        """
+
         if not index.isValid() or index.row() >= len(self._images):
             return None
         name = self._images[index.row()]
@@ -127,19 +184,53 @@ class ImageGridDelegate(QStyledItemDelegate):
         cell_size: int = 192,
         parent=None,
     ):
+        """Initialise le delegate avec une référence au cache de thumbnails et au scheduler de génération de thumbnails.
+
+        Args:
+            cache (ThumbnailCache): Le cache de thumbnails à utiliser pour récupérer les thumbnails à dessiner
+            scheduler (ThumbnailScheduler): Le scheduler de génération de thumbnails à utiliser pour demander la génération de thumbnails manquants
+            cell_size (int, optional): La taille des cellules en pixels. Par défaut à
+            parent (Any, optional): Le parent QObject. Par défaut à None.
+        """
+
         super().__init__(parent)
         self.cache = cache
         self.scheduler = scheduler
         self.cell_size = cell_size
-        self.scheduler.thumbnail_ready.connect(self._on_thumbnail_ready)
+        self.scheduler.thumbnail_ready.connect(self.on_thumbnail_ready)
 
     def sizeHint(self, _option, _index) -> QSize:
+        """Override de la méthode sizeHint pour retourner la taille des cellules.
+
+        Args:
+            _option (QStyleOptionViewItem): Les options de style du QListView
+            _index (QModelIndex): L'index du QListView
+
+        Returns:
+            QSize: La taille des cellules en pixels
+        """
         return QSize(self.cell_size, self.cell_size)
 
     def set_cell_size(self, size: int):
+        """Met à jour la taille des cellules.
+
+        Args:
+            size (int): La nouvelle taille des cellules en pixels.
+        Returns:
+            None
+        """
+
         self.cell_size = size
 
     def paint(self, painter: QPainter, option, index: QModelIndex):
+        """Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée.
+
+        Args:
+            painter (QPainter): Le painter à utiliser pour dessiner la cellule.
+            option (QStyleOptionViewItem): Les options de dessin fournies par Qt.
+            index (QModelIndex): L'index de la cellule à dessiner.
+        """
+
         img_name = index.data(IMG_NAME_ROLE)
         if not img_name:
             return
@@ -177,5 +268,11 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         painter.restore()
 
-    def _on_thumbnail_ready(self, img_name: str, _pixmap: QPixmap):
+    def on_thumbnail_ready(self, img_name: str):
+        """Emet un signal pour indiquer que le thumbnail d'une image est prêt, afin que la cellule correspondante soit redessinée.
+
+        Args:
+            img_name (str): Le nom de fichier de l'image dont le thumbnail est prêt.
+        """
+
         self.repaint_requested.emit(img_name)
