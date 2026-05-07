@@ -35,6 +35,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from models import config_repository
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import MapWorker
+from viewmodels.gallery_vm import GalleryViewModel
 
 _MAP_CACHE_FILE = "map_cache.pkl"
 
@@ -51,7 +52,7 @@ class MapViewModel(QObject):
     compute_error = pyqtSignal(str)
     params_changed = pyqtSignal(dict)
 
-    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm, parent=None):
+    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, parent=None):
         """
         Args:
             client (OllamaWrapper): client Ollama
