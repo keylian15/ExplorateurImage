@@ -322,28 +322,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#styles.detail_btn_style" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        detail_btn_style
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#styles.detail_label_style" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        detail_label_style
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#styles.dot_color_style" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1366,28 +1344,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#styles.detail_btn_style" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        detail_btn_style
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#styles.detail_label_style" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        detail_label_style
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#styles.dot_color_style" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1652,106 +1608,6 @@ depuis l'interface utilisateur sans redémarrage de l'application.</p>
 
 
 
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="styles.detail_btn_style" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">detail_btn_style</span><span class="p">()</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Retourne le style QSS pour le bouton de detail d'image.</p>
-
-
-<details class="retourns" open>
-  <summary>Retourns</summary>
-  <p>str: Chaîne de style QSS inline.</p>
-</details>
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detail_btn_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le bouton de detail d&#39;image.</span>
-
-<span class="sd">    Retourns:</span>
-<span class="sd">        str: Chaîne de style QSS inline.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">no_border_style</span><span class="p">()</span><span class="si">}</span><span class="s2"> color: </span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;text_secondary&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">; font-size: </span><span class="si">{</span><span class="n">FONTS</span><span class="p">[</span><span class="s1">&#39;size_small&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">;&quot;</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="styles.detail_label_style" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">detail_label_style</span><span class="p">()</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Retourne le style QSS pour le label de detail d'image.</p>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>str</code></td>            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Chaîne de style QSS inline.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detail_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le label de detail d&#39;image.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        str: Chaîne de style QSS inline.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;font-weight </span><span class="si">{</span><span class="n">FONTS</span><span class="p">[</span><span class="s1">&#39;weight_bold&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">; font-size: </span><span class="si">{</span><span class="n">FONTS</span><span class="p">[</span><span class="s1">&#39;size_small&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">; padding : </span><span class="si">{</span><span class="n">METRICS</span><span class="p">[</span><span class="s1">&#39;padding_md&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 <div class="doc doc-object doc-function">
 

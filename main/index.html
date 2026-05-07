@@ -1170,9 +1170,26 @@
     <div class="doc doc-contents first">
 
         <p>Point d'entrée principal de l'application Explorateur d'images.</p>
-<p>La MainWindow reçoit désormais uniquement le client Ollama et la config.
-Chaque onglet instancie ses propres ViewModels de manière autonome.</p>
+<p>Ce module initialise l'environnement d'exécution PyQt, charge la configuration globale,
+instancie les services nécessaires ainsi que l'ensemble des ViewModels, puis crée et
+affiche la fenêtre principale de l'application.</p>
+<p>Il orchestre uniquement le démarrage de l'application sans contenir de logique métier.
+Toute la logique fonctionnelle est déléguée aux ViewModels et aux services.</p>
 
+
+<details class="responsabilités-" open>
+  <summary>Responsabilités</summary>
+  <ol>
+<li>Initialiser l'application Qt (QApplication)</li>
+<li>Appliquer le stylesheet global de l'interface</li>
+<li>Charger la configuration applicative (config_repository)</li>
+<li>Instancier les services externes (OllamaWrapper)</li>
+<li>Créer les ViewModels dans le bon ordre de dépendance</li>
+<li>Instancier et afficher la MainWindow</li>
+<li>Ouvrir automatiquement le dossier par défaut si configuré</li>
+<li>Lancer la boucle événementielle Qt</li>
+</ol>
+</details>
 
 
 
