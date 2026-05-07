@@ -1,126 +1,491 @@
 """
-Fenêtre principale de l'application.
+views/main_window.py
 
-Cette classe est le point d'assemblage de l'interface utilisateur. Elle orchestre les différents widgets et centralise leur intégration via des onglets et un dock latéral.
+Fenêtre principale de l'application — architecture multi-workspace.
 
-Toute la logique métier est externalisée dans les ViewModels : cette fenêtre se limite à la composition de l'UI, à la navigation globale et à la propagation des événements entre composants.
+La fenêtre principale centralise la gestion des workspaces affichés sous forme
+d'onglets dans un QTabWidget. Chaque onglet correspond à une instance autonome
+de WorkspaceWidget contenant sa propre galerie, carte et état utilisateur.
 
-Contenu :
- - Gestion des onglets principaux (Galerie, Carte 2D, Thème)
- - Dock latéral pour l'affichage des détails d'image
- - Instanciation et intégration des widgets principaux
- - Dialogue de sélection de dossier
- - Connexion des ViewModels entre eux via signaux
- - Gestion de la sélection d'image globale
+L'objectif de cette classe est uniquement d'orchestrer l'interface et la
+persistance des workspaces. Aucune logique métier liée au traitement des images
+ou à l'IA n'est implémentée ici.
+
 
 Responsabilités :
- 1. Assembler les widgets principaux de l'application dans une interface unifiée
- 2. Gérer l'ouverture d'un dossier d'images via une boîte de dialogue
- 3. Afficher ou masquer le panneau de détail selon la sélection
- 4. Propager les événements de sélection d'image vers les ViewModels concernés
- 5. Assurer la coordination entre galerie, carte 2D et panneau de détail
+    1. Restaurer les workspaces depuis la configuration au démarrage
+    2. Créer un workspace vide par défaut si aucun n'est sauvegardé
+    3. Ajouter de nouveaux workspaces via l'onglet « + »
+    4. Supprimer dynamiquement des workspaces
+    5. Renommer un workspace par double-clic sur son onglet
+    6. Persister automatiquement tous les changements
+    7. Synchroniser la visibilité des docks entre workspaces
+    8. Garantir qu'au moins un workspace reste ouvert
 """
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt
+import os
+
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QApplication,
-    QDockWidget,
-    QFileDialog,
+    QInputDialog,
     QMainWindow,
+    QTabBar,
     QTabWidget,
+    QWidget,
 )
 
-from viewmodels.autocomplete_vm import AutocompleteViewModel
-from viewmodels.detail_vm import DetailViewModel
-from viewmodels.gallery_vm import GalleryViewModel
-from viewmodels.map_vm import MapViewModel
-from views.detail_widget import DetailWidget
-from views.gallery_widget import GalleryWidget
-from views.map_widget import MapTab
-from views.style_tab import StyleTab
+from models import config_repository
+from models import workspace_repository as ws_repo
+from services.ollama_wrapper import OllamaWrapper
+from views.workspace_widget import WorkspaceWidget
+
+# ──────────────────────────────────────────────────────────────────────────────
+# QTabBar renommable
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class RenamableTabBar(QTabBar):
+    """
+    QTabBar personnalisé supportant le double-clic sur les onglets.
+
+    Cette classe expose un signal permettant à la fenêtre principale
+    d'ouvrir une boîte de dialogue de renommage lorsqu'un utilisateur
+    double-clique sur un onglet.
+    """
+
+    tab_double_clicked = pyqtSignal(int)
+
+    def mouseDoubleClickEvent(self, event):
+        """
+        Intercepte le double-clic sur un onglet.
+
+        Args:
+            event: Événement Qt de double-clic souris.
+        """
+        index = self.tabAt(event.pos())
+
+        if index >= 0:
+            self.tab_double_clicked.emit(index)
+
+        super().mouseDoubleClickEvent(event)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Widget placeholder du bouton +
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class PlusPlaceholder(QWidget):
+    """
+    Widget fantôme utilisé pour représenter l'onglet « + ».
+
+    Cet onglet n'héberge aucun contenu réel.
+    Il sert uniquement de déclencheur de création de workspace.
+    """
+
+    pass
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fenêtre principale
+# ──────────────────────────────────────────────────────────────────────────────
 
 
 class MainWindow(QMainWindow):
-    def __init__(
-        self,
-        gallery_vm: GalleryViewModel,
-        detail_vm: DetailViewModel,
-        autocomplete_vm: AutocompleteViewModel,
-        map_vm: MapViewModel,
-    ):
-        """
-        Args:
-            gallery_vm (GalleryViewModel): ViewModel de la vue d'exploration
-            detail_vm (DetailViewModel): ViewModel de la vue de détail
-            autocomplete_vm (AutocompleteViewModel): ViewModel de la vue d'autocomplétion
-            map_vm (MapViewModel): ViewModel de la vue de carte"""
+    """
+    Fenêtre principale multi-workspace de l'application.
 
+    Chaque workspace est affiché sous forme d'onglet indépendant.
+    La fenêtre gère leur cycle de vie complet :
+        - création
+        - suppression
+        - renommage
+        - restauration
+        - persistance
+
+    Args:
+        client (OllamaWrapper):
+            Client Ollama partagé entre tous les workspaces.
+
+        config (dict):
+            Configuration globale chargée au démarrage.
+    """
+
+    def __init__(self, client: OllamaWrapper, config: dict):
         super().__init__()
-        self._gvm = gallery_vm
-        self._dvm = detail_vm
-        self._avm = autocomplete_vm
-        self._mvm = map_vm
+
+        self.client = client
+        self.config = config
 
         self.setWindowTitle("Explorateur d'images")
+
         screen = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen)
 
-        self.build_ui()
-        self.connect_vms()
+        self.workspaces: dict[str, WorkspaceWidget] = {}
 
-    # ── Construction ──────────────────────────────────────────────────────────
+        self.build_ui()
+        self.restore_workspaces()
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Construction
+    # ──────────────────────────────────────────────────────────────────────
 
     def build_ui(self):
-        """Construit l'interface utilisateur de la fenêtre principale"""
+        """
+        Construit l'interface principale.
 
-        # ── Widgets principaux ────────────────────────────────────────────────
-        self._gallery_widget = GalleryWidget(self._gvm, self._avm, self)
-        self._detail_widget = DetailWidget(self._dvm, self)
-        self._map_tab = MapTab(self._mvm, self, self)
-        self._style_tab = StyleTab(self)
+        Initialise :
+            - le QTabWidget principal
+            - la gestion des fermetures d'onglets
+            - le déplacement d'onglets
+            - l'onglet spécial « + »
+        """
 
-        # Bouton "Ouvrir" dans la galerie → dialog ici car besoin de la fenêtre
-        self._gallery_widget.btn_open.clicked.connect(self.open_folder_dialog)
+        tab_bar = RenamableTabBar()
+        tab_bar.tab_double_clicked.connect(self.on_tab_double_clicked)
 
-        # ── Onglets ───────────────────────────────────────────────────────────
-        tabs = QTabWidget()
-        tabs.addTab(self._gallery_widget, "Galerie")
-        tabs.addTab(self._map_tab, "Carte 2D")
-        tabs.addTab(self._style_tab, "🎨 Thème")
-        self.setCentralWidget(tabs)
+        self.tabs = QTabWidget()
 
-        # ── Dock détail ───────────────────────────────────────────────────────
-        self._dock = QDockWidget("Détails de l'image", self)
-        self._dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
-        self._dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
-        self._dock.setWidget(self._detail_widget)
-        self._dock.setMinimumWidth(280)
-        self._dock.setVisible(False)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._dock)
+        self.tabs.setTabBar(tab_bar)
+        self.tabs.setTabsClosable(True)
+        self.tabs.setMovable(True)
 
-    def connect_vms(self):
-        """Connecter les VMs entre elles"""
-        # Sélection dans la galerie → détail + carte
-        self._gvm.image_selected.connect(self.on_image_selected)
-        # Sélection via carte → galerie
-        self._gvm.image_selected.connect(self._map_tab.on_image_selected)
+        self.setCentralWidget(self.tabs)
 
-    # ── Slots ─────────────────────────────────────────────────────────────────
+        self.tabs.addTab(PlusPlaceholder(), "+")
 
-    def open_folder_dialog(self):
-        """Ouvre une boîte de dialogue pour choisir un dossier"""
-        folder = QFileDialog.getExistingDirectory(self, "Choisir un dossier")
-        if folder:
-            self._gvm.open_folder(folder)
+        plus_idx = self.tabs.count() - 1
 
-    def on_image_selected(self, img_name: str):
-        """Selectionne l'image.
+        self.tabs.tabBar().setTabButton(
+            plus_idx,
+            QTabBar.ButtonPosition.RightSide,
+            None,
+        )
+
+        self.tabs.tabBar().setTabButton(
+            plus_idx,
+            QTabBar.ButtonPosition.LeftSide,
+            None,
+        )
+
+        self.tabs.tabCloseRequested.connect(self.on_tab_close_requested)
+        self.tabs.currentChanged.connect(self.on_tab_changed)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Restauration
+    # ──────────────────────────────────────────────────────────────────────
+
+    def restore_workspaces(self):
+        """
+        Recharge les workspaces sauvegardés dans la configuration.
+
+        Si aucun workspace n'existe, un workspace vide est créé
+        automatiquement.
+        """
+        workspaces = ws_repo.load(self.config)
+
+        for ws_data in workspaces:
+            self.create_workspace(
+                ws_id=ws_data["id"],
+                name=ws_data["name"],
+                folder=ws_data.get("folder"),
+            )
+
+        if not self.workspaces:
+            self.create_workspace()
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Génération de nom
+    # ──────────────────────────────────────────────────────────────────────
+
+    def next_workspace_name(self) -> str:
+        """
+        Génère automatiquement un nom de workspace sans collision.
+
+        Returns:
+            str:
+                Nom unique au format « Workspace N ».
+        """
+        existing = {ws.ws_name for ws in self.workspaces.values()}
+
+        n = 1
+
+        while f"Workspace {n}" in existing:
+            n += 1
+
+        return f"Workspace {n}"
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Création
+    # ──────────────────────────────────────────────────────────────────────
+
+    def create_workspace(
+        self,
+        ws_id: str | None = None,
+        name: str | None = None,
+        folder: str | None = None,
+    ) -> WorkspaceWidget:
+        """
+        Crée et insère un nouveau workspace.
 
         Args:
-            img_name (str): Nom de l'image
+            ws_id:
+                Identifiant existant lors d'une restauration.
+
+            name:
+                Nom du workspace.
+
+            folder:
+                Dossier à restaurer.
+
+        Returns:
+            WorkspaceWidget:
+                Workspace créé et inséré dans les onglets.
         """
-        if not self._dock.isVisible():
-            self._dock.setVisible(True)
-        self._dvm.on_image_selected(img_name)
+        is_new = ws_id is None
+
+        if is_new:
+            resolved_name = name or self.next_workspace_name()
+
+            data = ws_repo.make_workspace(name=resolved_name)
+
+            ws_id = data["id"]
+            name = data["name"]
+
+        else:
+            name = name or self.next_workspace_name()
+
+        widget = WorkspaceWidget(
+            ws_id=ws_id,
+            name=name,
+            client=self.client,
+            config=self.config,
+            main_window=self,
+            folder=folder,
+        )
+
+        widget.folder_changed.connect(self.on_workspace_folder_changed)
+
+        self.workspaces[ws_id] = widget
+
+        self.tabs.currentChanged.disconnect(self.on_tab_changed)
+
+        insert_idx = self.tabs.count() - 1
+
+        self.tabs.insertTab(insert_idx, widget, name)
+        self.tabs.setCurrentIndex(insert_idx)
+
+        self.tabs.currentChanged.connect(self.on_tab_changed)
+
+        if is_new:
+            self.save_workspaces()
+
+        self.update_close_buttons()
+
+        return widget
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Suppression
+    # ──────────────────────────────────────────────────────────────────────
+
+    def remove_workspace(self, tab_index: int):
+        """
+        Supprime un workspace à partir de son index d'onglet.
+
+        La sélection est automatiquement déplacée vers
+        un workspace valide afin d'éviter la sélection
+        de l'onglet « + ».
+
+        Args:
+            tab_index (int):
+                Index de l'onglet à supprimer.
+        """
+        widget = self.tabs.widget(tab_index)
+
+        if not isinstance(widget, WorkspaceWidget):
+            return
+
+        ws_id = widget.ws_id
+
+        widget.hide_dock()
+
+        if tab_index < self.tabs.count() - 2:
+            next_index = tab_index
+        else:
+            next_index = max(0, tab_index - 1)
+
+        self.tabs.currentChanged.disconnect(self.on_tab_changed)
+
+        self.tabs.removeTab(tab_index)
+        self.tabs.setCurrentIndex(next_index)
+
+        self.tabs.currentChanged.connect(self.on_tab_changed)
+
+        self.workspaces.pop(ws_id, None)
+
+        self.save_workspaces()
+        self.update_close_buttons()
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Persistance
+    # ──────────────────────────────────────────────────────────────────────
+
+    def save_workspaces(self):
+        """
+        Sauvegarde tous les workspaces dans la configuration.
+
+        Les workspaces sont sauvegardés dans l'ordre
+        actuel des onglets.
+        """
+        workspaces = []
+
+        for idx in range(self.tabs.count() - 1):
+            widget = self.tabs.widget(idx)
+
+            if isinstance(widget, WorkspaceWidget):
+                workspaces.append(
+                    {
+                        "id": widget.ws_id,
+                        "name": widget.ws_name,
+                        "folder": widget.current_folder,
+                    }
+                )
+
+        self.config = ws_repo.save(self.config, workspaces)
+
+        config_repository.save(self.config)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Slots Qt
+    # ──────────────────────────────────────────────────────────────────────
+
+    def on_tab_close_requested(self, index: int):
+        """
+        Déclenché lorsqu'un utilisateur ferme un onglet.
+
+        Garantit qu'au moins un workspace reste ouvert.
+
+        Args:
+            index (int):
+                Index de l'onglet à fermer.
+        """
+        widget = self.tabs.widget(index)
+
+        if not isinstance(widget, WorkspaceWidget):
+            return
+
+        real_count = sum(1 for i in range(self.tabs.count()) if isinstance(self.tabs.widget(i), WorkspaceWidget))
+
+        if real_count <= 1:
+            return
+
+        self.remove_workspace(index)
+
+    def on_tab_changed(self, index: int):
+        """
+        Déclenché lorsqu'un onglet devient actif.
+
+        Fonctionnalités :
+            - création d'un workspace via l'onglet « + »
+            - masquage des docks inactifs
+
+        Args:
+            index (int):
+                Index de l'onglet actif.
+        """
+        widget = self.tabs.widget(index)
+
+        if isinstance(widget, PlusPlaceholder):
+            self.create_workspace()
+            return
+
+        for ws_widget in self.workspaces.values():
+            if ws_widget is not widget:
+                ws_widget.hide_dock()
+
+    def on_tab_double_clicked(self, index: int):
+        """
+        Ouvre une boîte de dialogue de renommage d'onglet.
+
+        Args:
+            index (int):
+                Index de l'onglet renommé.
+        """
+        widget = self.tabs.widget(index)
+
+        if not isinstance(widget, WorkspaceWidget):
+            return
+
+        new_name, ok = QInputDialog.getText(
+            self,
+            "Renommer l'espace de travail",
+            "Nouveau nom :",
+            text=widget.ws_name,
+        )
+
+        if ok and new_name.strip():
+            new_name = new_name.strip()
+
+            self.tabs.setTabText(index, new_name)
+
+            widget.rename(new_name)
+
+            self.save_workspaces()
+
+    def on_workspace_folder_changed(self, ws_id: str, folder: str):
+        """
+        Déclenché lorsqu'un workspace change de dossier.
+
+        Si le workspace possède encore son nom automatique,
+        il est renommé avec le nom du dossier sélectionné.
+
+        Args:
+            ws_id (str):
+                Identifiant du workspace.
+
+            folder (str):
+                Nouveau dossier sélectionné.
+        """
+        widget = self.workspaces.get(ws_id)
+
+        if widget is None:
+            return
+
+        if widget.ws_name.startswith("Workspace "):
+            folder_name = os.path.basename(folder)
+
+            idx = self.tabs.indexOf(widget)
+
+            self.tabs.setTabText(idx, folder_name)
+
+            widget.ws_name = folder_name
+
+        self.save_workspaces()
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Helpers
+    # ──────────────────────────────────────────────────────────────────────
+
+    def update_close_buttons(self):
+        """
+        Met à jour la visibilité des boutons de fermeture.
+
+        Le dernier workspace restant ne peut pas être fermé.
+        """
+        real_count = sum(1 for i in range(self.tabs.count()) if isinstance(self.tabs.widget(i), WorkspaceWidget))
+
+        for idx in range(self.tabs.count() - 1):
+            widget = self.tabs.widget(idx)
+
+            if isinstance(widget, WorkspaceWidget):
+                btn = self.tabs.tabBar().tabButton(
+                    idx,
+                    QTabBar.ButtonPosition.RightSide,
+                )
+
+                if btn:
+                    btn.setVisible(real_count > 1)

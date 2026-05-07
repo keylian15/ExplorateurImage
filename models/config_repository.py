@@ -22,15 +22,7 @@ import os
 
 CONFIG_FILE = "config.json"
 
-_DEFAULTS = {
-    "default_folder": None,
-    "k_neighbors": 5,
-    "map_params": {
-        "umap_n_neighbors": 30,
-        "umap_min_dist": 0.3,
-        "hdbscan_min_cluster": 15,
-    },
-}
+_DEFAULTS = {"k_neighbors": 5, "map_params": {"umap_n_neighbors": 30, "umap_min_dist": 0.3, "hdbscan_min_cluster": 15}, "workspaces": []}
 
 
 def load() -> dict:

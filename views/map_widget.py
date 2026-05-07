@@ -362,29 +362,21 @@ class MapTab(QWidget):
         self._btn_reset_filter.setEnabled(False)
         bar.addWidget(self._btn_reset_filter)
 
-        self._lbl_status = QLabel("Chargement en cours…")
-        self._lbl_status.setStyleSheet("color: gray; font-size: 12px;")
-        bar.addWidget(self._lbl_status, stretch=1)
-
-        root.addLayout(bar)
-
         # ── Barre de recherche ────────────────────────────────────────────────
-        search_bar = QHBoxLayout()
-        search_bar.setSpacing(6)
 
         self._search_edit = QLineEdit()
         self._search_edit.setObjectName("search_bar")
         self._search_edit.setPlaceholderText("Rechercher sur la carte…")
         self._search_edit.textChanged.connect(self.on_search_text_changed)
         self._search_edit.setClearButtonEnabled(True)
-        search_bar.addWidget(self._search_edit, stretch=1)
 
-        self._lbl_search_count = QLabel("")
-        self._lbl_search_count.setStyleSheet("color: gray; font-size: 12px;")
-        self._lbl_search_count.setMinimumWidth(120)
-        search_bar.addWidget(self._lbl_search_count)
+        bar.addWidget(self._search_edit, stretch=1)
 
-        root.addLayout(search_bar)
+        self._lbl_status = QLabel("Chargement en cours…")
+        self._lbl_status.setStyleSheet("color: gray; font-size: 12px;")
+        bar.addWidget(self._lbl_status, stretch=1)
+
+        root.addLayout(bar)
 
         # ── Zone carte + légende ──────────────────────────────────────────────
         h = QHBoxLayout()
@@ -424,7 +416,6 @@ class MapTab(QWidget):
         self._nodes.clear()
         self._cluster_rects.clear()
         self._btn_reset_filter.setEnabled(False)
-        self._lbl_search_count.setText("")
 
     def on_error(self, msg: str):
         """Callback pour afficher un message d'erreur
@@ -479,7 +470,6 @@ class MapTab(QWidget):
             if self._active_filter == "search":
                 self._active_filter = None
                 self._btn_reset_filter.setEnabled(bool(self._nodes))
-                self._lbl_search_count.setText("")
                 for node in self._nodes.values():
                     node.setOpacity(1.0)
                 self._view.fitInView(QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio)
@@ -498,7 +488,6 @@ class MapTab(QWidget):
                 node.setOpacity(0.08)
                 node.setZValue(0)
 
-        self._lbl_search_count.setText(f"{count} résultat{'s' if count > 1 else ''}")
         self._btn_reset_filter.setEnabled(True)
 
         # Zoom automatique sur la bounding box des résultats trouvés
@@ -671,7 +660,6 @@ class MapTab(QWidget):
         self._search_edit.blockSignals(True)
         self._search_edit.clear()
         self._search_edit.blockSignals(False)
-        self._lbl_search_count.setText("")
 
         self._active_filter = "cluster"
         for node in self._nodes.values():
@@ -690,7 +678,6 @@ class MapTab(QWidget):
         self._vm.clear_search()
 
         self._active_filter = None
-        self._lbl_search_count.setText("")
         self._btn_reset_filter.setEnabled(bool(self._nodes))
 
         for node in self._nodes.values():

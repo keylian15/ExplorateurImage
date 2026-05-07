@@ -39,8 +39,8 @@ from services.ollama_wrapper import OllamaWrapper
 from services.workers import MapWorker
 from viewmodels.gallery_vm import GalleryViewModel
 
+_MAP_CACHE_DIR = ".semantic_map"
 _MAP_CACHE_FILE = "map_cache.pkl"
-
 MODEL_EMBED = "nomic-embed-text:v1.5"
 
 
@@ -184,6 +184,20 @@ class MapViewModel(QObject):
 
     # ── Cache pickle ──────────────────────────────────────────────────────────
 
+    def cache_path(self) -> str:
+        """Construit le chemin du cache de la map pour le workspace actuel.
+
+        Returns:
+            str: chemin du fichier pickle.
+        """
+
+        folder = self._gallery_vm.current_folder
+
+        cache_dir = os.path.join(folder, _MAP_CACHE_DIR)
+        os.makedirs(cache_dir, exist_ok=True)
+
+        return os.path.join(cache_dir, _MAP_CACHE_FILE)
+
     def save_cache(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
         """Sauvegarde le cache.
 
@@ -194,7 +208,7 @@ class MapViewModel(QObject):
             cluster_names (dict[int, str]): Les noms des clusters.
         """
         data = {"points": points, "labels": labels, "names": names, "cluster_names": cluster_names}
-        with open(_MAP_CACHE_FILE, "wb") as f:
+        with open(self.cache_path(), "wb") as f:
             pickle.dump(data, f)
 
     def load_cache(self) -> dict | None:
@@ -203,10 +217,13 @@ class MapViewModel(QObject):
         Returns:
             dict | None: Le cache ou None si il n'existe pas.
         """
-        if not os.path.exists(_MAP_CACHE_FILE):
-            return None
         try:
-            with open(_MAP_CACHE_FILE, "rb") as f:
+            path = self.cache_path()
+
+            if not os.path.exists(path):
+                return None
+
+            with open(path, "rb") as f:
                 return pickle.load(f)
         except Exception:
             return None

@@ -34,7 +34,7 @@ import os
 
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from models import config_repository, index_repository
+from models import index_repository
 from models.image_model import ImageGridDelegate, ImageListModel
 from services.ollama_wrapper import OllamaWrapper
 from services.thumbnail_cache import ThumbnailCache
@@ -110,8 +110,6 @@ class GalleryViewModel(QObject):
             folder (str): Chemin du dossier.
         """
         self.current_folder = folder
-        self._config["default_folder"] = folder
-        config_repository.save(self._config)
 
         self.cache.set_folder(folder)
         self.cache.resize(self._cell_size)
