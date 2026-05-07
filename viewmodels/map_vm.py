@@ -14,6 +14,7 @@ Contenu :
  - Chargement et sauvegarde d'un cache pickle des résultats
  - Réutilisation du cache pour éviter les recalculs
  - Communication des clusters nommés et du résultat final
+ - Recherche sémantique sur la carte avec filtrage des noeuds
 
 Responsabilités :
  1. Charger et filtrer les embeddings depuis l'index des images
@@ -23,6 +24,7 @@ Responsabilités :
  5. Restaurer les résultats depuis le cache si disponible
  6. Notifier la vue de l'avancement et du résultat final
  7. Synchroniser les paramètres avec la configuration persistante
+ 8. Filtrer les noeuds visibles selon une requête sémantique
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ from __future__ import annotations
 import os
 import pickle
 
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
 from models import config_repository
 from services.ollama_wrapper import OllamaWrapper
@@ -38,6 +40,8 @@ from services.workers import MapWorker
 from viewmodels.gallery_vm import GalleryViewModel
 
 _MAP_CACHE_FILE = "map_cache.pkl"
+
+MODEL_EMBED = "nomic-embed-text:v1.5"
 
 
 class MapViewModel(QObject):
@@ -51,6 +55,8 @@ class MapViewModel(QObject):
     cluster_named = pyqtSignal(int, str)
     compute_error = pyqtSignal(str)
     params_changed = pyqtSignal(dict)
+    # noms des images à mettre en valeur (liste vide = tout afficher)
+    search_results_changed = pyqtSignal(list)
 
     def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, parent=None):
         """
@@ -66,6 +72,13 @@ class MapViewModel(QObject):
         self._gallery_vm = gallery_vm
         self._worker: MapWorker | None = None
         self._params = config_repository.get_map_params(config)
+
+        # Debounce pour la recherche
+        self._search_timer = QTimer()
+        self._search_timer.setInterval(300)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.timeout.connect(self.do_search)
+        self._search_text = ""
 
     # ── Paramètres ────────────────────────────────────────────────────────────
 
@@ -139,6 +152,35 @@ class MapViewModel(QObject):
 
         self.save_cache(points, labels, names, cluster_names)
         self.compute_finished.emit(points, labels, names, cluster_names)
+
+    # ── Recherche sémantique ──────────────────────────────────────────────────
+
+    def schedule_search(self, text: str):
+        """Déclenche une recherche avec debounce.
+
+        Args:
+            text (str): Texte de la requête.
+        """
+        self._search_text = text
+        self._search_timer.start()
+
+    def do_search(self):
+        """Effectue la recherche et émet le signal avec les résultats."""
+        text = self._search_text.strip()
+        if not text:
+            # Requête vide → tout afficher
+            self.search_results_changed.emit([])
+            return
+
+        # Réutilise la logique de recherche sémantique du GalleryViewModel
+        results = self._gallery_vm.filtered_images(text)
+        self.search_results_changed.emit(results)
+
+    def clear_search(self):
+        """Vide la recherche et réaffiche tous les noeuds."""
+        self._search_text = ""
+        self._search_timer.stop()
+        self.search_results_changed.emit([])
 
     # ── Cache pickle ──────────────────────────────────────────────────────────
 

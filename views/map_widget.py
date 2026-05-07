@@ -12,6 +12,7 @@ des interactions utilisateur.
 
 Contenu :
  - Zone de contrôle (lancement du calcul, paramètres, reset filtre, statut)
+ - Barre de recherche sémantique avec debounce
  - Vue graphique interactive (QGraphicsView) représentant les points 2D
  - Légende dynamique des clusters avec noms et effectifs
  - Dock de paramètres (UMAP / HDBSCAN)
@@ -28,6 +29,7 @@ Responsabilités :
  6. Permettre l'isolation visuelle d'un cluster avec zoom automatique
  7. Relayer les actions utilisateur vers le ViewModel sans logique métier
  8. Synchroniser l'affichage avec les résultats du calcul du ViewModel
+ 9. Filtrer les noeuds visibles selon une requête sémantique
 """
 
 from __future__ import annotations
@@ -45,6 +47,7 @@ from PyQt6.QtWidgets import (
     QGraphicsView,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -308,6 +311,8 @@ class MapTab(QWidget):
         self._cluster_rects: dict[int, QRectF] = {}
         self._legend_labels: dict[int, QLabel] = {}
         self._cluster_names: dict[int, str] = {}
+        # État du filtre actif : "cluster" | "search" | None
+        self._active_filter: str | None = None
 
         self.build_ui()
 
@@ -328,6 +333,7 @@ class MapTab(QWidget):
         self._vm.cluster_named.connect(self.on_cluster_named)
         self._vm.compute_error.connect(self.on_error)
         self._vm.params_changed.connect(self._settings_dock.set_params)
+        self._vm.search_results_changed.connect(self.on_search_results)
 
         QTimer.singleShot(500, self._vm.autoload)
 
@@ -339,6 +345,7 @@ class MapTab(QWidget):
         root.setContentsMargins(8, 8, 8, 8)
         root.setSpacing(6)
 
+        # ── Barre de contrôle ─────────────────────────────────────────────────
         bar = QHBoxLayout()
 
         self._btn_compute = QPushButton("Calculer la carte")
@@ -351,7 +358,7 @@ class MapTab(QWidget):
         bar.addWidget(self._btn_settings)
 
         self._btn_reset_filter = QPushButton("Réinitialiser le filtre")
-        self._btn_reset_filter.clicked.connect(self.reset_opacity)
+        self._btn_reset_filter.clicked.connect(self.reset_all_filters)
         self._btn_reset_filter.setEnabled(False)
         bar.addWidget(self._btn_reset_filter)
 
@@ -361,6 +368,25 @@ class MapTab(QWidget):
 
         root.addLayout(bar)
 
+        # ── Barre de recherche ────────────────────────────────────────────────
+        search_bar = QHBoxLayout()
+        search_bar.setSpacing(6)
+
+        self._search_edit = QLineEdit()
+        self._search_edit.setObjectName("search_bar")
+        self._search_edit.setPlaceholderText("Rechercher sur la carte…")
+        self._search_edit.textChanged.connect(self.on_search_text_changed)
+        self._search_edit.setClearButtonEnabled(True)
+        search_bar.addWidget(self._search_edit, stretch=1)
+
+        self._lbl_search_count = QLabel("")
+        self._lbl_search_count.setStyleSheet("color: gray; font-size: 12px;")
+        self._lbl_search_count.setMinimumWidth(120)
+        search_bar.addWidget(self._lbl_search_count)
+
+        root.addLayout(search_bar)
+
+        # ── Zone carte + légende ──────────────────────────────────────────────
         h = QHBoxLayout()
         h.setSpacing(8)
 
@@ -398,6 +424,7 @@ class MapTab(QWidget):
         self._nodes.clear()
         self._cluster_rects.clear()
         self._btn_reset_filter.setEnabled(False)
+        self._lbl_search_count.setText("")
 
     def on_error(self, msg: str):
         """Callback pour afficher un message d'erreur
@@ -424,6 +451,9 @@ class MapTab(QWidget):
         self._btn_reset_filter.setEnabled(True)
         if self._current_selected:
             self.highlight(self._current_selected)
+        # Rejoue la recherche en cours si elle existait avant le recalcul
+        if self._search_edit.text().strip():
+            self._vm.schedule_search(self._search_edit.text())
 
     def on_cluster_named(self, cid: int, name: str):
         """Callback lors du nommage.
@@ -433,6 +463,63 @@ class MapTab(QWidget):
             name (str): Nom du cluster"""
         self._cluster_names[cid] = name
         self.refresh_legend_names()
+
+    def on_search_results(self, matching_names: list[str]):
+        """Applique le filtre de recherche sur les noeuds.
+
+        Args:
+            matching_names (list[str]): Noms des images correspondant à la requête.
+                                        Liste vide = afficher tout.
+        """
+        if not self._nodes:
+            return
+
+        if not matching_names:
+            # Requête vide : réafficher tout (sauf si un filtre cluster est actif)
+            if self._active_filter == "search":
+                self._active_filter = None
+                self._btn_reset_filter.setEnabled(bool(self._nodes))
+                self._lbl_search_count.setText("")
+                for node in self._nodes.values():
+                    node.setOpacity(1.0)
+                self._view.fitInView(QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio)
+            return
+
+        # Filtre actif : mettre en valeur les résultats
+        self._active_filter = "search"
+        matching_set = set(matching_names)
+        count = 0
+        for name, node in self._nodes.items():
+            if name in matching_set:
+                node.setOpacity(1.0)
+                node.setZValue(2)
+                count += 1
+            else:
+                node.setOpacity(0.08)
+                node.setZValue(0)
+
+        self._lbl_search_count.setText(f"{count} résultat{'s' if count > 1 else ''}")
+        self._btn_reset_filter.setEnabled(True)
+
+        # Zoom automatique sur la bounding box des résultats trouvés
+        if count > 0:
+            matching_nodes = [self._nodes[n] for n in matching_names if n in self._nodes]
+            xs = [node.pos().x() for node in matching_nodes]
+            ys = [node.pos().y() for node in matching_nodes]
+            if xs and ys:
+                rect = QRectF(min(xs), min(ys), max(xs) - min(xs) or 1, max(ys) - min(ys) or 1)
+                self._view.zoom_to_rect(rect, margin=80.0)
+
+    def on_search_text_changed(self, text: str):
+        """Relaie le texte au ViewModel avec debounce.
+
+        Args:
+            text (str): Texte saisi.
+        """
+        if not text.strip():
+            self._vm.clear_search()
+        else:
+            self._vm.schedule_search(text)
 
     # ── Scène ─────────────────────────────────────────────────────────────────
 
@@ -450,6 +537,7 @@ class MapTab(QWidget):
         self._cluster_rects.clear()
         self.clear_legend()
         self._cluster_names = dict(cluster_names)
+        self._active_filter = None
 
         xs = [p[0] for p in points]
         ys = [p[1] for p in points]
@@ -579,17 +667,40 @@ class MapTab(QWidget):
         Args:
             cluster_id (int): ID du cluster.
         """
+        # Vider la recherche textuelle si elle était active
+        self._search_edit.blockSignals(True)
+        self._search_edit.clear()
+        self._search_edit.blockSignals(False)
+        self._lbl_search_count.setText("")
+
+        self._active_filter = "cluster"
         for node in self._nodes.values():
             node.setOpacity(1.0 if node.cluster == cluster_id else 0.12)
+            node.setZValue(2 if node.cluster == cluster_id else 0)
         if cluster_id in self._cluster_rects:
             self._view.zoom_to_rect(self._cluster_rects[cluster_id])
         self._btn_reset_filter.setEnabled(True)
 
-    def reset_opacity(self):
-        """Reset l'opacité des nodes."""
+    def reset_all_filters(self):
+        """Réinitialise tous les filtres (recherche + cluster)."""
+        # Vider le champ de recherche sans déclencher la recherche
+        self._search_edit.blockSignals(True)
+        self._search_edit.clear()
+        self._search_edit.blockSignals(False)
+        self._vm.clear_search()
+
+        self._active_filter = None
+        self._lbl_search_count.setText("")
+        self._btn_reset_filter.setEnabled(bool(self._nodes))
+
         for node in self._nodes.values():
             node.setOpacity(1.0)
+            node.setZValue(1)
         self._view.fitInView(QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio)
+
+    # def reset_opacity(self):
+    #     """Reset l'opacité des nodes (alias pour compatibilité)."""
+    #     self.reset_all_filters()
 
     # ── API externe ───────────────────────────────────────────────────────────
 
