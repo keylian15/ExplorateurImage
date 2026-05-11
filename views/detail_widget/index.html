@@ -1090,6 +1090,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#views.detail_widget.DetailWidget.on_pin_changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_pin_changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#views.detail_widget.DetailWidget.on_preview_ready" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1441,6 +1452,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#views.detail_widget.DetailWidget.on_pin_changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_pin_changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#views.detail_widget.DetailWidget.on_preview_ready" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1550,7 +1572,8 @@
         <p>Panneau de détail d'une image dans l'interface de la galerie.</p>
 <p>Ce composant constitue la vue dédiée à l'inspection et à l'édition des métadonnées
 d'une image sélectionnée. Il permet d'afficher un aperçu, de modifier la description
-et les mots-clés, de déclencher l'auto-complétion, et de visualiser les images similaires.</p>
+et les mots-clés, de déclencher l'auto-complétion, de visualiser les images similaires
+et d'épingler/désépingler une image.</p>
 <p>Toute la logique métier est déléguée au ViewModel associé : ce widget ne gère que
 l'affichage et la propagation des interactions utilisateur.</p>
 
@@ -1561,6 +1584,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
 <li>Aperçu cliquable de l'image avec ouverture plein écran</li>
 <li>Champs d'édition (description, mots-clés, nom de fichier)</li>
 <li>Bouton d'auto-complétion des métadonnées</li>
+<li>Bouton 📌 d'épinglage/désépinglage</li>
 <li>Grille des images similaires avec scores de proximité</li>
 <li>Interaction temps réel avec le ViewModel via signaux Qt</li>
 </ul>
@@ -1571,7 +1595,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
   <ol>
 <li>Afficher les métadonnées de l'image sélectionnée</li>
 <li>Permettre l'édition de la description, des mots-clés et du nom de fichier</li>
-<li>Déclencher les actions utilisateur (rename, auto-complétion, sauvegarde)</li>
+<li>Déclencher les actions utilisateur (rename, auto-complétion, sauvegarde, pin)</li>
 <li>Afficher dynamiquement les images similaires et leurs scores</li>
 <li>Ouvrir une visualisation plein écran de l'image</li>
 <li>Refléter l'état du ViewModel sans contenir de logique métier</li>
@@ -1624,9 +1648,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>views/detail_widget.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 60</span>
 <span class="normal"> 61</span>
 <span class="normal"> 62</span>
 <span class="normal"> 63</span>
@@ -1918,7 +1940,47 @@ l'affichage et la propagation des interactions utilisateur.</p>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
-<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class qui gere le widget de detail.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail_vm</span><span class="p">:</span> <span class="n">DetailViewModel</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1941,7 +2003,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
         <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
 
-        <span class="c1"># ── Titre + renommage ─────────────────────────────────────────────────</span>
+        <span class="c1"># ── Titre + renommage + épingle ───────────────────────────────────────</span>
         <span class="n">title_row</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="s2">&quot;Nom de l&#39;image…&quot;</span><span class="p">)</span>
@@ -1951,6 +2013,13 @@ l'affichage et la propagation des interactions utilisateur.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Renommer le fichier&quot;</span><span class="p">)</span>
         <span class="n">title_row</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;📌&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Épingler / désépingler cette image&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">title_row</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="p">)</span>
+
         <span class="n">layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">title_row</span><span class="p">)</span>
 
         <span class="c1"># ── Aperçu ────────────────────────────────────────────────────────────</span>
@@ -2011,7 +2080,15 @@ l'affichage et la propagation des interactions utilisateur.</p>
         <span class="c1"># View → ViewModel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">btn_autocomplete</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">auto_complete</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">toggle_pin</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spin_k</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_k_changed</span><span class="p">)</span>
+
+        <span class="c1"># Raccourci clavier</span>
+        <span class="n">action_pin</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Search&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">action_pin</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+E&quot;</span><span class="p">))</span>
+        <span class="n">action_pin</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">toggle_pin</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action_pin</span><span class="p">)</span>
 
         <span class="c1"># Debounce sauvegarde</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">()</span>
@@ -2039,6 +2116,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">autocomplete_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_autocomplete_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">rename_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_rename_done</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">rename_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_rename_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">pin_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_pin_changed</span><span class="p">)</span>
 
     <span class="c1"># ── Slots ViewModel → View ────────────────────────────────────────────────</span>
 
@@ -2078,6 +2156,29 @@ l'affichage et la propagation des interactions utilisateur.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">keywords_edit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">desc_edit</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keywords_edit</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pin_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_pinned</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Met à jour le bouton 📌 selon l&#39;état d&#39;épinglage de l&#39;image affichée.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            img_name (str): Nom de l&#39;image concernée.</span>
+<span class="sd">            is_pinned (bool): True si l&#39;image est épinglée.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ne mettre à jour le bouton que si c&#39;est bien l&#39;image actuellement affichée</span>
+        <span class="k">if</span> <span class="n">img_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Bloquer le signal clicked pour éviter une boucle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">is_pinned</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_pinned</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Désépingler cette image&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;color: #f59e0b;&quot;</span><span class="p">)</span>  <span class="c1"># orange = épinglé</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Épingler cette image&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">display_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Affiche les voisins de l&#39;image.</span>
@@ -2180,7 +2281,6 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">on_rename_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Indique que la modification du titre a échoué.&quot;&quot;&quot;</span>
-        <span class="c1"># self.title_edit.setStyleSheet(&quot;border: 1px solid red;&quot;)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">rename_error_style</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -2275,9 +2375,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
@@ -2285,7 +2383,9 @@ l'affichage et la propagation des interactions utilisateur.</p>
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail_vm</span><span class="p">:</span> <span class="n">DetailViewModel</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail_vm</span><span class="p">:</span> <span class="n">DetailViewModel</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        detail_vm (DetailViewModel): Le viewmodel de ce widget.</span>
@@ -2318,9 +2418,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 77</span>
 <span class="normal"> 78</span>
 <span class="normal"> 79</span>
 <span class="normal"> 80</span>
@@ -2387,13 +2485,22 @@ l'affichage et la propagation des interactions utilisateur.</p>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">build_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Construit l&#39;interface utilisateur.&quot;&quot;&quot;</span>
     <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
     <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
     <span class="n">layout</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
 
-    <span class="c1"># ── Titre + renommage ─────────────────────────────────────────────────</span>
+    <span class="c1"># ── Titre + renommage + épingle ───────────────────────────────────────</span>
     <span class="n">title_row</span> <span class="o">=</span> <span class="n">QHBoxLayout</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">setPlaceholderText</span><span class="p">(</span><span class="s2">&quot;Nom de l&#39;image…&quot;</span><span class="p">)</span>
@@ -2403,6 +2510,13 @@ l'affichage et la propagation des interactions utilisateur.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Renommer le fichier&quot;</span><span class="p">)</span>
     <span class="n">title_row</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;📌&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Épingler / désépingler cette image&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">title_row</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="p">)</span>
+
     <span class="n">layout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">title_row</span><span class="p">)</span>
 
     <span class="c1"># ── Aperçu ────────────────────────────────────────────────────────────</span>
@@ -2479,16 +2593,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
@@ -2511,12 +2616,38 @@ l'affichage et la propagation des interactions utilisateur.</p>
 <span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
-<span class="normal">178</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connect_vm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">connect_vm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect la view au viewmodel.&quot;&quot;&quot;</span>
     <span class="c1"># View → ViewModel</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">btn_rename</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">btn_autocomplete</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">auto_complete</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">toggle_pin</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">spin_k</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_k_changed</span><span class="p">)</span>
+
+    <span class="c1"># Raccourci clavier</span>
+    <span class="n">action_pin</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Search&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">action_pin</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+E&quot;</span><span class="p">))</span>
+    <span class="n">action_pin</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">toggle_pin</span><span class="p">())</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action_pin</span><span class="p">)</span>
 
     <span class="c1"># Debounce sauvegarde</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">()</span>
@@ -2544,6 +2675,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">autocomplete_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_autocomplete_error</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">rename_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_rename_done</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">rename_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_rename_error</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">pin_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_pin_changed</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2597,48 +2729,7 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
 <span class="normal">263</span>
@@ -2659,7 +2750,48 @@ l'affichage et la propagation des interactions utilisateur.</p>
 <span class="normal">278</span>
 <span class="normal">279</span>
 <span class="normal">280</span>
-<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">display_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Affiche les voisins de l&#39;image.</span>
 
 <span class="sd">    Args:</span>
@@ -2775,15 +2907,15 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback lorsque l&#39;auto-completion échoue.</span>
 
 <span class="sd">    Args:</span>
@@ -2861,16 +2993,16 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback lorsque l&#39;auto-completion est terminé.</span>
 
 <span class="sd">    Args:</span>
@@ -2902,10 +3034,10 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback lorsque l&#39;auto-completion est en cours.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lbl_loading</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">btn_autocomplete</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -2931,10 +3063,10 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_k_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_k_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recharge les voisins lorsque k change.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">k_neighbors</span> <span class="o">=</span> <span class="n">value</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span><span class="o">.</span><span class="n">refresh_neighbors</span><span class="p">()</span>
@@ -3023,25 +3155,25 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_metadata_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_metadata_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback appelé lorsque les métadonnées sont chargées pour les afficher.</span>
 
 <span class="sd">    Args:</span>
@@ -3060,6 +3192,118 @@ l'affichage et la propagation des interactions utilisateur.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">keywords_edit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">keywords</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">desc_edit</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">keywords_edit</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.detail_widget.DetailWidget.on_pin_changed" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_pin_changed</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">is_pinned</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Met à jour le bouton 📌 selon l'état d'épinglage de l'image affichée.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>img_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nom de l'image concernée.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>is_pinned</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True si l'image est épinglée.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/detail_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_pin_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_pinned</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour le bouton 📌 selon l&#39;état d&#39;épinglage de l&#39;image affichée.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        img_name (str): Nom de l&#39;image concernée.</span>
+<span class="sd">        is_pinned (bool): True si l&#39;image est épinglée.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ne mettre à jour le bouton que si c&#39;est bien l&#39;image actuellement affichée</span>
+    <span class="k">if</span> <span class="n">img_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">text</span><span class="p">():</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Bloquer le signal clicked pour éviter une boucle</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">is_pinned</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">blockSignals</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_pinned</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Désépingler cette image&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;color: #f59e0b;&quot;</span><span class="p">)</span>  <span class="c1"># orange = épinglé</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Épingler cette image&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_pin</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3129,22 +3373,22 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_preview_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">_img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_preview_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">_img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback appelé lorsque la preview est prête pour l&#39;afficher.</span>
 
 <span class="sd">    Args:</span>
@@ -3213,14 +3457,14 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_rename_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_rename_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Met a jour le titre de l&#39;item.</span>
 
 <span class="sd">    Args:</span>
@@ -3250,13 +3494,11 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_rename_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_rename_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indique que la modification du titre a échoué.&quot;&quot;&quot;</span>
-    <span class="c1"># self.title_edit.setStyleSheet(&quot;border: 1px solid red;&quot;)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">rename_error_style</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">title_edit</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3281,9 +3523,9 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_fullscreen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_fullscreen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ouvre l&#39;image en plein écran.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">open_fullscreen_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_pixmap</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -3339,16 +3581,16 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_fullscreen_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_fullscreen_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ouvre l&#39;image donnée en plein écran.</span>
 
 <span class="sd">    Args:</span>
@@ -3380,11 +3622,11 @@ l'affichage et la propagation des interactions utilisateur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_vm_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_vm_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enregistre les données dans le modèle.&quot;&quot;&quot;</span>
     <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc_edit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keywords_edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>

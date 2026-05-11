@@ -477,6 +477,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#models.image_model.ImageGridDelegate.draw_pin_badge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        draw_pin_badge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#models.image_model.ImageGridDelegate.on_thumbnail_ready" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -608,6 +619,17 @@
     <span class="md-ellipsis">
       
         set_indexed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#models.image_model.ImageListModel.set_pinned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set_pinned
       
     </span>
   </a>
@@ -1348,6 +1370,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#models.image_model.ImageGridDelegate.draw_pin_badge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        draw_pin_badge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#models.image_model.ImageGridDelegate.on_thumbnail_ready" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1486,6 +1519,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#models.image_model.ImageListModel.set_pinned" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        set_pinned
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#models.image_model.ImageListModel.set_selected" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1544,7 +1588,8 @@
   <summary>Ce module fournit</summary>
   <ul>
 <li>un modèle léger basé sur les noms de fichiers (sans chargement d'images en mémoire),</li>
-<li>un delegate responsable du rendu visuel des cellules (thumbnails, sélection, état indexé),</li>
+<li>un delegate responsable du rendu visuel des cellules (thumbnails, sélection, état indexé,
+  état épinglé),</li>
 <li>une gestion performante du chargement asynchrone des images via cache et scheduler.</li>
 </ul>
 </details>
@@ -1553,9 +1598,10 @@
   <summary>Responsabilités</summary>
   <ol>
 <li>Fournir un modèle Qt représentant une liste d'images sans charger les fichiers en mémoire</li>
-<li>Gérer les états associés aux images (sélection, indexation, mises à jour)</li>
-<li>Exposer des rôles Qt personnalisés pour l'UI (nom, sélection, indexation)</li>
-<li>Dessiner chaque cellule de la grille avec un delegate personnalisé (thumbnail, bordure, indicateurs)</li>
+<li>Gérer les états associés aux images (sélection, indexation, épinglage, mises à jour)</li>
+<li>Exposer des rôles Qt personnalisés pour l'UI (nom, sélection, indexation, épinglage)</li>
+<li>Dessiner chaque cellule de la grille avec un delegate personnalisé
+   (thumbnail, bordure, indicateurs indexé + épinglé)</li>
 <li>Interagir avec un cache de thumbnails pour éviter les rechargements inutiles</li>
 <li>Déclencher la génération asynchrone des thumbnails manquants via un scheduler</li>
 <li>Notifier la vue lors de la disponibilité d'un nouveau thumbnail</li>
@@ -1569,7 +1615,7 @@
 <li>Delegate de rendu basé sur QStyledItemDelegate</li>
 <li>Rôles Qt personnalisés pour les données d'affichage</li>
 <li>Intégration cache + génération asynchrone des thumbnails</li>
-<li>Logique de rendu (sélection, indexation, placeholder, bordures)</li>
+<li>Logique de rendu (sélection, indexation, épinglage, placeholder, bordures)</li>
 </ul>
 </details>
 
@@ -1608,7 +1654,7 @@
 
 
 
-        <p>Dessine chaque cellule : thumbnail, bordure de sélection, point indexé.</p>
+        <p>Dessine chaque cellule : thumbnail, bordure de sélection, point indexé, badge épinglé.</p>
 
 
 
@@ -1619,28 +1665,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>models/image_model.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -1725,14 +1750,83 @@
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
-<span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageGridDelegate</span><span class="p">(</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine chaque cellule : thumbnail, bordure de sélection, point indexé.&quot;&quot;&quot;</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageGridDelegate</span><span class="p">(</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine chaque cellule : thumbnail, bordure de sélection, point indexé, badge épinglé.&quot;&quot;&quot;</span>
 
     <span class="n">repaint_requested</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="n">BORDER</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;border_width&quot;</span><span class="p">]</span>
     <span class="n">DOT_RADIUS</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;dot_radius&quot;</span><span class="p">]</span>
     <span class="n">PADDING</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;padding&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Dimensions du badge 📌 (coin haut-gauche)</span>
+    <span class="n">PIN_BADGE_SIZE</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># taille du carré de fond arrondi</span>
+    <span class="n">PIN_FONT_SIZE</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1"># taille de l&#39;emoji en px</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1746,7 +1840,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            cache (ThumbnailCache): Le cache de thumbnails à utiliser pour récupérer les thumbnails à dessiner</span>
 <span class="sd">            scheduler (ThumbnailScheduler): Le scheduler de génération de thumbnails à utiliser pour demander la génération de thumbnails manquants</span>
-<span class="sd">            cell_size (int, optional): La taille des cellules en pixels. Par défaut à</span>
+<span class="sd">            cell_size (int, optional): La taille des cellules en pixels. Par défaut à 192.</span>
 <span class="sd">            parent (Any, optional): Le parent QObject. Par défaut à None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1780,7 +1874,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cell_size</span> <span class="o">=</span> <span class="n">size</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée,</span>
+<span class="sd">        point vert si indexée, badge 📌 en haut à gauche si épinglée.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            painter (QPainter): Le painter à utiliser pour dessiner la cellule.</span>
@@ -1793,12 +1888,15 @@
 
         <span class="n">is_selected</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">SELECTED_ROLE</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">state</span> <span class="o">&amp;</span> <span class="n">QStyle</span><span class="o">.</span><span class="n">StateFlag</span><span class="o">.</span><span class="n">State_Selected</span><span class="p">)</span>
         <span class="n">is_indexed</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">INDEXED_ROLE</span><span class="p">)</span>
+        <span class="n">is_pinned</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">PINNED_ROLE</span><span class="p">)</span>
         <span class="n">rect</span><span class="p">:</span> <span class="n">QRect</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">rect</span>
         <span class="n">inner</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">)</span>
 
         <span class="n">painter</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">_COL_PLACEHOLDER</span><span class="p">)</span>
 
+        <span class="c1"># ── Thumbnail ─────────────────────────────────────────────────────────</span>
         <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">pixmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">pw</span><span class="p">,</span> <span class="n">ph</span> <span class="o">=</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
@@ -1810,19 +1908,55 @@
             <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">_COL_LOADING_TXT</span><span class="p">)</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
 
+        <span class="c1"># ── Bordure de sélection ──────────────────────────────────────────────</span>
         <span class="n">border_color</span> <span class="o">=</span> <span class="n">_COL_BORDER_SEL</span> <span class="k">if</span> <span class="n">is_selected</span> <span class="k">else</span> <span class="n">_COL_BORDER_NORM</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QPen</span><span class="p">(</span><span class="n">border_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">))</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
 
+        <span class="c1"># ── Point &quot;indexé&quot; (coin bas-droit) ───────────────────────────────────</span>
         <span class="k">if</span> <span class="n">is_indexed</span><span class="p">:</span>
-            <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">_COL_INDEXED_DOT</span><span class="p">))</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">PenStyle</span><span class="o">.</span><span class="n">NoPen</span><span class="p">)</span>
             <span class="n">cx</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">right</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span> <span class="o">-</span> <span class="mi">4</span>
             <span class="n">cy</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">bottom</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span> <span class="o">-</span> <span class="mi">4</span>
             <span class="n">painter</span><span class="o">.</span><span class="n">drawEllipse</span><span class="p">(</span><span class="n">QPoint</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span><span class="p">)</span>
 
+        <span class="c1"># ── Badge 📌 (coin haut-gauche) ───────────────────────────────────────</span>
+        <span class="k">if</span> <span class="n">is_pinned</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">draw_pin_badge</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">rect</span><span class="p">)</span>
+
         <span class="n">painter</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_pin_badge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">cell_rect</span><span class="p">:</span> <span class="n">QRect</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dessine le badge épingle dans le coin haut-gauche de la cellule.</span>
+
+<span class="sd">        Le badge est un petit carré arrondi ambré avec l&#39;emoji 📌 centré.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            painter (QPainter): Le painter actif.</span>
+<span class="sd">            cell_rect (QRect): Rectangle de la cellule entière.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">margin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">+</span> <span class="mi">3</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PIN_BADGE_SIZE</span>
+
+        <span class="n">badge_rect</span> <span class="o">=</span> <span class="n">QRect</span><span class="p">(</span>
+            <span class="n">cell_rect</span><span class="o">.</span><span class="n">left</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin</span><span class="p">,</span>
+            <span class="n">cell_rect</span><span class="o">.</span><span class="n">top</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin</span><span class="p">,</span>
+            <span class="n">size</span><span class="p">,</span>
+            <span class="n">size</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fond arrondi ambré semi-transparent</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">_COL_PIN_BG</span><span class="p">))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">PenStyle</span><span class="o">.</span><span class="n">NoPen</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawRoundedRect</span><span class="p">(</span><span class="n">badge_rect</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+        <span class="c1"># Emoji 📌 centré dans le badge</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setPixelSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PIN_FONT_SIZE</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">_COL_PIN_ICON</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">badge_rect</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">,</span> <span class="s2">&quot;📌&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Emet un signal pour indiquer que le thumbnail d&#39;une image est prêt, afin que la cellule correspondante soit redessinée.</span>
@@ -1914,7 +2048,7 @@
             </td>
             <td>
               <div class="doc-md-description">
-                <p>La taille des cellules en pixels. Par défaut à</p>
+                <p>La taille des cellules en pixels. Par défaut à 192.</p>
               </div>
             </td>
             <td>
@@ -1943,27 +2077,27 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">cache</span><span class="p">:</span> <span class="n">ThumbnailCache</span><span class="p">,</span>
     <span class="n">scheduler</span><span class="p">:</span> <span class="n">ThumbnailScheduler</span><span class="p">,</span>
@@ -1975,7 +2109,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        cache (ThumbnailCache): Le cache de thumbnails à utiliser pour récupérer les thumbnails à dessiner</span>
 <span class="sd">        scheduler (ThumbnailScheduler): Le scheduler de génération de thumbnails à utiliser pour demander la génération de thumbnails manquants</span>
-<span class="sd">        cell_size (int, optional): La taille des cellules en pixels. Par défaut à</span>
+<span class="sd">        cell_size (int, optional): La taille des cellules en pixels. Par défaut à 192.</span>
 <span class="sd">        parent (Any, optional): Le parent QObject. Par défaut à None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1984,6 +2118,135 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cell_size</span> <span class="o">=</span> <span class="n">cell_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">thumbnail_ready</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_thumbnail_ready</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="models.image_model.ImageGridDelegate.draw_pin_badge" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">draw_pin_badge</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">cell_rect</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Dessine le badge épingle dans le coin haut-gauche de la cellule.</p>
+<p>Le badge est un petit carré arrondi ambré avec l'emoji 📌 centré.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>painter</code>
+            </td>
+            <td>
+                  <code><span title="PyQt6.QtGui.QPainter">QPainter</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Le painter actif.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cell_rect</code>
+            </td>
+            <td>
+                  <code><span title="PyQt6.QtCore.QRect">QRect</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Rectangle de la cellule entière.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>models/image_model.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">draw_pin_badge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">cell_rect</span><span class="p">:</span> <span class="n">QRect</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine le badge épingle dans le coin haut-gauche de la cellule.</span>
+
+<span class="sd">    Le badge est un petit carré arrondi ambré avec l&#39;emoji 📌 centré.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        painter (QPainter): Le painter actif.</span>
+<span class="sd">        cell_rect (QRect): Rectangle de la cellule entière.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">margin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">+</span> <span class="mi">3</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PIN_BADGE_SIZE</span>
+
+    <span class="n">badge_rect</span> <span class="o">=</span> <span class="n">QRect</span><span class="p">(</span>
+        <span class="n">cell_rect</span><span class="o">.</span><span class="n">left</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin</span><span class="p">,</span>
+        <span class="n">cell_rect</span><span class="o">.</span><span class="n">top</span><span class="p">()</span> <span class="o">+</span> <span class="n">margin</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Fond arrondi ambré semi-transparent</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">_COL_PIN_BG</span><span class="p">))</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">PenStyle</span><span class="o">.</span><span class="n">NoPen</span><span class="p">)</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">drawRoundedRect</span><span class="p">(</span><span class="n">badge_rect</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># Emoji 📌 centré dans le badge</span>
+    <span class="n">font</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
+    <span class="n">font</span><span class="o">.</span><span class="n">setPixelSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PIN_FONT_SIZE</span><span class="p">)</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">_COL_PIN_ICON</span><span class="p">)</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">badge_rect</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">,</span> <span class="s2">&quot;📌&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2037,14 +2300,14 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Emet un signal pour indiquer que le thumbnail d&#39;une image est prêt, afin que la cellule correspondante soit redessinée.</span>
 
 <span class="sd">    Args:</span>
@@ -2069,7 +2332,8 @@
 
     <div class="doc doc-contents ">
 
-        <p>Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée.</p>
+        <p>Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée,
+point vert si indexée, badge 📌 en haut à gauche si épinglée.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2137,32 +2401,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
 <span class="normal">267</span>
@@ -2180,8 +2419,43 @@
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée.</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée,</span>
+<span class="sd">    point vert si indexée, badge 📌 en haut à gauche si épinglée.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        painter (QPainter): Le painter à utiliser pour dessiner la cellule.</span>
@@ -2194,12 +2468,15 @@
 
     <span class="n">is_selected</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">SELECTED_ROLE</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">state</span> <span class="o">&amp;</span> <span class="n">QStyle</span><span class="o">.</span><span class="n">StateFlag</span><span class="o">.</span><span class="n">State_Selected</span><span class="p">)</span>
     <span class="n">is_indexed</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">INDEXED_ROLE</span><span class="p">)</span>
+    <span class="n">is_pinned</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">PINNED_ROLE</span><span class="p">)</span>
     <span class="n">rect</span><span class="p">:</span> <span class="n">QRect</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">rect</span>
     <span class="n">inner</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">)</span>
 
     <span class="n">painter</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
     <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">_COL_PLACEHOLDER</span><span class="p">)</span>
 
+    <span class="c1"># ── Thumbnail ─────────────────────────────────────────────────────────</span>
     <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">pixmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">pw</span><span class="p">,</span> <span class="n">ph</span> <span class="o">=</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
@@ -2211,17 +2488,22 @@
         <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">_COL_LOADING_TXT</span><span class="p">)</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
 
+    <span class="c1"># ── Bordure de sélection ──────────────────────────────────────────────</span>
     <span class="n">border_color</span> <span class="o">=</span> <span class="n">_COL_BORDER_SEL</span> <span class="k">if</span> <span class="n">is_selected</span> <span class="k">else</span> <span class="n">_COL_BORDER_NORM</span>
     <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QPen</span><span class="p">(</span><span class="n">border_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span><span class="p">))</span>
     <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">adjusted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">BORDER</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
 
+    <span class="c1"># ── Point &quot;indexé&quot; (coin bas-droit) ───────────────────────────────────</span>
     <span class="k">if</span> <span class="n">is_indexed</span><span class="p">:</span>
-        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QPainter</span><span class="o">.</span><span class="n">RenderHint</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">)</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">_COL_INDEXED_DOT</span><span class="p">))</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">PenStyle</span><span class="o">.</span><span class="n">NoPen</span><span class="p">)</span>
         <span class="n">cx</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">right</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span> <span class="o">-</span> <span class="mi">4</span>
         <span class="n">cy</span> <span class="o">=</span> <span class="n">rect</span><span class="o">.</span><span class="n">bottom</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span> <span class="o">-</span> <span class="mi">4</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">drawEllipse</span><span class="p">(</span><span class="n">QPoint</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOT_RADIUS</span><span class="p">)</span>
+
+    <span class="c1"># ── Badge 📌 (coin haut-gauche) ───────────────────────────────────────</span>
+    <span class="k">if</span> <span class="n">is_pinned</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_pin_badge</span><span class="p">(</span><span class="n">painter</span><span class="p">,</span> <span class="n">rect</span><span class="p">)</span>
 
     <span class="n">painter</span><span class="o">.</span><span class="n">restore</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -2279,16 +2561,16 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_cell_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_cell_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour la taille des cellules.</span>
 
 <span class="sd">    Args:</span>
@@ -2390,17 +2672,17 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_option</span><span class="p">,</span> <span class="n">_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSize</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_option</span><span class="p">,</span> <span class="n">_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSize</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Override de la méthode sizeHint pour retourner la taille des cellules.</span>
 
 <span class="sd">    Args:</span>
@@ -2453,15 +2735,7 @@
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>models/image_model.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 70</span>
 <span class="normal"> 71</span>
 <span class="normal"> 72</span>
 <span class="normal"> 73</span>
@@ -2568,7 +2842,28 @@
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
-<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageListModel</span><span class="p">(</span><span class="n">QAbstractListModel</span><span class="p">):</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageListModel</span><span class="p">(</span><span class="n">QAbstractListModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stocke une liste ordonnée de noms de fichiers images.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -2576,6 +2871,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_indexed</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selected</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remplace la liste d&#39;images par une nouvelle. Réinitialise la sélection.</span>
@@ -2598,6 +2894,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_indexed</span> <span class="o">=</span> <span class="n">indexed</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">INDEXED_ROLE</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pinned</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Met à jour l&#39;ensemble des images épinglées.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pinned (set[str]): Le nouvel ensemble de noms de fichiers épinglés.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pinned</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">PINNED_ROLE</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Met à jour l&#39;image sélectionnée. Émet un signal de changement de données pour l&#39;ancienne et la nouvelle image sélectionnée.</span>
@@ -2681,6 +2987,8 @@
             <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexed</span>
         <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">SELECTED_ROLE</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected</span>
+        <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">PINNED_ROLE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span>
         <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">name</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -2765,28 +3073,30 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">175</span>
 <span class="normal">176</span>
-<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne les données pour une cellule donnée et un rôle donné.</span>
 
 <span class="sd">    Args:</span>
@@ -2805,6 +3115,8 @@
         <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexed</span>
     <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">SELECTED_ROLE</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">PINNED_ROLE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span>
     <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">ItemDataRole</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">name</span>
     <span class="k">return</span> <span class="kc">None</span>
@@ -2863,15 +3175,15 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">image_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">image_at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le nom de fichier de l&#39;image à la ligne donnée.</span>
 
 <span class="sd">    Args:</span>
@@ -2933,17 +3245,17 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">notify_image_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">notify_image_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indique que l&#39;image donnée a été mise à jour. Émet un signal de changement de données pour cette image.</span>
 
 <span class="sd">    Args:</span>
@@ -3009,16 +3321,16 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_parent</span><span class="p">:</span> <span class="n">QModelIndex</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_parent</span><span class="p">:</span> <span class="n">QModelIndex</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le nombre d&#39;images dans la liste.</span>
 
 <span class="sd">    Args:</span>
@@ -3083,19 +3395,19 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">row_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">row_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne l&#39;index de la ligne de l&#39;image donnée, ou None si elle n&#39;est pas dans la liste.</span>
 
 <span class="sd">    Args:</span>
@@ -3161,16 +3473,16 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Remplace la liste d&#39;images par une nouvelle. Réinitialise la sélection.</span>
 
 <span class="sd">    Args:</span>
@@ -3233,16 +3545,16 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_indexed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexed</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_indexed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexed</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour la liste des images indexées. Émet un signal de changement de données pour les images concernées.</span>
 
 <span class="sd">    Args:</span>
@@ -3252,6 +3564,76 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_indexed</span> <span class="o">=</span> <span class="n">indexed</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">INDEXED_ROLE</span><span class="p">])</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="models.image_model.ImageListModel.set_pinned" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">set_pinned</span><span class="p">(</span><span class="n">pinned</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Met à jour l'ensemble des images épinglées.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>pinned</code>
+            </td>
+            <td>
+                  <code><span title="set">set</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Le nouvel ensemble de noms de fichiers épinglés.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>models/image_model.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pinned</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour l&#39;ensemble des images épinglées.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pinned (set[str]): Le nouvel ensemble de noms de fichiers épinglés.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pinned</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_images</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">PINNED_ROLE</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3305,19 +3687,19 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour l&#39;image sélectionnée. Émet un signal de changement de données pour l&#39;ancienne et la nouvelle image sélectionnée.</span>
 
 <span class="sd">    Args:</span>
