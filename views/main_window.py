@@ -18,7 +18,7 @@ Responsabilités :
     3. Ajouter de nouveaux workspaces via l'onglet « + »
     4. Supprimer dynamiquement des workspaces
     5. Renommer un workspace par double-clic sur son onglet
-    6. Persister automatiquement tous les changements
+    6. Persister automatiquement tous les changements (y compris k_neighbors et map_params)
     7. Synchroniser la visibilité des docks entre workspaces
     8. Garantir qu'au moins un workspace reste ouvert
 """
@@ -104,7 +104,7 @@ class MainWindow(QMainWindow):
         - suppression
         - renommage
         - restauration
-        - persistance
+        - persistance (dossier, k_neighbors, map_params)
 
     Args:
         client (OllamaWrapper):
@@ -193,6 +193,7 @@ class MainWindow(QMainWindow):
                 ws_id=ws_data["id"],
                 name=ws_data["name"],
                 folder=ws_data.get("folder"),
+                ws_data=ws_data,
             )
 
         if not self.workspaces:
@@ -228,36 +229,34 @@ class MainWindow(QMainWindow):
         ws_id: str | None = None,
         name: str | None = None,
         folder: str | None = None,
+        ws_data: dict | None = None,
     ) -> WorkspaceWidget:
         """
         Crée et insère un nouveau workspace.
 
         Args:
-            ws_id:
-                Identifiant existant lors d'une restauration.
-
-            name:
-                Nom du workspace.
-
-            folder:
-                Dossier à restaurer.
+            ws_id (str | None): Identifiant existant lors d'une restauration.
+            name (str | None): Nom du workspace.
+            folder (str | None): Dossier à restaurer.
+            ws_data (dict | None): Données.
 
         Returns:
-            WorkspaceWidget:
-                Workspace créé et inséré dans les onglets.
+            WorkspaceWidget: Nouveau workspace.
         """
         is_new = ws_id is None
 
         if is_new:
             resolved_name = name or self.next_workspace_name()
-
             data = ws_repo.make_workspace(name=resolved_name)
-
             ws_id = data["id"]
             name = data["name"]
-
+            ws_data = data
         else:
             name = name or self.next_workspace_name()
+            # ws_data fourni lors de la restauration ; sinon on crée des défauts
+            if ws_data is None:
+                ws_data = ws_repo.make_workspace(name=name, folder=folder)
+                ws_data["id"] = ws_id
 
         widget = WorkspaceWidget(
             ws_id=ws_id,
@@ -266,6 +265,7 @@ class MainWindow(QMainWindow):
             config=self.config,
             main_window=self,
             folder=folder,
+            ws_data=ws_data,
         )
 
         widget.folder_changed.connect(self.on_workspace_folder_changed)
@@ -338,8 +338,8 @@ class MainWindow(QMainWindow):
         """
         Sauvegarde tous les workspaces dans la configuration.
 
-        Les workspaces sont sauvegardés dans l'ordre
-        actuel des onglets.
+        Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
+        y compris k_neighbors et map_params propres à chaque workspace.
         """
         workspaces = []
 
@@ -352,6 +352,8 @@ class MainWindow(QMainWindow):
                         "id": widget.ws_id,
                         "name": widget.ws_name,
                         "folder": widget.current_folder,
+                        "k_neighbors": widget.current_k_neighbors,
+                        "map_params": widget.current_map_params,
                     }
                 )
 

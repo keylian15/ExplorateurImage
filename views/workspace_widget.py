@@ -5,16 +5,19 @@ Chaque workspace est autonome : il possède ses propres instances de ViewModels
 (GalleryViewModel, DetailViewModel, AutocompleteViewModel, MapViewModel) et ses
 propres vues (GalleryWidget, DetailWidget, MapTab, StyleTab).
 
+Chaque workspace stocke également ses propres paramètres (k_neighbors, map_params).
+
 La communication avec la fenêtre principale se fait uniquement via des signaux :
 - folder_changed : quand l'utilisateur ouvre un dossier
 - name_changed   : quand l'utilisateur renomme l'espace de travail (géré par MainWindow)
 
 Responsabilités :
  1. Instancier les ViewModels dans le bon ordre de dépendance
- 2. Assembler les 3 onglets (Galerie, Carte 2D, Thème)
- 3. Gérer le dock de détail en interne
- 4. Ouvrir automatiquement le dossier restauré depuis la config
- 5. Exposer les métadonnées du workspace (id, nom, dossier courant)
+ 2. Transmettre les données du workspace (k_neighbors, map_params) aux ViewModels
+ 3. Assembler les 3 onglets (Galerie, Carte 2D, Thème)
+ 4. Gérer le dock de détail en interne
+ 5. Ouvrir automatiquement le dossier restauré depuis la config
+ 6. Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres)
 """
 
 from __future__ import annotations
@@ -30,6 +33,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from models import workspace_repository as ws_repo
 from services.ollama_wrapper import OllamaWrapper
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.detail_vm import DetailViewModel
@@ -55,6 +59,7 @@ class WorkspaceWidget(QWidget):
         config: dict,
         main_window: QMainWindow,
         folder: str | None = None,
+        ws_data: dict | None = None,
         parent=None,
     ):
         """
@@ -62,9 +67,10 @@ class WorkspaceWidget(QWidget):
             ws_id (str): Identifiant unique du workspace.
             name (str): Nom affiché dans l'onglet parent.
             client (OllamaWrapper): Client Ollama partagé.
-            config (dict): Configuration globale (lecture seule ici).
+            config (dict): Configuration globale.
             main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
             folder (str | None): Dossier à restaurer, ou None.
+            ws_data (dict | None): Données complètes du workspace (k_neighbors, map_params…).
             parent: Parent Qt.
         """
         super().__init__(parent)
@@ -72,11 +78,14 @@ class WorkspaceWidget(QWidget):
         self.ws_name = name
         self._main_window = main_window
 
+        # Données du workspace (avec valeurs par défaut si absent)
+        _ws_data = ws_data or ws_repo.make_workspace(name=name, folder=folder)
+
         # ── ViewModels ────────────────────────────────────────────────────────
         self.gallery_vm = GalleryViewModel(client, config)
-        self.detail_vm = DetailViewModel(client, config, self.gallery_vm)
+        self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
-        self.map_vm = MapViewModel(client, config, self.gallery_vm)
+        self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
 
         # ── Vues ──────────────────────────────────────────────────────────────
         self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self)
@@ -124,6 +133,16 @@ class WorkspaceWidget(QWidget):
     def current_folder(self) -> str | None:
         """Dossier courant du workspace."""
         return self.gallery_vm.current_folder
+
+    @property
+    def current_k_neighbors(self) -> int:
+        """k_neighbors courant du workspace."""
+        return self.detail_vm.k_neighbors
+
+    @property
+    def current_map_params(self) -> dict:
+        """map_params courants du workspace."""
+        return self.map_vm.params
 
     # ── Slots internes ────────────────────────────────────────────────────────
 

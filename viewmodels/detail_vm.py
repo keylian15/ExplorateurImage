@@ -33,6 +33,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap
 
 from models import config_repository, index_repository
+from models import workspace_repository as ws_repo
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import AutoCompleteWorker, SaveMetadataWorker
 
@@ -60,19 +61,25 @@ class DetailViewModel(QObject):
         client: OllamaWrapper,
         config: dict,
         gallery_vm,  # GalleryViewModel (évite import circulaire)
+        ws_id: str,
+        ws_data: dict,
         parent=None,
     ):
         """
         Args:
             client (OllamaWrapper): client Ollama
-            config (dict): config
+            config (dict): config globale
             gallery_vm (GalleryViewModel): gallery viewmodel
+            ws_id (str): identifiant du workspace
+            ws_data (dict): données du workspace (contient k_neighbors)
         """
 
         super().__init__(parent)
         self._client = client
         self._config = config
         self._gallery_vm = gallery_vm
+        self._ws_id = ws_id
+        self._k_neighbors = ws_repo.get_k_neighbors(ws_data)
 
         self.selected_image: str | None = None
         self._worker: AutoCompleteWorker | None = None
@@ -95,16 +102,27 @@ class DetailViewModel(QObject):
 
         Returns:
             int: nombre de voisins"""
-        return self._config.get("k_neighbors", 5)
+        return self._k_neighbors
 
     @k_neighbors.setter
     def k_neighbors(self, value: int):
-        """Remplace le nombre de voisins.
+        """Remplace le nombre de voisins et persiste dans le workspace.
 
         Args:
             value (int): nombre de voisins.
         """
-        self._config["k_neighbors"] = value
+        self._k_neighbors = value
+        self.save_k_neighbors_to_workspace(value)
+
+    def save_k_neighbors_to_workspace(self, value: int):
+        """Persiste k_neighbors dans le workspace courant.
+
+        Args:
+            value (int): Valeur à sauvegarder.
+        """
+        workspaces = ws_repo.load(self._config)
+        workspaces = ws_repo.update_workspace(workspaces, self._ws_id, k_neighbors=value)
+        self._config = ws_repo.save(self._config, workspaces)
         config_repository.save(self._config)
 
     @property
@@ -233,7 +251,7 @@ class DetailViewModel(QObject):
             if key == img_name or "embedding" not in data:
                 continue
             scores[key] = self._client.similarite_cosinus(entry["embedding"], data["embedding"])
-        top = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True)[: self.k_neighbors])
+        top = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True)[: self._k_neighbors])
         self.neighbors_ready.emit(top)
 
     def refresh_neighbors(self):

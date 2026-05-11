@@ -1,20 +1,26 @@
 {
-  "k_neighbors": 5,
-  "map_params": {
-    "umap_n_neighbors": 30,
-    "umap_min_dist": 0.3,
-    "hdbscan_min_cluster": 15
-  },
   "workspaces": [
     {
-      "id": "a9d0f656-109e-4b37-8003-677d1a630beb",
-      "name": "Dataset Enorme",
-      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset"
+      "id": "c783c7cb-8800-406d-890b-1b8dca662420",
+      "name": "Param1",
+      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
+      "k_neighbors": 5,
+      "map_params": {
+        "umap_n_neighbors": 30,
+        "umap_min_dist": 0.3,
+        "hdbscan_min_cluster": 15
+      }
     },
     {
-      "id": "dbbcd1e0-0cf4-46d7-96fd-6393b7b03762",
-      "name": "Images",
-      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images"
+      "id": "b0609125-ebdd-4145-ab12-d8e3c249956e",
+      "name": "Param2",
+      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
+      "k_neighbors": 5,
+      "map_params": {
+        "umap_n_neighbors": 30,
+        "umap_min_dist": 0.3,
+        "hdbscan_min_cluster": 15
+      }
     }
   ]
 }
