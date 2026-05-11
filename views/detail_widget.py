@@ -3,7 +3,8 @@ Panneau de détail d'une image dans l'interface de la galerie.
 
 Ce composant constitue la vue dédiée à l'inspection et à l'édition des métadonnées
 d'une image sélectionnée. Il permet d'afficher un aperçu, de modifier la description
-et les mots-clés, de déclencher l'auto-complétion, et de visualiser les images similaires.
+et les mots-clés, de déclencher l'auto-complétion, de visualiser les images similaires
+et d'épingler/désépingler une image.
 
 Toute la logique métier est déléguée au ViewModel associé : ce widget ne gère que
 l'affichage et la propagation des interactions utilisateur.
@@ -12,13 +13,14 @@ Contenu :
  - Aperçu cliquable de l'image avec ouverture plein écran
  - Champs d'édition (description, mots-clés, nom de fichier)
  - Bouton d'auto-complétion des métadonnées
+ - Bouton 📌 d'épinglage/désépinglage
  - Grille des images similaires avec scores de proximité
  - Interaction temps réel avec le ViewModel via signaux Qt
 
 Responsabilités :
  1. Afficher les métadonnées de l'image sélectionnée
  2. Permettre l'édition de la description, des mots-clés et du nom de fichier
- 3. Déclencher les actions utilisateur (rename, auto-complétion, sauvegarde)
+ 3. Déclencher les actions utilisateur (rename, auto-complétion, sauvegarde, pin)
  4. Afficher dynamiquement les images similaires et leurs scores
  5. Ouvrir une visualisation plein écran de l'image
  6. Refléter l'état du ViewModel sans contenir de logique métier
@@ -29,7 +31,7 @@ from __future__ import annotations
 import os
 
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QAction, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
@@ -78,7 +80,7 @@ class DetailWidget(QWidget):
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(6)
 
-        # ── Titre + renommage ─────────────────────────────────────────────────
+        # ── Titre + renommage + épingle ───────────────────────────────────────
         title_row = QHBoxLayout()
         self.title_edit = QLineEdit()
         self.title_edit.setPlaceholderText("Nom de l'image…")
@@ -88,6 +90,13 @@ class DetailWidget(QWidget):
         self.btn_rename.setFixedWidth(32)
         self.btn_rename.setToolTip("Renommer le fichier")
         title_row.addWidget(self.btn_rename)
+
+        self.btn_pin = QPushButton("📌")
+        self.btn_pin.setFixedWidth(32)
+        self.btn_pin.setToolTip("Épingler / désépingler cette image")
+        self.btn_pin.setCheckable(True)
+        title_row.addWidget(self.btn_pin)
+
         layout.addLayout(title_row)
 
         # ── Aperçu ────────────────────────────────────────────────────────────
@@ -148,7 +157,15 @@ class DetailWidget(QWidget):
         # View → ViewModel
         self.btn_rename.clicked.connect(lambda: self._vm.rename(self.title_edit.text().strip()))
         self.btn_autocomplete.clicked.connect(self._vm.auto_complete)
+        self.btn_pin.clicked.connect(self._vm.toggle_pin)
         self.spin_k.valueChanged.connect(self.on_k_changed)
+
+        # Raccourci clavier
+        action_pin = QAction("Search", self)
+        action_pin.setShortcut(QKeySequence("Ctrl+E"))
+        action_pin.triggered.connect(lambda: self._vm.toggle_pin())
+
+        self.addAction(action_pin)
 
         # Debounce sauvegarde
         self._save_timer = QTimer()
@@ -176,6 +193,7 @@ class DetailWidget(QWidget):
         self._vm.autocomplete_error.connect(self.on_autocomplete_error)
         self._vm.rename_done.connect(self.on_rename_done)
         self._vm.rename_error.connect(self.on_rename_error)
+        self._vm.pin_changed.connect(self.on_pin_changed)
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
@@ -215,6 +233,29 @@ class DetailWidget(QWidget):
         self.keywords_edit.setText(", ".join(keywords))
         self.desc_edit.blockSignals(False)
         self.keywords_edit.blockSignals(False)
+
+    def on_pin_changed(self, img_name: str, is_pinned: bool):
+        """Met à jour le bouton 📌 selon l'état d'épinglage de l'image affichée.
+
+        Args:
+            img_name (str): Nom de l'image concernée.
+            is_pinned (bool): True si l'image est épinglée.
+        """
+        # Ne mettre à jour le bouton que si c'est bien l'image actuellement affichée
+        if img_name != self.title_edit.text():
+            return
+
+        # Bloquer le signal clicked pour éviter une boucle
+        self.btn_pin.blockSignals(True)
+        self.btn_pin.setChecked(is_pinned)
+        self.btn_pin.blockSignals(False)
+
+        if is_pinned:
+            self.btn_pin.setToolTip("Désépingler cette image")
+            self.btn_pin.setStyleSheet("color: #f59e0b;")  # orange = épinglé
+        else:
+            self.btn_pin.setToolTip("Épingler cette image")
+            self.btn_pin.setStyleSheet("")
 
     def display_neighbors(self, neighbors: dict[str, float]):
         """Affiche les voisins de l'image.
@@ -317,7 +358,6 @@ class DetailWidget(QWidget):
 
     def on_rename_error(self, msg: str):
         """Indique que la modification du titre a échoué."""
-        # self.title_edit.setStyleSheet("border: 1px solid red;")
         self.title_edit.setStyleSheet(rename_error_style())
         self.title_edit.setToolTip(f"❌ {msg}")
 

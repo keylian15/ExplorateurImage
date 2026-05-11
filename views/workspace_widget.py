@@ -5,7 +5,8 @@ Chaque workspace est autonome : il possède ses propres instances de ViewModels
 (GalleryViewModel, DetailViewModel, AutocompleteViewModel, MapViewModel) et ses
 propres vues (GalleryWidget, DetailWidget, MapTab, StyleTab).
 
-Chaque workspace stocke également ses propres paramètres (k_neighbors, map_params).
+Chaque workspace stocke également ses propres paramètres (k_neighbors, map_params,
+pinned_images).
 
 La communication avec la fenêtre principale se fait uniquement via des signaux :
 - folder_changed : quand l'utilisateur ouvre un dossier
@@ -13,11 +14,11 @@ La communication avec la fenêtre principale se fait uniquement via des signaux 
 
 Responsabilités :
  1. Instancier les ViewModels dans le bon ordre de dépendance
- 2. Transmettre les données du workspace (k_neighbors, map_params) aux ViewModels
+ 2. Transmettre les données du workspace (k_neighbors, map_params, pinned_images) aux ViewModels
  3. Assembler les 3 onglets (Galerie, Carte 2D, Thème)
  4. Gérer le dock de détail en interne
  5. Ouvrir automatiquement le dossier restauré depuis la config
- 6. Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres)
+ 6. Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres, épingles)
 """
 
 from __future__ import annotations
@@ -71,7 +72,7 @@ class WorkspaceWidget(QWidget):
             config (dict): Configuration globale.
             main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
             folder (str | None): Dossier à restaurer, ou None.
-            ws_data (dict | None): Données complètes du workspace (k_neighbors, map_params…).
+            ws_data (dict | None): Données complètes du workspace (k_neighbors, map_params, pinned_images…).
             parent: Parent Qt.
         """
         super().__init__(parent)
@@ -83,7 +84,8 @@ class WorkspaceWidget(QWidget):
         _ws_data = ws_data or ws_repo.make_workspace(name=name, folder=folder)
 
         # ── ViewModels ────────────────────────────────────────────────────────
-        self.gallery_vm = GalleryViewModel(client, config)
+        # GalleryViewModel reçoit ws_id et ws_data pour gérer les épingles
+        self.gallery_vm = GalleryViewModel(client, config, ws_id=ws_id, ws_data=_ws_data)
         self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
         self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
@@ -150,6 +152,15 @@ class WorkspaceWidget(QWidget):
     def current_map_params(self) -> dict:
         """map_params courants du workspace."""
         return self.map_vm.params
+
+    @property
+    def current_pinned_images(self) -> list[str]:
+        """Liste des images épinglées du workspace.
+
+        Returns:
+            list[str]: Noms des images épinglées dans leur ordre d'épinglage.
+        """
+        return self.gallery_vm.pinned_images
 
     # ── Slots internes ────────────────────────────────────────────────────────
 

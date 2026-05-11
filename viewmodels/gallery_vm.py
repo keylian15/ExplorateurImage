@@ -3,7 +3,8 @@ ViewModel de la galerie d'images.
 
 Ce composant pilote la logique principale d'affichage et d'interaction avec un dossier
 d'images. Il gère le chargement des fichiers, la synchronisation avec l'index, le cache
-de thumbnails, le zoom de la grille et la recherche sémantique basée sur embeddings.
+de thumbnails, le zoom de la grille, la recherche sémantique basée sur embeddings,
+et la gestion des images épinglées.
 
 Il agit comme un point de coordination entre les modèles (liste, index), les services
 (IA, cache, workers) et la vue via des signaux Qt, tout en restant indépendant de toute
@@ -16,6 +17,7 @@ Contenu :
  - Gestion du zoom et de la taille des cellules
  - Sélection d'images et propagation des événements UI
  - Interaction avec le cache de thumbnails et le scheduler
+ - Épinglage d'images (tri en tête de liste, persistance par workspace)
 
 Responsabilités :
  1. Charger et maintenir la liste des images d'un dossier
@@ -26,6 +28,7 @@ Responsabilités :
  6. Maintenir le cache de thumbnails et son cycle de vie
  7. Propager les événements de sélection et de mise à jour vers la vue
  8. Assurer le lien entre modèles, services et interface via signaux Qt
+ 9. Gérer l'épinglage des images et leur positionnement en tête de liste
 """
 
 from __future__ import annotations
@@ -34,7 +37,8 @@ import os
 
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from models import index_repository
+from models import config_repository, index_repository
+from models import workspace_repository as ws_repo
 from models.image_model import ImageGridDelegate, ImageListModel
 from services.ollama_wrapper import OllamaWrapper
 from services.thumbnail_cache import ThumbnailCache
@@ -54,29 +58,38 @@ class GalleryViewModel(QObject):
     folder_changed = pyqtSignal(str)  # dossier courant
     index_changed = pyqtSignal(set)  # ensemble des noms indexés
     image_selected = pyqtSignal(str)  # image cliquée
+    pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
 
-    def __init__(self, client: OllamaWrapper, config: dict, parent=None):
+    def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None, parent=None):
         """
         Args:
             client (OllamaWrapper): client Ollama
             config (dict): configuration
+            ws_id (str): identifiant du workspace (pour la persistance des épingles)
+            ws_data (dict | None): données du workspace (pour restaurer les épingles)
             parent (QObject, optional): parent. Defaults to None.
         """
 
         super().__init__(parent)
         self._client = client
         self._config = config
+        self._ws_id = ws_id
 
         self.current_folder: str | None = None
         self.index: dict = {}
 
+        # Images épinglées (liste ordonnée pour conserver l'ordre d'épinglage)
+        self._pinned: list[str] = ws_repo.get_pinned_images(ws_data) if ws_data else []
+
         # Cache + scheduler
+
         _dummy = os.path.expanduser("~")
         self.cache = ThumbnailCache(_dummy, THUMB["default_size"], THUMB["lru_max_memory"])
         self.scheduler = ThumbnailScheduler(self.cache)
 
         # Modèle + delegate
         self.model = ImageListModel()
+        self.model.set_pinned(set(self._pinned))  # Restauration des épingles au démarrage
         self.delegate = ImageGridDelegate(self.cache, self.scheduler, THUMB["default_size"])
         self.delegate.repaint_requested.connect(self.on_repaint_requested)
 
@@ -100,6 +113,15 @@ class GalleryViewModel(QObject):
         Returns:
             int: Taille de la cellule en pixels."""
         return self._cell_size
+
+    @property
+    def pinned_images(self) -> list[str]:
+        """Retourne la liste ordonnée des images épinglées.
+
+        Returns:
+            list[str]: Noms des images épinglées.
+        """
+        return list(self._pinned)
 
     # ── Dossier ───────────────────────────────────────────────────────────────
 
@@ -132,7 +154,7 @@ class GalleryViewModel(QObject):
     # ── Images ────────────────────────────────────────────────────────────────
 
     def refresh(self, images: list[str] | None):
-        """Rafraîchit la liste des images.
+        """Rafraîchit la liste des images. Les épinglées apparaissent en premier.
 
         Args:
             images (list[str] | None): Liste des images à charger.
@@ -142,8 +164,26 @@ class GalleryViewModel(QObject):
                 images = [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
             except (FileNotFoundError, TypeError):
                 images = []
+
+        images = self.sort_with_pinned(images)
         self.model.set_images(images)
         self.images_changed.emit(images)
+
+    def sort_with_pinned(self, images: list[str]) -> list[str]:
+        """Trie la liste en mettant les épinglées en premier (dans leur ordre d'épinglage).
+
+        Args:
+            images (list[str]): Liste brute d'images.
+
+        Returns:
+            list[str]: Liste triée, épinglées en tête.
+        """
+        image_set = set(images)
+        # Épinglées présentes dans la liste, dans l'ordre d'épinglage
+        pinned_first = [p for p in self._pinned if p in image_set]
+        # Reste (non épinglées), dans leur ordre original
+        rest = [img for img in images if img not in set(self._pinned)]
+        return pinned_first + rest
 
     def all_images(self) -> list[str]:
         """Renvoie la liste de toutes les images du dossier courant.
@@ -163,6 +203,67 @@ class GalleryViewModel(QObject):
     def indexed_images(self) -> list[str]:
         """Renvoie la liste des images indexées du dossier courant."""
         return [f for f in self.all_images() if f in self.index]
+
+    # ── Épinglage ─────────────────────────────────────────────────────────────
+
+    def is_pinned(self, img_name: str) -> bool:
+        """Indique si une image est épinglée.
+
+        Args:
+            img_name (str): Nom de l'image.
+
+        Returns:
+            bool: True si épinglée.
+        """
+        return img_name in self._pinned
+
+    def pin_image(self, img_name: str):
+        """Épingle une image (la met en tête de galerie).
+
+        Args:
+            img_name (str): Nom de l'image à épingler.
+        """
+        if img_name in self._pinned:
+            return
+        self._pinned.insert(0, img_name)
+        self.model.set_pinned(set(self._pinned))
+        self.save_pinned()
+        self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
+        self.pin_changed.emit(img_name, True)
+
+    def unpin_image(self, img_name: str):
+        """Désépingle une image.
+
+        Args:
+            img_name (str): Nom de l'image à désépingler.
+        """
+        if img_name not in self._pinned:
+            return
+        self._pinned.remove(img_name)
+        self.model.set_pinned(set(self._pinned))
+        self.save_pinned()
+        self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
+        self.pin_changed.emit(img_name, False)
+
+    def toggle_pin(self, img_name: str):
+        """Bascule l'état épinglé d'une image.
+
+        Args:
+            img_name (str): Nom de l'image.
+        """
+        if self.is_pinned(img_name):
+            self.unpin_image(img_name)
+        else:
+            self.pin_image(img_name)
+
+    def save_pinned(self):
+        """Persiste la liste des épingles dans le workspace courant."""
+        if not self._ws_id:
+            return
+        workspaces = ws_repo.load(self._config)
+        workspaces = ws_repo.update_workspace(workspaces, self._ws_id, pinned_images=list(self._pinned))
+        self._config = ws_repo.save(self._config, workspaces)
+        config_repository.save(self._config)
 
     # ── Recherche ─────────────────────────────────────────────────────────────
 

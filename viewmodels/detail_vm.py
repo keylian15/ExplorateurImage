@@ -3,7 +3,7 @@ ViewModel du panneau de détail d'une image.
 
 Ce composant gère toute la logique liée à l'inspection et à la modification
 d'une image sélectionnée : affichage des métadonnées, sauvegarde, auto-complétion,
-calcul des voisins et renommage du fichier.
+calcul des voisins, renommage du fichier et épinglage.
 
 Il agit comme intermédiaire entre les services (IA, index, cache) et la vue,
 en exposant des signaux Qt pour piloter l'interface de manière réactive.
@@ -14,6 +14,7 @@ Contenu :
  - Sauvegarde des métadonnées avec embeddings
  - Auto-complétion via modèle IA
  - Renommage de fichiers et mise à jour de l'index
+ - Épinglage/désépinglage via le GalleryViewModel
 
 Responsabilités :
  1. Charger et exposer les métadonnées de l'image sélectionnée
@@ -22,7 +23,8 @@ Responsabilités :
  4. Orchestrer la sauvegarde des métadonnées (description, keywords, embedding)
  5. Déclencher l'auto-complétion d'une image
  6. Gérer le renommage et la cohérence de l'index et du cache
- 7. Notifier la vue des changements (metadata, save, autocomplete, rename)
+ 7. Notifier la vue des changements (metadata, save, autocomplete, rename, pin)
+ 8. Déléguer l'épinglage au GalleryViewModel pour centraliser la logique
 """
 
 from __future__ import annotations
@@ -55,6 +57,7 @@ class DetailViewModel(QObject):
     rename_done = pyqtSignal(str)  # nouveau nom
     rename_error = pyqtSignal(str)
     index_updated = pyqtSignal(set)  # noms indexés
+    pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
 
     def __init__(
         self,
@@ -93,6 +96,9 @@ class DetailViewModel(QObject):
 
         self._pending_desc: str = ""
         self._pending_keywords: list[str] = []
+
+        # Relayer le signal pin du gallery_vm vers la vue
+        self._gallery_vm.pin_changed.connect(self.pin_changed)
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
@@ -167,6 +173,26 @@ class DetailViewModel(QObject):
 
         # Voisins
         self.compute_neighbors(img_name)
+
+        # État épingle courant
+        self.pin_changed.emit(img_name, self._gallery_vm.is_pinned(img_name))
+
+    # ── Épinglage ─────────────────────────────────────────────────────────────
+
+    def toggle_pin(self):
+        """Bascule l'état épinglé de l'image sélectionnée."""
+        if self.selected_image:
+            self._gallery_vm.toggle_pin(self.selected_image)
+
+    def is_pinned(self) -> bool:
+        """Indique si l'image sélectionnée est épinglée.
+
+        Returns:
+            bool: True si épinglée.
+        """
+        if self.selected_image:
+            return self._gallery_vm.is_pinned(self.selected_image)
+        return False
 
     # ── Sauvegarde ────────────────────────────────────────────────────────────
 
@@ -287,6 +313,11 @@ class DetailViewModel(QObject):
         except OSError as e:
             self.rename_error.emit(str(e))
             return
+
+        # Mettre à jour l'épingle si l'image était épinglée
+        if self._gallery_vm.is_pinned(self.selected_image):
+            self._gallery_vm.unpin_image(self.selected_image)
+            self._gallery_vm.pin_image(new_name)
 
         self._gallery_vm.cache.invalidate(self.selected_image)
         index_repository.rename_entry(self._folder, self.selected_image, new_name, new_path)

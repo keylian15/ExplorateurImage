@@ -18,7 +18,8 @@ Responsabilités :
     3. Ajouter de nouveaux workspaces via l'onglet « + »
     4. Supprimer dynamiquement des workspaces
     5. Renommer un workspace par double-clic sur son onglet
-    6. Persister automatiquement tous les changements (y compris k_neighbors et map_params)
+    6. Persister automatiquement tous les changements
+       (y compris k_neighbors, map_params et pinned_images)
     7. Synchroniser la visibilité des docks entre workspaces
     8. Garantir qu'au moins un workspace reste ouvert
 """
@@ -105,7 +106,7 @@ class MainWindow(QMainWindow):
         - suppression
         - renommage
         - restauration
-        - persistance (dossier, k_neighbors, map_params)
+        - persistance (dossier, k_neighbors, map_params, pinned_images)
 
     Args:
         client (OllamaWrapper):
@@ -387,7 +388,7 @@ class MainWindow(QMainWindow):
         Sauvegarde tous les workspaces dans la configuration.
 
         Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
-        y compris k_neighbors et map_params propres à chaque workspace.
+        y compris k_neighbors, map_params et pinned_images propres à chaque workspace.
         """
         workspaces = []
 
@@ -402,6 +403,7 @@ class MainWindow(QMainWindow):
                         "folder": widget.current_folder,
                         "k_neighbors": widget.current_k_neighbors,
                         "map_params": widget.current_map_params,
+                        "pinned_images": widget.current_pinned_images,
                     }
                 )
 
