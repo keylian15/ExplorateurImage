@@ -1725,8 +1725,7 @@
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageGridDelegate</span><span class="p">(</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
+<span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageGridDelegate</span><span class="p">(</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine chaque cellule : thumbnail, bordure de sélection, point indexé.&quot;&quot;&quot;</span>
 
     <span class="n">repaint_requested</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
@@ -1788,7 +1787,6 @@
 <span class="sd">            option (QStyleOptionViewItem): Les options de dessin fournies par Qt.</span>
 <span class="sd">            index (QModelIndex): L&#39;index de la cellule à dessiner.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">img_name</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">IMG_NAME_ROLE</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">img_name</span><span class="p">:</span>
             <span class="k">return</span>
@@ -2039,14 +2037,14 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/image_model.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">285</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
+<span class="normal">285</span>
 <span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Emet un signal pour indiquer que le thumbnail d&#39;une image est prêt, afin que la cellule correspondante soit redessinée.</span>
 
 <span class="sd">    Args:</span>
@@ -2182,8 +2180,7 @@
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">):</span>
+<span class="normal">282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">:</span> <span class="n">QPainter</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée.</span>
 
 <span class="sd">    Args:</span>
@@ -2191,7 +2188,6 @@
 <span class="sd">        option (QStyleOptionViewItem): Les options de dessin fournies par Qt.</span>
 <span class="sd">        index (QModelIndex): L&#39;index de la cellule à dessiner.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">img_name</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">IMG_NAME_ROLE</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">img_name</span><span class="p">:</span>
         <span class="k">return</span>
