@@ -29,7 +29,7 @@ Responsabilités :
 from __future__ import annotations
 
 from PyQt6.QtCore import QModelIndex, QPoint, QSize, Qt, QTimer
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QAction, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QHBoxLayout,
@@ -86,6 +86,12 @@ class GalleryWidget(QWidget):
         self.search_bar.setObjectName("search_bar")
         self.search_bar.setPlaceholderText("Rechercher…")
         top.addWidget(self.search_bar, stretch=1)
+
+        action_search = QAction("Search", self)
+        action_search.setShortcut(QKeySequence("Ctrl+F"))
+        action_search.triggered.connect(lambda: self.search_bar.setFocus())
+
+        self.addAction(action_search)
 
         self.btn_cancel = QPushButton("Annuler")
         self.btn_cancel.setVisible(False)

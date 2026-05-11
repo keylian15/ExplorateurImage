@@ -35,7 +35,7 @@ Responsabilités :
 from __future__ import annotations
 
 from PyQt6.QtCore import QRectF, Qt, QTimer
-from PyQt6.QtGui import QBrush, QColor, QPainter, QPen, QWheelEvent
+from PyQt6.QtGui import QAction, QBrush, QColor, QKeySequence, QPainter, QPen, QWheelEvent
 from PyQt6.QtWidgets import (
     QDockWidget,
     QDoubleSpinBox,
@@ -361,6 +361,12 @@ class MapTab(QWidget):
         self._btn_reset_filter.clicked.connect(self.reset_all_filters)
         self._btn_reset_filter.setEnabled(False)
         bar.addWidget(self._btn_reset_filter)
+
+        action_search = QAction("Search", self)
+        action_search.setShortcut(QKeySequence("Ctrl+F"))
+        action_search.triggered.connect(lambda: self._search_edit.setFocus())
+
+        self.addAction(action_search)
 
         # ── Barre de recherche ────────────────────────────────────────────────
 

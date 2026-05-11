@@ -2,8 +2,8 @@
   "workspaces": [
     {
       "id": "c8a5f562-0980-4903-b8b6-2bb8f3ccc698",
-      "name": "Workspace 2",
-      "folder": null,
+      "name": "Images",
+      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
       "k_neighbors": 5,
       "map_params": {
         "umap_n_neighbors": 30,

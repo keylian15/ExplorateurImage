@@ -244,7 +244,6 @@ class ImageGridDelegate(QStyledItemDelegate):
             option (QStyleOptionViewItem): Les options de dessin fournies par Qt.
             index (QModelIndex): L'index de la cellule à dessiner.
         """
-
         img_name = index.data(IMG_NAME_ROLE)
         if not img_name:
             return
