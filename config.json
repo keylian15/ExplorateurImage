@@ -1,20 +1,9 @@
 {
   "workspaces": [
     {
-      "id": "c783c7cb-8800-406d-890b-1b8dca662420",
-      "name": "Param1",
-      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
-      "k_neighbors": 5,
-      "map_params": {
-        "umap_n_neighbors": 30,
-        "umap_min_dist": 0.3,
-        "hdbscan_min_cluster": 15
-      }
-    },
-    {
-      "id": "b0609125-ebdd-4145-ab12-d8e3c249956e",
-      "name": "Param2",
-      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
+      "id": "c8a5f562-0980-4903-b8b6-2bb8f3ccc698",
+      "name": "Workspace 2",
+      "folder": null,
       "k_neighbors": 5,
       "map_params": {
         "umap_n_neighbors": 30,

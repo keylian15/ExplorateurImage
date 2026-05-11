@@ -25,6 +25,7 @@ from __future__ import annotations
 import os
 
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
     QDockWidget,
     QFileDialog,
@@ -95,6 +96,12 @@ class WorkspaceWidget(QWidget):
 
         # Bouton "Ouvrir" → dialog géré ici
         self._gallery_widget.btn_open.clicked.connect(self.open_folder_dialog)
+
+        action_open_workspace = QAction("Open Workspace", self)
+        action_open_workspace.setShortcut(QKeySequence("Ctrl+O"))
+        action_open_workspace.triggered.connect(lambda: self.open_folder_dialog())
+
+        self.addAction(action_open_workspace)
 
         # ── Onglets internes ──────────────────────────────────────────────────
         self._tabs = QTabWidget(self)

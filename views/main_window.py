@@ -28,6 +28,7 @@ from __future__ import annotations
 import os
 
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
     QApplication,
     QInputDialog,
@@ -119,6 +120,7 @@ class MainWindow(QMainWindow):
 
         self.client = client
         self.config = config
+        self._tab_flip_direction = 1
 
         self.setWindowTitle("Explorateur d'images")
 
@@ -127,8 +129,54 @@ class MainWindow(QMainWindow):
 
         self.workspaces: dict[str, WorkspaceWidget] = {}
 
+        self.create_shortcuts()
         self.build_ui()
         self.restore_workspaces()
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Raccourcis
+    # ──────────────────────────────────────────────────────────────────────
+
+    def create_shortcuts(self):
+        """Créer tous les raccourcis clavier."""
+
+        # Nouvel onglet
+        action_new_workspace = QAction("New Workspace", self)
+        action_new_workspace.setShortcut(QKeySequence("Ctrl+T"))
+        action_new_workspace.triggered.connect(lambda: self.create_workspace())
+
+        self.addAction(action_new_workspace)
+
+        # Fermer l'onglet
+        action_close_workspace = QAction("Close Workspace", self)
+        action_close_workspace.setShortcut(QKeySequence("Ctrl+W"))
+        action_close_workspace.triggered.connect(lambda: self.on_tab_close_requested(self.tabs.currentIndex()))
+
+        self.addAction(action_close_workspace)
+
+        # Changer d'onglet
+        action_flip_tab = QAction(self)
+        action_flip_tab.setShortcut(QKeySequence("Ctrl+Tab"))
+        action_flip_tab.triggered.connect(self.flip_flop_tab)
+
+        self.addAction(action_flip_tab)
+
+    def flip_flop_tab(self):
+        """
+        Alterne entre onglets en inversant la direction à chaque appel.
+        """
+        count = self.tabs.count() - 1
+
+        current = self.tabs.currentIndex()
+
+        if count <= 1:
+            next_index = current + 1
+        else:
+            next_index = (current + self._tab_flip_direction) % count
+
+        self.tabs.setCurrentIndex(next_index)
+
+        self._tab_flip_direction *= -1
 
     # ──────────────────────────────────────────────────────────────────────
     # Construction
