@@ -1555,7 +1555,7 @@ ou à l'IA n'est implémentée ici.</p>
 <li>Ajouter de nouveaux workspaces via l'onglet « + »</li>
 <li>Supprimer dynamiquement des workspaces</li>
 <li>Renommer un workspace par double-clic sur son onglet</li>
-<li>Persister automatiquement tous les changements</li>
+<li>Persister automatiquement tous les changements (y compris k_neighbors et map_params)</li>
 <li>Synchroniser la visibilité des docks entre workspaces</li>
 <li>Garantir qu'au moins un workspace reste ouvert</li>
 </ol>
@@ -1603,7 +1603,7 @@ La fenêtre gère leur cycle de vie complet :
     - suppression
     - renommage
     - restauration
-    - persistance</p>
+    - persistance (dossier, k_neighbors, map_params)</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2055,7 +2055,9 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
-<span class="normal">491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fenêtre principale multi-workspace de l&#39;application.</span>
 
@@ -2065,7 +2067,7 @@ La fenêtre gère leur cycle de vie complet :
 <span class="sd">        - suppression</span>
 <span class="sd">        - renommage</span>
 <span class="sd">        - restauration</span>
-<span class="sd">        - persistance</span>
+<span class="sd">        - persistance (dossier, k_neighbors, map_params)</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        client (OllamaWrapper):</span>
@@ -2154,6 +2156,7 @@ La fenêtre gère leur cycle de vie complet :
                 <span class="n">ws_id</span><span class="o">=</span><span class="n">ws_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">ws_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
                 <span class="n">folder</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;folder&quot;</span><span class="p">),</span>
+                <span class="n">ws_data</span><span class="o">=</span><span class="n">ws_data</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">:</span>
@@ -2189,36 +2192,34 @@ La fenêtre gère leur cycle de vie complet :
         <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorkspaceWidget</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Crée et insère un nouveau workspace.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            ws_id:</span>
-<span class="sd">                Identifiant existant lors d&#39;une restauration.</span>
-
-<span class="sd">            name:</span>
-<span class="sd">                Nom du workspace.</span>
-
-<span class="sd">            folder:</span>
-<span class="sd">                Dossier à restaurer.</span>
+<span class="sd">            ws_id (str | None): Identifiant existant lors d&#39;une restauration.</span>
+<span class="sd">            name (str | None): Nom du workspace.</span>
+<span class="sd">            folder (str | None): Dossier à restaurer.</span>
+<span class="sd">            ws_data (dict | None): Données.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            WorkspaceWidget:</span>
-<span class="sd">                Workspace créé et inséré dans les onglets.</span>
+<span class="sd">            WorkspaceWidget: Nouveau workspace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">is_new</span> <span class="o">=</span> <span class="n">ws_id</span> <span class="ow">is</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">is_new</span><span class="p">:</span>
             <span class="n">resolved_name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_workspace_name</span><span class="p">()</span>
-
             <span class="n">data</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">make_workspace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">resolved_name</span><span class="p">)</span>
-
             <span class="n">ws_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-
+            <span class="n">ws_data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_workspace_name</span><span class="p">()</span>
+            <span class="c1"># ws_data fourni lors de la restauration ; sinon on crée des défauts</span>
+            <span class="k">if</span> <span class="n">ws_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ws_data</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">make_workspace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">)</span>
+                <span class="n">ws_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws_id</span>
 
         <span class="n">widget</span> <span class="o">=</span> <span class="n">WorkspaceWidget</span><span class="p">(</span>
             <span class="n">ws_id</span><span class="o">=</span><span class="n">ws_id</span><span class="p">,</span>
@@ -2227,6 +2228,7 @@ La fenêtre gère leur cycle de vie complet :
             <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
             <span class="n">main_window</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+            <span class="n">ws_data</span><span class="o">=</span><span class="n">ws_data</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">widget</span><span class="o">.</span><span class="n">folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
@@ -2299,8 +2301,8 @@ La fenêtre gère leur cycle de vie complet :
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sauvegarde tous les workspaces dans la configuration.</span>
 
-<span class="sd">        Les workspaces sont sauvegardés dans l&#39;ordre</span>
-<span class="sd">        actuel des onglets.</span>
+<span class="sd">        Les workspaces sont sauvegardés dans l&#39;ordre actuel des onglets,</span>
+<span class="sd">        y compris k_neighbors et map_params propres à chaque workspace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">workspaces</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -2313,6 +2315,8 @@ La fenêtre gère leur cycle de vie complet :
                         <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">ws_id</span><span class="p">,</span>
                         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">ws_name</span><span class="p">,</span>
                         <span class="s2">&quot;folder&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_folder</span><span class="p">,</span>
+                        <span class="s2">&quot;k_neighbors&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_k_neighbors</span><span class="p">,</span>
+                        <span class="s2">&quot;map_params&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_map_params</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
 
@@ -2581,7 +2585,7 @@ La fenêtre gère leur cycle de vie complet :
 
 
 <h4 id="views.main_window.MainWindow.create_workspace" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_workspace</span><span class="p">(</span><span class="n">ws_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">create_workspace</span><span class="p">(</span><span class="n">ws_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ws_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -2650,6 +2654,22 @@ La fenêtre gère leur cycle de vie complet :
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ws_data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Données.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -2669,7 +2689,7 @@ La fenêtre gère leur cycle de vie complet :
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Workspace créé et inséré dans les onglets.</p>
+                <p>Nouveau workspace.</p>
               </div>
             </td>
           </tr>
@@ -2679,8 +2699,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">226</span>
-<span class="normal">227</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">227</span>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
@@ -2747,36 +2766,34 @@ La fenêtre gère leur cycle de vie complet :
     <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorkspaceWidget</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crée et insère un nouveau workspace.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        ws_id:</span>
-<span class="sd">            Identifiant existant lors d&#39;une restauration.</span>
-
-<span class="sd">        name:</span>
-<span class="sd">            Nom du workspace.</span>
-
-<span class="sd">        folder:</span>
-<span class="sd">            Dossier à restaurer.</span>
+<span class="sd">        ws_id (str | None): Identifiant existant lors d&#39;une restauration.</span>
+<span class="sd">        name (str | None): Nom du workspace.</span>
+<span class="sd">        folder (str | None): Dossier à restaurer.</span>
+<span class="sd">        ws_data (dict | None): Données.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        WorkspaceWidget:</span>
-<span class="sd">            Workspace créé et inséré dans les onglets.</span>
+<span class="sd">        WorkspaceWidget: Nouveau workspace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_new</span> <span class="o">=</span> <span class="n">ws_id</span> <span class="ow">is</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">is_new</span><span class="p">:</span>
         <span class="n">resolved_name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_workspace_name</span><span class="p">()</span>
-
         <span class="n">data</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">make_workspace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">resolved_name</span><span class="p">)</span>
-
         <span class="n">ws_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
-
+        <span class="n">ws_data</span> <span class="o">=</span> <span class="n">data</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_workspace_name</span><span class="p">()</span>
+        <span class="c1"># ws_data fourni lors de la restauration ; sinon on crée des défauts</span>
+        <span class="k">if</span> <span class="n">ws_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ws_data</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">make_workspace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">)</span>
+            <span class="n">ws_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ws_id</span>
 
     <span class="n">widget</span> <span class="o">=</span> <span class="n">WorkspaceWidget</span><span class="p">(</span>
         <span class="n">ws_id</span><span class="o">=</span><span class="n">ws_id</span><span class="p">,</span>
@@ -2785,6 +2802,7 @@ La fenêtre gère leur cycle de vie complet :
         <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
         <span class="n">main_window</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+        <span class="n">ws_data</span><span class="o">=</span><span class="n">ws_data</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">widget</span><span class="o">.</span><span class="n">folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
@@ -2851,8 +2869,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -2866,7 +2883,8 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
-<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">next_workspace_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">220</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">next_workspace_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Génère automatiquement un nom de workspace sans collision.</span>
 
@@ -2943,9 +2961,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
@@ -2963,7 +2979,9 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Déclenché lorsqu&#39;un onglet devient actif.</span>
 
@@ -3038,9 +3056,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">368</span>
 <span class="normal">369</span>
 <span class="normal">370</span>
 <span class="normal">371</span>
@@ -3058,7 +3074,9 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">383</span>
 <span class="normal">384</span>
 <span class="normal">385</span>
-<span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_close_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_close_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Déclenché lorsqu&#39;un utilisateur ferme un onglet.</span>
 
@@ -3132,9 +3150,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">412</span>
 <span class="normal">413</span>
 <span class="normal">414</span>
 <span class="normal">415</span>
@@ -3159,7 +3175,9 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">434</span>
 <span class="normal">435</span>
 <span class="normal">436</span>
-<span class="normal">437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ouvre une boîte de dialogue de renommage d&#39;onglet.</span>
 
@@ -3258,9 +3276,7 @@ il est renommé avec le nom du dossier sélectionné.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
 <span class="normal">444</span>
@@ -3286,7 +3302,9 @@ il est renommé avec le nom du dossier sélectionné.</p>
 <span class="normal">464</span>
 <span class="normal">465</span>
 <span class="normal">466</span>
-<span class="normal">467</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_workspace_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_workspace_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Déclenché lorsqu&#39;un workspace change de dossier.</span>
 
@@ -3485,7 +3503,8 @@ automatiquement.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">restore_workspaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">199</span>
+<span class="normal">200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">restore_workspaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Recharge les workspaces sauvegardés dans la configuration.</span>
 
@@ -3499,6 +3518,7 @@ automatiquement.</p>
             <span class="n">ws_id</span><span class="o">=</span><span class="n">ws_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
             <span class="n">name</span><span class="o">=</span><span class="n">ws_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
             <span class="n">folder</span><span class="o">=</span><span class="n">ws_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;folder&quot;</span><span class="p">),</span>
+            <span class="n">ws_data</span><span class="o">=</span><span class="n">ws_data</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">:</span>
@@ -3521,8 +3541,8 @@ automatiquement.</p>
     <div class="doc doc-contents ">
 
         <p>Sauvegarde tous les workspaces dans la configuration.</p>
-<p>Les workspaces sont sauvegardés dans l'ordre
-actuel des onglets.</p>
+<p>Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
+y compris k_neighbors et map_params propres à chaque workspace.</p>
 
 
             <details class="mkdocstrings-source">
@@ -3550,12 +3570,14 @@ actuel des onglets.</p>
 <span class="normal">357</span>
 <span class="normal">358</span>
 <span class="normal">359</span>
-<span class="normal">360</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_workspaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_workspaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sauvegarde tous les workspaces dans la configuration.</span>
 
-<span class="sd">    Les workspaces sont sauvegardés dans l&#39;ordre</span>
-<span class="sd">    actuel des onglets.</span>
+<span class="sd">    Les workspaces sont sauvegardés dans l&#39;ordre actuel des onglets,</span>
+<span class="sd">    y compris k_neighbors et map_params propres à chaque workspace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">workspaces</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -3568,6 +3590,8 @@ actuel des onglets.</p>
                     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">ws_id</span><span class="p">,</span>
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">ws_name</span><span class="p">,</span>
                     <span class="s2">&quot;folder&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_folder</span><span class="p">,</span>
+                    <span class="s2">&quot;k_neighbors&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_k_neighbors</span><span class="p">,</span>
+                    <span class="s2">&quot;map_params&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_map_params</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">)</span>
 
@@ -3597,9 +3621,7 @@ actuel des onglets.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">475</span>
 <span class="normal">476</span>
 <span class="normal">477</span>
 <span class="normal">478</span>
@@ -3615,7 +3637,9 @@ actuel des onglets.</p>
 <span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
-<span class="normal">491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_close_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_close_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Met à jour la visibilité des boutons de fermeture.</span>
 

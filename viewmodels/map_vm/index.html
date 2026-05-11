@@ -919,6 +919,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#viewmodels.map_vm.MapViewModel.save_params_to_workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        save_params_to_workspace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#viewmodels.map_vm.MapViewModel.schedule_search" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1430,6 +1441,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#viewmodels.map_vm.MapViewModel.save_params_to_workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        save_params_to_workspace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#viewmodels.map_vm.MapViewModel.schedule_search" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1493,7 +1515,7 @@ configuration et la vue, en exposant des signaux de progression et de résultats
   <summary>Contenu</summary>
   <ul>
 <li>Lancement et supervision du calcul de projection 2D</li>
-<li>Gestion des paramètres UMAP et HDBSCAN</li>
+<li>Gestion des paramètres UMAP et HDBSCAN (par workspace)</li>
 <li>Chargement et sauvegarde d'un cache pickle des résultats</li>
 <li>Réutilisation du cache pour éviter les recalculs</li>
 <li>Communication des clusters nommés et du résultat final</li>
@@ -1506,11 +1528,11 @@ configuration et la vue, en exposant des signaux de progression et de résultats
   <ol>
 <li>Charger et filtrer les embeddings depuis l'index des images</li>
 <li>Déclencher le calcul de la carte via MapWorker</li>
-<li>Gérer les paramètres de réduction dimensionnelle et clustering</li>
+<li>Gérer les paramètres de réduction dimensionnelle et clustering (par workspace)</li>
 <li>Sauvegarder les résultats (points, labels, clusters) dans un cache pickle</li>
 <li>Restaurer les résultats depuis le cache si disponible</li>
 <li>Notifier la vue de l'avancement et du résultat final</li>
-<li>Synchroniser les paramètres avec la configuration persistante</li>
+<li>Synchroniser les paramètres avec la configuration persistante du workspace</li>
 <li>Filtrer les noeuds visibles selon une requête sémantique</li>
 </ol>
 </details>
@@ -1561,8 +1583,7 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 47</span>
-<span class="normal"> 48</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 48</span>
 <span class="normal"> 49</span>
 <span class="normal"> 50</span>
 <span class="normal"> 51</span>
@@ -1743,7 +1764,28 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
-<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MapViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MapViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class qui représente la carte 2D sémantique.&quot;&quot;&quot;</span>
 
     <span class="c1"># ── Signaux vers la View ──────────────────────────────────────────────────</span>
@@ -1757,20 +1799,31 @@ configuration et la vue, en exposant des signaux de progression et de résultats
     <span class="c1"># noms des images à mettre en valeur (liste vide = tout afficher)</span>
     <span class="n">search_results_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span>
+        <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            client (OllamaWrapper): client Ollama</span>
-<span class="sd">            config (dict): configuration</span>
+<span class="sd">            config (dict): configuration globale</span>
 <span class="sd">            gallery_vm (GalleryViewModel): ViewModel de la gallerie</span>
+<span class="sd">            ws_id (str): identifiant du workspace</span>
+<span class="sd">            ws_data (dict): données du workspace (contient map_params)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span> <span class="o">=</span> <span class="n">gallery_vm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="p">:</span> <span class="n">MapWorker</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">config_repository</span><span class="o">.</span><span class="n">get_map_params</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">get_map_params</span><span class="p">(</span><span class="n">ws_data</span><span class="p">)</span>
 
         <span class="c1"># Debounce pour la recherche</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_search_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">()</span>
@@ -1790,16 +1843,26 @@ configuration et la vue, en exposant des signaux de progression et de résultats
         <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">apply_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Modifie les paramètres de la carte</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Modifie les paramètres de la carte et les persiste dans le workspace.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            params (dict): Nouveaux paramètres.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config_repository</span><span class="o">.</span><span class="n">set_map_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-        <span class="n">config_repository</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_params_to_workspace</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_params_to_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persiste map_params dans le workspace courant.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): Paramètres à sauvegarder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">workspaces</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
+        <span class="n">workspaces</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">update_workspace</span><span class="p">(</span><span class="n">workspaces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span><span class="p">,</span> <span class="n">map_params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">workspaces</span><span class="p">)</span>
+        <span class="n">config_repository</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
 
     <span class="c1"># ── Calcul ────────────────────────────────────────────────────────────────</span>
 
@@ -1845,6 +1908,7 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
 <span class="sd">        Args:</span>
 <span class="sd">            points (list[tuple[float, float]]): Les points de la carte.</span>
+<span class="sd">            labels (list[int]): Les labels des clusters.</span>
 <span class="sd">            names (list[str]): Les noms des images.</span>
 <span class="sd">            cluster_names (dict[int, str]): Les noms des clusters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1867,11 +1931,9 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Effectue la recherche et émet le signal avec les résultats.&quot;&quot;&quot;</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
-            <span class="c1"># Requête vide → tout afficher</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">search_results_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">([])</span>
             <span class="k">return</span>
 
-        <span class="c1"># Réutilise la logique de recherche sémantique du GalleryViewModel</span>
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">filtered_images</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_results_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 
@@ -1991,7 +2053,7 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
 
 <h4 id="viewmodels.map_vm.MapViewModel.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">gallery_vm</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">gallery_vm</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
@@ -2036,7 +2098,7 @@ configuration et la vue, en exposant des signaux de progression et de résultats
             </td>
             <td>
               <div class="doc-md-description">
-                <p>configuration</p>
+                <p>configuration globale</p>
               </div>
             </td>
             <td>
@@ -2059,14 +2121,45 @@ configuration et la vue, en exposant des signaux de progression et de résultats
                 <em>required</em>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ws_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>identifiant du workspace</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ws_data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>données du workspace (contient map_params)</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
       </tbody>
     </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
-<span class="normal">62</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
@@ -2085,20 +2178,43 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 <span class="normal">78</span>
 <span class="normal">79</span>
 <span class="normal">80</span>
-<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span>
+    <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        client (OllamaWrapper): client Ollama</span>
-<span class="sd">        config (dict): configuration</span>
+<span class="sd">        config (dict): configuration globale</span>
 <span class="sd">        gallery_vm (GalleryViewModel): ViewModel de la gallerie</span>
+<span class="sd">        ws_id (str): identifiant du workspace</span>
+<span class="sd">        ws_data (dict): données du workspace (contient map_params)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span> <span class="o">=</span> <span class="n">gallery_vm</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="p">:</span> <span class="n">MapWorker</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">config_repository</span><span class="o">.</span><span class="n">get_map_params</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">get_map_params</span><span class="p">(</span><span class="n">ws_data</span><span class="p">)</span>
 
     <span class="c1"># Debounce pour la recherche</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_search_timer</span> <span class="o">=</span> <span class="n">QTimer</span><span class="p">()</span>
@@ -2123,7 +2239,7 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
     <div class="doc doc-contents ">
 
-        <p>Modifie les paramètres de la carte</p>
+        <p>Modifie les paramètres de la carte et les persiste dans le workspace.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2159,25 +2275,23 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifie les paramètres de la carte</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifie les paramètres de la carte et les persiste dans le workspace.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        params (dict): Nouveaux paramètres.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">params</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config_repository</span><span class="o">.</span><span class="n">set_map_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="n">config_repository</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">save_params_to_workspace</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">params_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -2202,18 +2316,18 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">autoload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">autoload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance depuis le cache si disponible, sinon calcule.&quot;&quot;&quot;</span>
     <span class="n">cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_cache</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
@@ -2270,19 +2384,19 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cache_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Construit le chemin du cache de la map pour le workspace actuel.</span>
 
 <span class="sd">    Returns:</span>
@@ -2317,11 +2431,11 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Vide la recherche et réaffiche tous les noeuds.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_search_timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
@@ -2348,29 +2462,29 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Démarre le calcul de la carte.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">isRunning</span><span class="p">():</span>
         <span class="k">return</span>
@@ -2415,25 +2529,21 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Effectue la recherche et émet le signal avec les résultats.&quot;&quot;&quot;</span>
     <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
-        <span class="c1"># Requête vide → tout afficher</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_results_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">([])</span>
         <span class="k">return</span>
 
-    <span class="c1"># Réutilise la logique de recherche sémantique du GalleryViewModel</span>
     <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">filtered_images</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">search_results_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -2481,22 +2591,22 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Charge le cache.</span>
 
 <span class="sd">    Returns:</span>
@@ -2561,6 +2671,22 @@ configuration et la vue, en exposant des signaux de progression et de résultats
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>labels</code>
+            </td>
+            <td>
+                  <code><span title="list">list</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Les labels des clusters.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>names</code>
             </td>
             <td>
@@ -2597,21 +2723,23 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">cluster_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_finished</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">cluster_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback du worker.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        points (list[tuple[float, float]]): Les points de la carte.</span>
+<span class="sd">        labels (list[int]): Les labels des clusters.</span>
 <span class="sd">        names (list[str]): Les noms des images.</span>
 <span class="sd">        cluster_names (dict[int, str]): Les noms des clusters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2719,18 +2847,18 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">cluster_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">cluster_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sauvegarde le cache.</span>
 
 <span class="sd">    Args:</span>
@@ -2742,6 +2870,78 @@ configuration et la vue, en exposant des signaux de progression et de résultats
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="n">points</span><span class="p">,</span> <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span> <span class="s2">&quot;names&quot;</span><span class="p">:</span> <span class="n">names</span><span class="p">,</span> <span class="s2">&quot;cluster_names&quot;</span><span class="p">:</span> <span class="n">cluster_names</span><span class="p">}</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_path</span><span class="p">(),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="viewmodels.map_vm.MapViewModel.save_params_to_workspace" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">save_params_to_workspace</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Persiste map_params dans le workspace courant.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>params</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Paramètres à sauvegarder.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_params_to_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Persiste map_params dans le workspace courant.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        params (dict): Paramètres à sauvegarder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">workspaces</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
+    <span class="n">workspaces</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">update_workspace</span><span class="p">(</span><span class="n">workspaces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span><span class="p">,</span> <span class="n">map_params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">workspaces</span><span class="p">)</span>
+    <span class="n">config_repository</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2795,14 +2995,14 @@ configuration et la vue, en exposant des signaux de progression et de résultats
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/map_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Déclenche une recherche avec debounce.</span>
 
 <span class="sd">    Args:</span>

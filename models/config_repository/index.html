@@ -426,17 +426,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#models.config_repository.get_map_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        get_map_params
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#models.config_repository.load" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -452,17 +441,6 @@
     <span class="md-ellipsis">
       
         save
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#models.config_repository.set_map_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        set_map_params
       
     </span>
   </a>
@@ -1192,17 +1170,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#models.config_repository.get_map_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        get_map_params
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#models.config_repository.load" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1218,17 +1185,6 @@
     <span class="md-ellipsis">
       
         save
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#models.config_repository.set_map_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        set_map_params
       
     </span>
   </a>
@@ -1280,8 +1236,6 @@
 <li>Charger la configuration depuis un fichier JSON avec fallback sécurisé</li>
 <li>Sauvegarder les paramètres utilisateur de manière persistante</li>
 <li>Garantir des valeurs par défaut pour les champs manquants</li>
-<li>Extraire et typer les paramètres liés à la carte (UMAP / HDBSCAN)</li>
-<li>Mettre à jour proprement les paramètres sans altérer la structure globale</li>
 </ol>
 </details>
 
@@ -1290,8 +1244,6 @@
   <ul>
 <li>Valeurs par défaut de configuration (_DEFAULTS)</li>
 <li>Lecture / écriture du fichier de configuration</li>
-<li>Accès simplifié aux paramètres de la carte</li>
-<li>Utilitaires de mise à jour des paramètres</li>
 </ul>
 </details>
 
@@ -1313,111 +1265,6 @@
 
 
 
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="models.config_repository.get_map_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_map_params</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Extrait les paramètres de la carte depuis la configuration, en appliquant les valeurs par défaut pour les clés manquantes.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>config</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>La configuration à utiliser.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>dict</code></td>            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Paramètres de la carte ou les valeurs par défaut.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>models/config_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_map_params</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrait les paramètres de la carte depuis la configuration, en appliquant les valeurs par défaut pour les clés manquantes.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        config (dict): La configuration à utiliser.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Paramètres de la carte ou les valeurs par défaut.&quot;&quot;&quot;</span>
-    <span class="n">raw</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;map_params&quot;</span><span class="p">,</span> <span class="p">{})</span>
-    <span class="n">defaults</span> <span class="o">=</span> <span class="n">_DEFAULTS</span><span class="p">[</span><span class="s2">&quot;map_params&quot;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;umap_n_neighbors&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;umap_n_neighbors&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;umap_n_neighbors&quot;</span><span class="p">])),</span>
-        <span class="s2">&quot;umap_min_dist&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;umap_min_dist&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;umap_min_dist&quot;</span><span class="p">])),</span>
-        <span class="s2">&quot;hdbscan_min_cluster&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hdbscan_min_cluster&quot;</span><span class="p">,</span> <span class="n">defaults</span><span class="p">[</span><span class="s2">&quot;hdbscan_min_cluster&quot;</span><span class="p">])),</span>
-    <span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 <div class="doc doc-object doc-function">
 
@@ -1458,7 +1305,11 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/config_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
@@ -1469,12 +1320,7 @@
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Charge la configuration depuis le fichier config.json, ou retourne les valeurs par défaut si le fichier n&#39;existe pas ou est invalide.</span>
 
 <span class="sd">    Returns:</span>
@@ -1484,7 +1330,6 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">CONFIG_FILE</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-            <span class="c1"># Fusionne avec les défauts pour les clés manquantes</span>
             <span class="n">merged</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">_DEFAULTS</span><span class="p">)</span>
             <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">merged</span>
@@ -1544,14 +1389,14 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/config_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
 <span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enregistre la configuration dans le fichier config.json.</span>
 
 <span class="sd">    Args:</span>
@@ -1559,121 +1404,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">CONFIG_FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="models.config_repository.set_map_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_map_params</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Retourne une nouvelle configuration avec les paramètres de la carte mis à jour.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>config</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>La configuration à mettre à jour.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>params</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Les nouveaux paramètres de la carte.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>dict</code></td>            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Nouvelle configuration avec les paramètres de la carte mis à jour.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>models/config_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_map_params</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne une nouvelle configuration avec les paramètres de la carte mis à jour.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        config (dict): La configuration à mettre à jour.</span>
-<span class="sd">        params (dict): Les nouveaux paramètres de la carte.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        dict: Nouvelle configuration avec les paramètres de la carte mis à jour.&quot;&quot;&quot;</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;map_params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
-    <span class="k">return</span> <span class="n">config</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
