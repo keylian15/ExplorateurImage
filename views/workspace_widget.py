@@ -91,7 +91,7 @@ class WorkspaceWidget(QWidget):
         self._last_history_selection: str | None = None
         self._is_restoring_history = False
 
-        action_back = QAction("Search", self)
+        action_back = QAction("Back", self)
         action_back.setShortcut(QKeySequence("Ctrl+Z"))
         action_back.triggered.connect(self.on_history_back)
         self.addAction(action_back)
