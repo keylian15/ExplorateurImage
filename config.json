@@ -1,16 +1,18 @@
 {
   "workspaces": [
     {
-      "id": "c8a5f562-0980-4903-b8b6-2bb8f3ccc698",
-      "name": "Images",
-      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
+      "id": "05668746-94f9-4fdf-9f1d-cd1e40901635",
+      "name": "Workspace 1",
+      "folder": null,
       "k_neighbors": 5,
       "map_params": {
         "umap_n_neighbors": 30,
         "umap_min_dist": 0.3,
         "hdbscan_min_cluster": 15
       },
-      "pinned_images": []
+      "pinned_images": [],
+      "history": [],
+      "history_current_id": null
     }
   ]
 }

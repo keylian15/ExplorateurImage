@@ -3,7 +3,8 @@ Gestion de la persistance des espaces de travail (workspaces).
 
 Chaque workspace est un espace de travail indépendant avec son propre dossier
 d'images, son nom personnalisé, ses paramètres de carte (UMAP/HDBSCAN), son
-nombre de voisins (k_neighbors) et sa liste d'images épinglées (pinned_images).
+nombre de voisins (k_neighbors), sa liste d'images épinglées (pinned_images)
+et son historique d'actions (history / history_current_id).
 
 La liste des workspaces est stockée dans config.json sous la clé « workspaces ».
 
@@ -12,7 +13,7 @@ Responsabilités :
  2. Sauvegarder les modifications (ajout, suppression, renommage, dossier)
  3. Construire des entrées de workspace standardisées
  4. Garantir au moins un workspace par défaut
- 5. Fournir les valeurs par défaut de map_params, k_neighbors et pinned_images
+ 5. Fournir les valeurs par défaut de map_params, k_neighbors, pinned_images et history
 """
 
 from __future__ import annotations
@@ -49,6 +50,8 @@ def make_workspace(name: str = "Workspace", folder: str | None = None) -> dict:
         "k_neighbors": _DEFAULT_K_NEIGHBORS,
         "map_params": dict(_DEFAULT_MAP_PARAMS),
         "pinned_images": [],
+        "history": [],
+        "history_current_id": None,
     }
 
 
@@ -115,6 +118,24 @@ def get_pinned_images(ws_data: dict) -> list[str]:
     return []
 
 
+def get_history(ws_data: dict) -> tuple[list[dict], str | None]:
+    """Extrait l'historique sérialisé et l'id du noeud courant d'un workspace.
+
+    Args:
+        ws_data (dict): Données du workspace.
+
+    Returns:
+        tuple[list[dict], str | None]:
+            - Liste plate des noeuds d'historique sérialisés.
+            - ID du noeud courant, ou None.
+    """
+    history = ws_data.get("history", [])
+    current_id = ws_data.get("history_current_id", None)
+    if not isinstance(history, list):
+        history = []
+    return history, current_id
+
+
 # ── Lecture / écriture ────────────────────────────────────────────────────────
 
 
@@ -137,16 +158,18 @@ def load(config: dict) -> list[dict]:
     validated = []
     for ws in workspaces:
         if isinstance(ws, dict) and "id" in ws and "name" in ws:
-            # Injecte les clés manquantes pour la rétrocompatibilité
+            ws = dict(ws)
+            # Rétrocompatibilité : injecter les clés manquantes
             if "k_neighbors" not in ws:
-                ws = dict(ws)
                 ws["k_neighbors"] = _DEFAULT_K_NEIGHBORS
             if "map_params" not in ws:
-                ws = dict(ws)
                 ws["map_params"] = dict(_DEFAULT_MAP_PARAMS)
             if "pinned_images" not in ws:
-                ws = dict(ws)
                 ws["pinned_images"] = []
+            if "history" not in ws:
+                ws["history"] = []
+            if "history_current_id" not in ws:
+                ws["history_current_id"] = None
             validated.append(ws)
 
     return validated if validated else [make_workspace("Workspace 1")]
@@ -173,7 +196,8 @@ def update_workspace(workspaces: list[dict], ws_id: str, **kwargs) -> list[dict]
     Args:
         workspaces (list[dict]): Liste courante.
         ws_id (str): Identifiant du workspace à modifier.
-        **kwargs: Champs à mettre à jour (name, folder, k_neighbors, map_params, pinned_images…).
+        **kwargs: Champs à mettre à jour (name, folder, k_neighbors, map_params,
+                  pinned_images, history, history_current_id…).
 
     Returns:
         list[dict]: Liste mise à jour (copie défensive).
