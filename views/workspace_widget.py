@@ -36,6 +36,9 @@ from PyQt6.QtWidgets import (
 )
 
 from models import workspace_repository as ws_repo
+from services.history.history_node import HistoryNode
+from services.history.history_tree import HistoryTree
+from services.history.history_types import HistoryActionType
 from services.ollama_wrapper import OllamaWrapper
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.detail_vm import DetailViewModel
@@ -83,6 +86,22 @@ class WorkspaceWidget(QWidget):
         # Données du workspace (avec valeurs par défaut si absent)
         _ws_data = ws_data or ws_repo.make_workspace(name=name, folder=folder)
 
+        # Historique
+        self.history_tree = HistoryTree()
+        self._last_history_selection: str | None = None
+        self._is_restoring_history = False
+
+        action_back = QAction("Search", self)
+        action_back.setShortcut(QKeySequence("Ctrl+Z"))
+        action_back.triggered.connect(self.on_history_back)
+        self.addAction(action_back)
+
+        # DEBBUG
+        action_debbug = QAction("Debbug", self)
+        action_debbug.setShortcut(QKeySequence("Ctrl+D"))
+        action_debbug.triggered.connect(self.print_history_tree)
+        self.addAction(action_debbug)
+
         # ── ViewModels ────────────────────────────────────────────────────────
         # GalleryViewModel reçoit ws_id et ws_data pour gérer les épingles
         self.gallery_vm = GalleryViewModel(client, config, ws_id=ws_id, ws_data=_ws_data)
@@ -128,9 +147,10 @@ class WorkspaceWidget(QWidget):
         main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._dock)
 
         # ── Connexions inter-VM ───────────────────────────────────────────────
-        self.gallery_vm.image_selected.connect(self._on_image_selected)
+        self.gallery_vm.image_selected.connect(self.on_image_selected)
         self.gallery_vm.image_selected.connect(self._map_tab.on_image_selected)
-        self.gallery_vm.folder_changed.connect(self._on_folder_changed)
+        self.gallery_vm.folder_changed.connect(self.on_folder_changed)
+        self.gallery_vm.pin_changed.connect(self.on_pin_changed)
 
         # ── Restauration du dossier ───────────────────────────────────────────
         if folder and os.path.exists(folder):
@@ -164,15 +184,61 @@ class WorkspaceWidget(QWidget):
 
     # ── Slots internes ────────────────────────────────────────────────────────
 
-    def _on_image_selected(self, img_name: str):
+    def on_image_selected(self, img_name: str):
         """Affiche le dock de détail et notifie le DetailViewModel."""
+
+        if self._is_restoring_history:
+            return
+
+        if img_name == self._last_history_selection:
+            return
+
+        self._last_history_selection = img_name
+
         if not self._dock.isVisible():
             self._dock.setVisible(True)
+
         self.detail_vm.on_image_selected(img_name)
 
-    def _on_folder_changed(self, folder: str):
-        """Propage le changement de dossier vers MainWindow pour persistance."""
+        self.history_tree.push(
+            action_type=HistoryActionType.SELECT,
+            payload={"img_name": img_name},
+            active_view="gallery",
+        )
+
+    def on_folder_changed(self, folder: str):
+        """
+        Propage le changement de dossier vers MainWindow
+        et l'ajoute à l'historique.
+        """
+
+        old_folder = self.current_folder
+
+        self.history_tree.push(
+            action_type=HistoryActionType.FOLDER_CHANGED,
+            payload={
+                "old_folder": old_folder,
+                "new_folder": folder,
+            },
+            active_view="gallery",
+        )
+
         self.folder_changed.emit(self.ws_id, folder)
+
+    def on_pin_changed(self, img_name: str, is_pinned: bool):
+        """Ajoute l'action de pin à l'historique."""
+
+        if self._is_restoring_history:
+            return
+
+        self.history_tree.push(
+            action_type=HistoryActionType.PIN_IMAGE,
+            payload={
+                "img_name": img_name,
+                "is_pinned": is_pinned,
+            },
+            active_view="gallery",
+        )
 
     # ── API publique ──────────────────────────────────────────────────────────
 
@@ -191,10 +257,77 @@ class WorkspaceWidget(QWidget):
         self._dock.setVisible(False)
 
     def rename(self, new_name: str):
-        """Met à jour le nom interne et le titre du dock.
-
-        Args:
-            new_name (str): Nouveau nom de l'espace de travail.
         """
+        Met à jour le nom interne et le titre du dock.
+        """
+
+        old_name = self.ws_name
+
         self.ws_name = new_name
+
         self._dock.setWindowTitle(f"Détails — {new_name}")
+
+        self.history_tree.push(
+            action_type=HistoryActionType.RENAME_WORKSPACE,
+            payload={
+                "old_name": old_name,
+                "new_name": new_name,
+            },
+            active_view="gallery",
+        )
+
+    # ── Historique ──────────────────────────────────────────────────────────
+
+    def on_history_back(self) -> None:
+        """
+        Revient au noeud précédent et restaure son état.
+        """
+
+        node = self.history_tree.back()
+
+        if not node:
+            return
+
+        self.restore_history_node(node)
+
+    def restore_history_node(self, node: HistoryNode) -> None:
+
+        self._is_restoring_history = True
+        try:
+            if node.action_type == HistoryActionType.SELECT:
+                img_name = node.payload["img_name"]
+
+                self.gallery_vm.select_image(img_name)
+
+        finally:
+            self._is_restoring_history = False
+
+    def print_history_tree(self) -> None:
+        """
+        Affiche l'arbre d'historique dans la console.
+        """
+
+        print("\n=== HISTORY TREE ===\n")
+
+        self._print_history_node(self.history_tree.root)
+
+    def _print_history_node(
+        self,
+        node: HistoryNode,
+        indent: int = 0,
+    ) -> None:
+        """
+        Affichage récursif des noeuds d'historique.
+        """
+
+        prefix = "    " * indent
+
+        current_marker = ""
+
+        if node == self.history_tree.current:
+            current_marker = " <== CURRENT"
+
+        print(f"{prefix}- {node.action_type.name} {node.payload}{current_marker} - {node.active_view}")
+
+        for child in node.children:
+            self._print_history_node(child, indent + 1)

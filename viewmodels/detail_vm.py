@@ -63,7 +63,7 @@ class DetailViewModel(QObject):
         self,
         client: OllamaWrapper,
         config: dict,
-        gallery_vm,  # GalleryViewModel (évite import circulaire)
+        gallery_vm,  # GalleryViewModel
         ws_id: str,
         ws_data: dict,
         parent=None,

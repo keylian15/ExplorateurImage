@@ -9,7 +9,8 @@
         "umap_n_neighbors": 30,
         "umap_min_dist": 0.3,
         "hdbscan_min_cluster": 15
-      }
+      },
+      "pinned_images": []
     }
   ]
 }
