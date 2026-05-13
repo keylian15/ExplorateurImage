@@ -1,9 +1,9 @@
 {
   "workspaces": [
     {
-      "id": "ac23e98c-8f5b-4ba1-bb23-809824a20b13",
-      "name": "Dataset",
-      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
+      "id": "44d3c97a-c9e8-47de-8a1d-48576262bfe5",
+      "name": "Images",
+      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images",
       "k_neighbors": 5,
       "map_params": {
         "umap_n_neighbors": 30,
@@ -13,88 +13,69 @@
       "pinned_images": [],
       "history": [
         {
-          "id": "bbd291f3-af4d-4e83-bd21-f41f5f9f3be1",
+          "id": "e1b3d759-ae44-46a8-b585-6aabaad714e8",
           "action_type": "FOLDER_CHANGED",
           "payload": {
-            "old_folder": "",
-            "new_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset"
+            "old_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images",
+            "new_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images"
           },
           "active_view": "gallery",
-          "timestamp": 1778664033.7725937,
+          "timestamp": 1778596839.8464053,
           "parent_id": null
         },
         {
-          "id": "72f11739-bbe7-439c-be0a-39549c200f8e",
+          "id": "2b67abcc-51dc-48ac-8863-a68bc03deb9a",
           "action_type": "SELECT",
           "payload": {
-            "img_name": "000000000001.jpg"
+            "img_name": "Image_0.jpg"
           },
           "active_view": "gallery",
-          "timestamp": 1778664034.984364,
-          "parent_id": "bbd291f3-af4d-4e83-bd21-f41f5f9f3be1"
+          "timestamp": 1778596842.2957828,
+          "parent_id": "e1b3d759-ae44-46a8-b585-6aabaad714e8"
         },
         {
-          "id": "5e6b4f39-912c-4235-b9df-f5191c8096ff",
+          "id": "551cece8-bec8-4a72-9b59-89c3093ccd8f",
           "action_type": "SELECT",
           "payload": {
-            "img_name": "000000000016.jpg"
+            "img_name": "Image_1.jpg"
           },
           "active_view": "gallery",
-          "timestamp": 1778664035.5183182,
-          "parent_id": "72f11739-bbe7-439c-be0a-39549c200f8e"
+          "timestamp": 1778596843.303225,
+          "parent_id": "2b67abcc-51dc-48ac-8863-a68bc03deb9a"
         },
         {
-          "id": "bca1e615-39c3-42f5-89c7-49af61078c8e",
-          "action_type": "SELECT",
+          "id": "fc55bf6d-7afc-4146-8d63-7d8699426d8e",
+          "action_type": "FOLDER_CHANGED",
           "payload": {
-            "img_name": "000000000069.jpg"
+            "old_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images",
+            "new_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images"
           },
           "active_view": "gallery",
-          "timestamp": 1778664041.5349073,
-          "parent_id": "72f11739-bbe7-439c-be0a-39549c200f8e"
+          "timestamp": 1778596860.13808,
+          "parent_id": "2b67abcc-51dc-48ac-8863-a68bc03deb9a"
         },
         {
-          "id": "274ef7d0-60eb-4a42-8ba0-7aea6a27e955",
+          "id": "8a0546ea-a696-4625-b470-79048af33dd2",
           "action_type": "SELECT",
           "payload": {
-            "img_name": "000000000019.jpg"
+            "img_name": "Image_2.jpg"
           },
           "active_view": "gallery",
-          "timestamp": 1778664037.9924264,
-          "parent_id": "5e6b4f39-912c-4235-b9df-f5191c8096ff"
+          "timestamp": 1778596844.703382,
+          "parent_id": "551cece8-bec8-4a72-9b59-89c3093ccd8f"
         },
         {
-          "id": "df03df14-7112-47d2-b15b-969be7892514",
-          "action_type": "SELECT",
+          "id": "3aa6d080-c0cc-4813-bfbb-2816cb6f1d26",
+          "action_type": "FOLDER_CHANGED",
           "payload": {
-            "img_name": "000000000080.jpg"
+            "old_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images",
+            "new_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images"
           },
           "active_view": "gallery",
-          "timestamp": 1778664041.9998465,
-          "parent_id": "bca1e615-39c3-42f5-89c7-49af61078c8e"
-        },
-        {
-          "id": "0f45860d-7ff8-4170-bd2d-00db4176b9e4",
-          "action_type": "SELECT",
-          "payload": {
-            "img_name": "000000000090.jpg"
-          },
-          "active_view": "gallery",
-          "timestamp": 1778664042.409323,
-          "parent_id": "df03df14-7112-47d2-b15b-969be7892514"
-        },
-        {
-          "id": "3f452e48-cbfb-4d73-a1c3-d22aa2a3fca4",
-          "action_type": "SELECT",
-          "payload": {
-            "img_name": "000000000128.jpg"
-          },
-          "active_view": "gallery",
-          "timestamp": 1778664047.6344113,
-          "parent_id": "df03df14-7112-47d2-b15b-969be7892514"
+          "timestamp": 1778596849.27691,
+          "parent_id": "8a0546ea-a696-4625-b470-79048af33dd2"
         }
-      ],
-      "history_current_id": "3f452e48-cbfb-4d73-a1c3-d22aa2a3fca4"
+      ]
     }
   ]
 }
