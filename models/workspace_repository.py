@@ -42,14 +42,7 @@ def make_workspace(name: str = "Workspace", folder: str | None = None) -> dict:
     Returns:
         dict: Entrée workspace standardisée.
     """
-    return {
-        "id": str(uuid.uuid4()),
-        "name": name,
-        "folder": folder,
-        "k_neighbors": _DEFAULT_K_NEIGHBORS,
-        "map_params": dict(_DEFAULT_MAP_PARAMS),
-        "pinned_images": [],
-    }
+    return {"id": str(uuid.uuid4()), "name": name, "folder": folder, "k_neighbors": _DEFAULT_K_NEIGHBORS, "map_params": dict(_DEFAULT_MAP_PARAMS), "pinned_images": [], "history": {}}
 
 
 def default_map_params() -> dict:

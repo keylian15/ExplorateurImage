@@ -35,3 +35,18 @@ class HistoryNode:
         """
 
         return self.parent is None
+
+    def to_dict(self) -> dict:
+        """Sérialise le noeud en dict.
+
+        Returns:
+            dict: Représentation sérialisable du noeud.
+        """
+        return {
+            "id": self.id,
+            "action_type": self.action_type.name,
+            "payload": self.payload,
+            "active_view": self.active_view,
+            "timestamp": self.timestamp,
+            "parent_id": self.parent.id if self.parent else None,
+        }

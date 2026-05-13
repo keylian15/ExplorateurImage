@@ -182,6 +182,10 @@ class WorkspaceWidget(QWidget):
         """
         return self.gallery_vm.pinned_images
 
+    @property
+    def current_history(self):
+        return self.history_tree.to_dict()
+
     # ── Slots internes ────────────────────────────────────────────────────────
 
     def on_image_selected(self, img_name: str):

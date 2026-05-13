@@ -1,3 +1,5 @@
+from collections import deque
+
 from services.history.history_node import HistoryNode
 from services.history.history_types import HistoryActionType
 
@@ -43,3 +45,17 @@ class HistoryTree:
     def can_go_back(self) -> bool:
 
         return self.current.parent is not None
+
+    def to_dict(self) -> list:
+        if not self.root:
+            return []
+
+        result = []
+        queue = deque([self.root])
+
+        while queue:
+            node = queue.popleft()
+            result.append(node.to_dict())
+            queue.extend(node.children)
+
+        return result

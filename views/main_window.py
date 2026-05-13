@@ -404,6 +404,7 @@ class MainWindow(QMainWindow):
                         "k_neighbors": widget.current_k_neighbors,
                         "map_params": widget.current_map_params,
                         "pinned_images": widget.current_pinned_images,
+                        "history": widget.current_history,
                     }
                 )
 
