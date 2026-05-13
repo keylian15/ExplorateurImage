@@ -283,19 +283,30 @@ class GalleryViewModel(QObject):
         else:
             self.refresh(None)
 
-    def filtered_images(self, filter_text: str) -> list[str]:
+    def filtered_images(self, filter_text: str, context: list[str] = None) -> list[str]:
         """Renvoi les 100 images les plus proches de la requête.
 
         Args:
             filter_text (str): Requête de recherche.
+            context (list[str]): Liste de nom d'images servant de base. Si none ce base sur toutes les images.
 
         Returns:
             list[str]: Liste des images.
         """
+
+        # Récupère les embeddings de la requête
         ft = filter_text.lower().strip()
         query_emb = self._client.embed(model=MODEL_EMBED, text=ft)
+
+        # Récupère les embeddings des images selon le context
+        if context is None:
+            images = self.index
+        else:
+            images = {key: self.index[key] for key in context if key in self.index}
+
+        # Calcule la similarité entre la requête et les embeddings
         scores = {}
-        for key, data in self.index.items():
+        for key, data in images.items():
             sim = self._client.similarite_cosinus(query_emb, data["embedding"])
             text_match = ft in data.get("description", "").lower() or ft in " ".join(data.get("keywords", [])).lower()
             score = sim * 1.0
