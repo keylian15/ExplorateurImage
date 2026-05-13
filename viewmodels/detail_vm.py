@@ -34,7 +34,7 @@ import os
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap
 
-from models import config_repository, index_repository
+from models import index_repository
 from models import workspace_repository as ws_repo
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import AutoCompleteWorker, SaveMetadataWorker
@@ -56,8 +56,10 @@ class DetailViewModel(QObject):
     autocomplete_error = pyqtSignal(str)
     rename_done = pyqtSignal(str)  # nouveau nom
     rename_error = pyqtSignal(str)
-    index_updated = pyqtSignal(set)  # noms indexés
-    pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
+    index_updated = pyqtSignal(set)
+    pin_changed = pyqtSignal(str, bool)
+    # Nouveau : demande de persistance à WorkspaceWidget
+    persist_requested = pyqtSignal()
 
     def __init__(
         self,
@@ -79,7 +81,6 @@ class DetailViewModel(QObject):
 
         super().__init__(parent)
         self._client = client
-        self._config = config
         self._gallery_vm = gallery_vm
         self._ws_id = ws_id
         self._k_neighbors = ws_repo.get_k_neighbors(ws_data)
@@ -118,18 +119,7 @@ class DetailViewModel(QObject):
             value (int): nombre de voisins.
         """
         self._k_neighbors = value
-        self.save_k_neighbors_to_workspace(value)
-
-    def save_k_neighbors_to_workspace(self, value: int):
-        """Persiste k_neighbors dans le workspace courant.
-
-        Args:
-            value (int): Valeur à sauvegarder.
-        """
-        workspaces = ws_repo.load(self._config)
-        workspaces = ws_repo.update_workspace(workspaces, self._ws_id, k_neighbors=value)
-        self._config = ws_repo.save(self._config, workspaces)
-        config_repository.save(self._config)
+        self.persist_requested.emit()
 
     @property
     def _index(self) -> dict:

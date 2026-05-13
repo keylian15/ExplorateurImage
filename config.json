@@ -1,9 +1,9 @@
 {
   "workspaces": [
     {
-      "id": "05668746-94f9-4fdf-9f1d-cd1e40901635",
-      "name": "Workspace 1",
-      "folder": null,
+      "id": "ac23e98c-8f5b-4ba1-bb23-809824a20b13",
+      "name": "Dataset",
+      "folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset",
       "k_neighbors": 5,
       "map_params": {
         "umap_n_neighbors": 30,
@@ -11,8 +11,90 @@
         "hdbscan_min_cluster": 15
       },
       "pinned_images": [],
-      "history": [],
-      "history_current_id": null
+      "history": [
+        {
+          "id": "bbd291f3-af4d-4e83-bd21-f41f5f9f3be1",
+          "action_type": "FOLDER_CHANGED",
+          "payload": {
+            "old_folder": "",
+            "new_folder": "C:/Users/keyli/Documents/IUT/ExplorateurImage/Images/Dataset"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664033.7725937,
+          "parent_id": null
+        },
+        {
+          "id": "72f11739-bbe7-439c-be0a-39549c200f8e",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000001.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664034.984364,
+          "parent_id": "bbd291f3-af4d-4e83-bd21-f41f5f9f3be1"
+        },
+        {
+          "id": "5e6b4f39-912c-4235-b9df-f5191c8096ff",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000016.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664035.5183182,
+          "parent_id": "72f11739-bbe7-439c-be0a-39549c200f8e"
+        },
+        {
+          "id": "bca1e615-39c3-42f5-89c7-49af61078c8e",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000069.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664041.5349073,
+          "parent_id": "72f11739-bbe7-439c-be0a-39549c200f8e"
+        },
+        {
+          "id": "274ef7d0-60eb-4a42-8ba0-7aea6a27e955",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000019.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664037.9924264,
+          "parent_id": "5e6b4f39-912c-4235-b9df-f5191c8096ff"
+        },
+        {
+          "id": "df03df14-7112-47d2-b15b-969be7892514",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000080.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664041.9998465,
+          "parent_id": "bca1e615-39c3-42f5-89c7-49af61078c8e"
+        },
+        {
+          "id": "0f45860d-7ff8-4170-bd2d-00db4176b9e4",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000090.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664042.409323,
+          "parent_id": "df03df14-7112-47d2-b15b-969be7892514"
+        },
+        {
+          "id": "3f452e48-cbfb-4d73-a1c3-d22aa2a3fca4",
+          "action_type": "SELECT",
+          "payload": {
+            "img_name": "000000000128.jpg"
+          },
+          "active_view": "gallery",
+          "timestamp": 1778664047.6344113,
+          "parent_id": "df03df14-7112-47d2-b15b-969be7892514"
+        }
+      ],
+      "history_current_id": "3f452e48-cbfb-4d73-a1c3-d22aa2a3fca4"
     }
   ]
 }

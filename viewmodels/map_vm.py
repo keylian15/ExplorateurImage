@@ -34,7 +34,6 @@ import pickle
 
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from models import config_repository
 from models import workspace_repository as ws_repo
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import MapWorker
@@ -56,8 +55,8 @@ class MapViewModel(QObject):
     cluster_named = pyqtSignal(int, str)
     compute_error = pyqtSignal(str)
     params_changed = pyqtSignal(dict)
-    # noms des images à mettre en valeur (liste vide = tout afficher)
     search_results_changed = pyqtSignal(list)
+    persist_requested = pyqtSignal()
 
     def __init__(
         self,
@@ -79,7 +78,6 @@ class MapViewModel(QObject):
 
         super().__init__(parent)
         self._client = client
-        self._config = config
         self._gallery_vm = gallery_vm
         self._ws_id = ws_id
         self._worker: MapWorker | None = None
@@ -109,20 +107,9 @@ class MapViewModel(QObject):
             params (dict): Nouveaux paramètres.
         """
         self._params = params
-        self.save_params_to_workspace(params)
+        self.persist_requested.emit()
         self.params_changed.emit(params)
         self.compute()
-
-    def save_params_to_workspace(self, params: dict):
-        """Persiste map_params dans le workspace courant.
-
-        Args:
-            params (dict): Paramètres à sauvegarder.
-        """
-        workspaces = ws_repo.load(self._config)
-        workspaces = ws_repo.update_workspace(workspaces, self._ws_id, map_params=params)
-        self._config = ws_repo.save(self._config, workspaces)
-        config_repository.save(self._config)
 
     # ── Calcul ────────────────────────────────────────────────────────────────
 

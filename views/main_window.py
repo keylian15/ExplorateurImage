@@ -19,7 +19,7 @@ Responsabilités :
     4. Supprimer dynamiquement des workspaces
     5. Renommer un workspace par double-clic sur son onglet
     6. Persister automatiquement tous les changements
-       (y compris k_neighbors, map_params et pinned_images)
+       (y compris k_neighbors, map_params, pinned_images et history)
     7. Synchroniser la visibilité des docks entre workspaces
     8. Garantir qu'au moins un workspace reste ouvert
 """
@@ -318,6 +318,8 @@ class MainWindow(QMainWindow):
         )
 
         widget.folder_changed.connect(self.on_workspace_folder_changed)
+        widget.save_requested.connect(self._on_workspace_save_requested)
+        widget.rename_requested.connect(self._on_workspace_rename_requested)
 
         self.workspaces[ws_id] = widget
 
@@ -384,12 +386,7 @@ class MainWindow(QMainWindow):
     # ──────────────────────────────────────────────────────────────────────
 
     def save_workspaces(self):
-        """
-        Sauvegarde tous les workspaces dans la configuration.
-
-        Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
-        y compris k_neighbors, map_params et pinned_images propres à chaque workspace.
-        """
+        """Sauvegarde tous les workspaces (dossier, paramètres, épingles, historique)."""
         workspaces = []
 
         for idx in range(self.tabs.count() - 1):
@@ -417,16 +414,32 @@ class MainWindow(QMainWindow):
     # Slots Qt
     # ──────────────────────────────────────────────────────────────────────
 
-    def on_tab_close_requested(self, index: int):
-        """
-        Déclenché lorsqu'un utilisateur ferme un onglet.
-
-        Garantit qu'au moins un workspace reste ouvert.
+    def _on_workspace_save_requested(self):
+        """Déclenché par save_requested (historique, épingles, k_neighbors, map_params).
+        Sauvegarde la config complète toujours à jour.
 
         Args:
-            index (int):
-                Index de l'onglet à fermer.
+            ws_id (str): Identifiant du workspace demandeur.
         """
+        self.save_workspaces()
+
+    def _on_workspace_rename_requested(self, ws_id: str, new_name: str):
+        """Déclenché par rename_requested lors d'une restauration d'historique.
+        Met à jour le texte de l'onglet et sauvegarde.
+
+        Args:
+            ws_id (str): Identifiant du workspace.
+            new_name (str): Nom à restaurer.
+        """
+        widget = self.workspaces.get(ws_id)
+        if widget is None:
+            return
+        idx = self.tabs.indexOf(widget)
+        if idx >= 0:
+            self.tabs.setTabText(idx, new_name)
+        self.save_workspaces()
+
+    def on_tab_close_requested(self, index: int):
         widget = self.tabs.widget(index)
 
         if not isinstance(widget, WorkspaceWidget):

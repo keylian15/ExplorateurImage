@@ -37,7 +37,7 @@ import os
 
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from models import config_repository, index_repository
+from models import index_repository
 from models import workspace_repository as ws_repo
 from models.image_model import ImageGridDelegate, ImageListModel
 from services.ollama_wrapper import OllamaWrapper
@@ -52,13 +52,14 @@ MODEL_EMBED = "nomic-embed-text:v1.5"
 class GalleryViewModel(QObject):
     """Class qui gère la logique de la vue de la galerie."""
 
-    # ── Signaux émis vers la View ─────────────────────────────────────────────
-    images_changed = pyqtSignal(list)  # nouvelle liste de noms
-    cell_size_changed = pyqtSignal(int)  # zoom modifié
-    folder_changed = pyqtSignal(str)  # dossier courant
-    index_changed = pyqtSignal(set)  # ensemble des noms indexés
-    image_selected = pyqtSignal(str)  # image cliquée
-    pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
+    images_changed = pyqtSignal(list)
+    cell_size_changed = pyqtSignal(int)
+    folder_changed = pyqtSignal(str, str)
+    index_changed = pyqtSignal(set)
+    image_selected = pyqtSignal(str)
+    pin_changed = pyqtSignal(str, bool)
+    # Nouveau : demande de persistance à WorkspaceWidget
+    persist_requested = pyqtSignal()
 
     def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None, parent=None):
         """
@@ -72,7 +73,6 @@ class GalleryViewModel(QObject):
 
         super().__init__(parent)
         self._client = client
-        self._config = config
         self._ws_id = ws_id
 
         self.current_folder: str | None = None
@@ -131,6 +131,7 @@ class GalleryViewModel(QObject):
         Args:
             folder (str): Chemin du dossier.
         """
+        old_folder = self.current_folder
         self.current_folder = folder
 
         self.cache.set_folder(folder)
@@ -139,7 +140,7 @@ class GalleryViewModel(QObject):
 
         self.load_index()
         self.refresh(None)
-        self.folder_changed.emit(folder)
+        self.folder_changed.emit(old_folder, folder)
 
     def load_index(self):
         """Charge l'index du dossier courant."""
@@ -227,7 +228,7 @@ class GalleryViewModel(QObject):
             return
         self._pinned.insert(0, img_name)
         self.model.set_pinned(set(self._pinned))
-        self.save_pinned()
+        self.persist_requested.emit()
         self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
         self.pin_changed.emit(img_name, True)
 
@@ -241,7 +242,7 @@ class GalleryViewModel(QObject):
             return
         self._pinned.remove(img_name)
         self.model.set_pinned(set(self._pinned))
-        self.save_pinned()
+        self.persist_requested.emit()
         self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
         self.pin_changed.emit(img_name, False)
 
@@ -255,15 +256,6 @@ class GalleryViewModel(QObject):
             self.unpin_image(img_name)
         else:
             self.pin_image(img_name)
-
-    def save_pinned(self):
-        """Persiste la liste des épingles dans le workspace courant."""
-        if not self._ws_id:
-            return
-        workspaces = ws_repo.load(self._config)
-        workspaces = ws_repo.update_workspace(workspaces, self._ws_id, pinned_images=list(self._pinned))
-        self._config = ws_repo.save(self._config, workspaces)
-        config_repository.save(self._config)
 
     # ── Recherche ─────────────────────────────────────────────────────────────
 
