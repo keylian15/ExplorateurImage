@@ -48,6 +48,7 @@ from styles import THUMB
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.gallery_vm import GalleryViewModel
 from views.components.fullscreen_dialog import FullscreenDialog
+from views.tree_widget import TreeViewWidget
 
 PREFETCH_ROWS = THUMB["prefetch_rows"]
 
@@ -105,6 +106,9 @@ class GalleryWidget(QWidget):
         self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
         top.addWidget(self.checkbox_affinage)
 
+        self.tree_widget = TreeViewWidget(self._gvm.search_tree)
+        top.addWidget(self.tree_widget)
+
         layout.addLayout(top)
 
         # ── Vue ───────────────────────────────────────────────────────────────
@@ -154,6 +158,7 @@ class GalleryWidget(QWidget):
 
         # ViewModel → View
         self._gvm.cell_size_changed.connect(self.on_cell_size_changed)
+        self._gvm.saved_search.connect(self.tree_widget.refresh)
 
         self._avm.started.connect(self.on_batch_started)
         self._avm.progress.connect(self.on_batch_progress)

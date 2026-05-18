@@ -60,6 +60,7 @@ class GalleryViewModel(QObject):
     index_changed = pyqtSignal(set)  # ensemble des noms indexés
     image_selected = pyqtSignal(str)  # image cliquée
     pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
+    saved_search = pyqtSignal()  # une recherche a été sauvegardée
 
     def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None, parent=None):
         """
@@ -339,6 +340,7 @@ class GalleryViewModel(QObject):
             self.search_tree.return_to_root()
 
         self.search_tree.push_search(query=self._search_text.strip(), results=self._result_images)
+        self.saved_search.emit()
 
     def set_affinage(self, enabled: bool) -> None:
         """Active ou désactive l'affinage des recherches.
