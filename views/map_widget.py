@@ -12,10 +12,10 @@ des interactions utilisateur.
 
 Contenu :
  - Zone de contrôle (lancement du calcul, paramètres, reset filtre, statut)
- - Barre de recherche sémantique avec debounce
  - Vue graphique interactive (QGraphicsView) représentant les points 2D
  - Légende dynamique des clusters avec noms et effectifs
  - Dock de paramètres (UMAP / HDBSCAN)
+ - Dock de recherche avec barre, arbre d'historique, bouton sauvegarde et affinage
  - Interaction directe avec les points (hover, sélection, centrage)
  - Filtrage visuel des clusters et zoom contextuel
  - Mise à jour dynamique des noms de clusters
@@ -30,6 +30,7 @@ Responsabilités :
  7. Relayer les actions utilisateur vers le ViewModel sans logique métier
  8. Synchroniser l'affichage avec les résultats du calcul du ViewModel
  9. Filtrer les noeuds visibles selon une requête sémantique
+ 10. Gérer l'arbre d'historique des recherches avec affinage
 """
 
 from __future__ import annotations
@@ -37,6 +38,7 @@ from __future__ import annotations
 from PyQt6.QtCore import QRectF, Qt, QTimer
 from PyQt6.QtGui import QAction, QBrush, QColor, QKeySequence, QPainter, QPen, QWheelEvent
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QDockWidget,
     QDoubleSpinBox,
     QFormLayout,
@@ -59,6 +61,7 @@ from PyQt6.QtWidgets import (
 
 from styles import dot_color_style, dot_label_style, legend_label_style, no_border_style
 from viewmodels.map_vm import MapViewModel
+from views.tree_widget import TreeViewWidget
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 _CLUSTER_COLORS = [
@@ -313,6 +316,8 @@ class MapTab(QWidget):
         self._cluster_names: dict[int, str] = {}
         # État du filtre actif : "cluster" | "search" | None
         self._active_filter: str | None = None
+        # Dock recherche (construit depuis workspace_widget)
+        self._search_dock: QDockWidget | None = None
 
         self.build_ui()
 
@@ -362,25 +367,17 @@ class MapTab(QWidget):
         self._btn_reset_filter.setEnabled(False)
         bar.addWidget(self._btn_reset_filter)
 
-        action_search = QAction("Search", self)
-        action_search.setShortcut(QKeySequence("Ctrl+F"))
-        action_search.triggered.connect(lambda: self._search_edit.setFocus())
+        # Bouton pour afficher/masquer le dock de recherche
+        self._btn_search_dock = QPushButton("🔍 Recherche")
+        self._btn_search_dock.setCheckable(True)
+        self._btn_search_dock.setToolTip("Afficher / masquer le panneau de recherche")
+        bar.addWidget(self._btn_search_dock)
 
-        self.addAction(action_search)
-
-        # ── Barre de recherche ────────────────────────────────────────────────
-
-        self._search_edit = QLineEdit()
-        self._search_edit.setObjectName("search_bar")
-        self._search_edit.setPlaceholderText("Rechercher sur la carte…")
-        self._search_edit.textChanged.connect(self.on_search_text_changed)
-        self._search_edit.setClearButtonEnabled(True)
-
-        bar.addWidget(self._search_edit, stretch=1)
+        bar.addStretch()
 
         self._lbl_status = QLabel("Chargement en cours…")
         self._lbl_status.setStyleSheet("color: gray; font-size: 12px;")
-        bar.addWidget(self._lbl_status, stretch=1)
+        bar.addWidget(self._lbl_status)
 
         root.addLayout(bar)
 
@@ -412,6 +409,120 @@ class MapTab(QWidget):
         h.addWidget(legend_scroll)
 
         root.addLayout(h)
+
+    def build_search_dock(self, main_window) -> QDockWidget:
+        """Construit et retourne le dock de recherche de la carte.
+
+        Doit être appelé depuis WorkspaceWidget après construction,
+        une fois que main_window est disponible.
+
+        Args:
+            main_window: La QMainWindow à laquelle rattacher le dock.
+
+        Returns:
+            QDockWidget: Le dock de recherche.
+        """
+        dock = QDockWidget("Recherche sur la Carte", main_window)
+        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
+        dock.setMinimumWidth(220)
+
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
+
+        # ── Barre de recherche ────────────────────────────────────────────────
+        self.dock_search_bar = QLineEdit()
+        self.dock_search_bar.setObjectName("search_bar")
+        self.dock_search_bar.setPlaceholderText("Rechercher…")
+        self.dock_search_bar.setClearButtonEnabled(True)
+        layout.addWidget(self.dock_search_bar)
+
+        # ── Actions sous la barre ─────────────────────────────────────────────
+        actions_row = QHBoxLayout()
+        actions_row.setSpacing(6)
+
+        self.btn_save_search = QPushButton("💾 Sauvegarder")
+        self.btn_save_search.setToolTip("Enregistrer la recherche dans l'historique")
+        actions_row.addWidget(self.btn_save_search)
+
+        self.checkbox_affinage = QCheckBox("Affinage")
+        self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
+        actions_row.addWidget(self.checkbox_affinage)
+
+        layout.addLayout(actions_row)
+
+        # ── Séparateur ────────────────────────────────────────────────────────
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet("color: #1f2937;")
+        layout.addWidget(sep)
+
+        # ── Arbre de recherche ────────────────────────────────────────────────
+        self.tree_widget = TreeViewWidget(self._vm.search_tree)
+        self.tree_widget.node_clicked.connect(self._on_tree_node_clicked)
+        layout.addWidget(self.tree_widget)
+
+        layout.addStretch()
+        dock.setWidget(content)
+
+        # Raccourci Ctrl+F → focus dock_search_bar quand dock visible
+        action_focus = QAction("MapSearch", self)
+        action_focus.setShortcut(QKeySequence("Ctrl+F"))
+        action_focus.triggered.connect(lambda: (dock.setVisible(True), self.dock_search_bar.setFocus()))
+        self.addAction(action_focus)
+
+        # Sync bouton ↔ visibilité dock
+        dock.visibilityChanged.connect(self._btn_search_dock.setChecked)
+        self._btn_search_dock.clicked.connect(dock.setVisible)
+
+        # Connexions vers le ViewModel
+        self.dock_search_bar.textChanged.connect(self._on_dock_search_text_changed)
+        self.btn_save_search.clicked.connect(self._vm.save_search)
+        self.checkbox_affinage.toggled.connect(self._vm.set_affinage)
+
+        # Signal sauvegarde → refresh arbre
+        self._vm.saved_search.connect(self._on_search_saved)
+
+        self._search_dock = dock
+        return dock
+
+    # ── Slots internes ─────────────────────────────────────────────────────
+
+    def _on_search_saved(self):
+        """Rafraîchit l'arbre après sauvegarde d'une recherche."""
+        if hasattr(self, "tree_widget"):
+            self.tree_widget.refresh()
+
+    def _on_tree_node_clicked(self, node_id: str):
+        """Navigue vers le noeud cliqué dans l'arbre.
+
+        Args:
+            node_id (str): Identifiant du noeud.
+        """
+        node = self._vm.search_tree.get_node(node_id)
+        if node is None:
+            return
+        self._vm.search_tree.set_current(node_id)
+        if hasattr(node, "query") and hasattr(self, "dock_search_bar"):
+            self.dock_search_bar.blockSignals(True)
+            self.dock_search_bar.setText(node.query)
+            self.dock_search_bar.blockSignals(False)
+            self._vm.schedule_search(node.query)
+        if hasattr(self, "tree_widget"):
+            self.tree_widget.refresh()
+
+    def _on_dock_search_text_changed(self, text: str):
+        """Relaie le texte du dock au ViewModel.
+
+        Args:
+            text (str): Texte saisi dans le dock.
+        """
+        if not text.strip():
+            self._vm.clear_search()
+        else:
+            self._vm.schedule_search(text)
 
     # ── Slots ─────────────────────────────────────────────────────────────────
 
@@ -449,8 +560,8 @@ class MapTab(QWidget):
         if self._current_selected:
             self.highlight(self._current_selected)
         # Rejoue la recherche en cours si elle existait avant le recalcul
-        if self._search_edit.text().strip():
-            self._vm.schedule_search(self._search_edit.text())
+        if hasattr(self, "dock_search_bar") and self.dock_search_bar.text().strip():
+            self._vm.schedule_search(self.dock_search_bar.text())
 
     def on_cluster_named(self, cid: int, name: str):
         """Callback lors du nommage.
@@ -504,17 +615,6 @@ class MapTab(QWidget):
             if xs and ys:
                 rect = QRectF(min(xs), min(ys), max(xs) - min(xs) or 1, max(ys) - min(ys) or 1)
                 self._view.zoom_to_rect(rect, margin=80.0)
-
-    def on_search_text_changed(self, text: str):
-        """Relaie le texte au ViewModel avec debounce.
-
-        Args:
-            text (str): Texte saisi.
-        """
-        if not text.strip():
-            self._vm.clear_search()
-        else:
-            self._vm.schedule_search(text)
 
     # ── Scène ─────────────────────────────────────────────────────────────────
 
@@ -662,10 +762,11 @@ class MapTab(QWidget):
         Args:
             cluster_id (int): ID du cluster.
         """
-        # Vider la recherche textuelle si elle était active
-        self._search_edit.blockSignals(True)
-        self._search_edit.clear()
-        self._search_edit.blockSignals(False)
+        # Vider la recherche du dock si elle était active
+        if hasattr(self, "dock_search_bar"):
+            self.dock_search_bar.blockSignals(True)
+            self.dock_search_bar.clear()
+            self.dock_search_bar.blockSignals(False)
 
         self._active_filter = "cluster"
         for node in self._nodes.values():
@@ -677,10 +778,11 @@ class MapTab(QWidget):
 
     def reset_all_filters(self):
         """Réinitialise tous les filtres (recherche + cluster)."""
-        # Vider le champ de recherche sans déclencher la recherche
-        self._search_edit.blockSignals(True)
-        self._search_edit.clear()
-        self._search_edit.blockSignals(False)
+        if hasattr(self, "dock_search_bar"):
+            self.dock_search_bar.blockSignals(True)
+            self.dock_search_bar.clear()
+            self.dock_search_bar.blockSignals(False)
+
         self._vm.clear_search()
 
         self._active_filter = None
@@ -691,10 +793,6 @@ class MapTab(QWidget):
             node.setZValue(1)
         self._view.fitInView(QRectF(0, 0, 800, 800), Qt.AspectRatioMode.KeepAspectRatio)
 
-    # def reset_opacity(self):
-    #     """Reset l'opacité des nodes (alias pour compatibilité)."""
-    #     self.reset_all_filters()
-
     # ── API externe ───────────────────────────────────────────────────────────
 
     def on_image_selected(self, img_name: str):
@@ -704,3 +802,8 @@ class MapTab(QWidget):
             img_name (str): Nom de l'image."""
         if self._nodes:
             self.highlight(img_name)
+
+    def hide_search_dock(self):
+        """Masque le dock de recherche de la carte."""
+        if self._search_dock:
+            self._search_dock.setVisible(False)

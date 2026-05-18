@@ -126,15 +126,15 @@ class WorkspaceWidget(QWidget):
         self._dock.setVisible(False)
         main_window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._dock)
 
-        # ── Dock recherche (rattaché à la fenêtre principale) ─────────────────
+        # ── Dock recherche galerie (rattaché à la fenêtre principale) ─────────
         self._search_dock = self._gallery_widget.build_search_dock(main_window)
         self._search_dock.setVisible(False)
         main_window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._search_dock)
 
-        # Connecter les signaux de la barre de recherche maintenant qu'elle existe
-        self._gallery_widget.search_bar.textChanged.connect(self.gallery_vm.schedule_search)
-        self._gallery_widget.btn_save_search.clicked.connect(self.gallery_vm.save_search)
-        self._gallery_widget.checkbox_affinage.toggled.connect(self.gallery_vm.set_affinage)
+        # ── Dock recherche carte (rattaché à la fenêtre principale) ──────────
+        self._map_search_dock = self._map_tab.build_search_dock(main_window)
+        self._map_search_dock.setVisible(False)
+        main_window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._map_search_dock)
 
         # ── Connexions inter-VM ───────────────────────────────────────────────
         self.gallery_vm.image_selected.connect(self._on_image_selected)
@@ -196,9 +196,10 @@ class WorkspaceWidget(QWidget):
         self._dock.setVisible(visible)
 
     def hide_dock(self):
-        """Masque le dock de détail et le dock de recherche."""
+        """Masque le dock de détail, le dock de recherche galerie et le dock de recherche carte."""
         self._dock.setVisible(False)
         self._search_dock.setVisible(False)
+        self._map_search_dock.setVisible(False)
 
     def rename(self, new_name: str):
         """Met à jour le nom interne et le titre du dock.

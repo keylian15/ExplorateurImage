@@ -15,6 +15,7 @@ Contenu :
  - Réutilisation du cache pour éviter les recalculs
  - Communication des clusters nommés et du résultat final
  - Recherche sémantique sur la carte avec filtrage des noeuds
+ - Arbre de recherche avec historique et affinage
 
 Responsabilités :
  1. Charger et filtrer les embeddings depuis l'index des images
@@ -25,6 +26,7 @@ Responsabilités :
  6. Notifier la vue de l'avancement et du résultat final
  7. Synchroniser les paramètres avec la configuration persistante du workspace
  8. Filtrer les noeuds visibles selon une requête sémantique
+ 9. Gérer l'arbre de recherche avec historique et affinage
 """
 
 from __future__ import annotations
@@ -36,6 +38,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
 from models import config_repository
 from models import workspace_repository as ws_repo
+from models.tree.search_tree import SearchTree
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import MapWorker
 from viewmodels.gallery_vm import GalleryViewModel
@@ -58,6 +61,8 @@ class MapViewModel(QObject):
     params_changed = pyqtSignal(dict)
     # noms des images à mettre en valeur (liste vide = tout afficher)
     search_results_changed = pyqtSignal(list)
+    # une recherche a été sauvegardée dans l'arbre
+    saved_search = pyqtSignal()
 
     def __init__(
         self,
@@ -85,12 +90,20 @@ class MapViewModel(QObject):
         self._worker: MapWorker | None = None
         self._params = ws_repo.get_map_params(ws_data)
 
+        # ── Recherche ─────────────────────────────────────────────────────────
+        self._search_text = ""
+        self._result_names: list[str] = []
+        self._affinage_enabled = False
+
         # Debounce pour la recherche
         self._search_timer = QTimer()
         self._search_timer.setInterval(300)
         self._search_timer.setSingleShot(True)
         self._search_timer.timeout.connect(self.do_search)
-        self._search_text = ""
+
+        # Arbre de recherche (identique à la galerie)
+        self.search_tree = SearchTree()
+        self.search_tree.create_root(query="__root__", results=[])
 
     # ── Paramètres ────────────────────────────────────────────────────────────
 
@@ -191,17 +204,44 @@ class MapViewModel(QObject):
         """Effectue la recherche et émet le signal avec les résultats."""
         text = self._search_text.strip()
         if not text:
+            self._result_names = []
             self.search_results_changed.emit([])
             return
 
-        results = self._gallery_vm.filtered_images(text)
-        self.search_results_changed.emit(results)
+        context = None
+        if self._affinage_enabled and self.search_tree.current:
+            context = self.search_tree.current.results
+
+        self._result_names = self._gallery_vm.filtered_images(filter_text=text, context=context)
+        self.search_results_changed.emit(self._result_names)
 
     def clear_search(self):
         """Vide la recherche et réaffiche tous les noeuds."""
         self._search_text = ""
+        self._result_names = []
         self._search_timer.stop()
         self.search_results_changed.emit([])
+
+    def save_search(self) -> None:
+        """Enregistre la recherche courante dans l'arbre de recherche."""
+        if not self._affinage_enabled:
+            self.search_tree.return_to_root()
+
+        self.search_tree.push_search(
+            query=self._search_text.strip(),
+            results=self._result_names,
+        )
+        self.saved_search.emit()
+
+    def set_affinage(self, enabled: bool) -> None:
+        """Active ou désactive l'affinage des recherches.
+
+        Args:
+            enabled (bool): Si True, les recherches suivantes seront affinées
+                            à partir des résultats actuels.
+        """
+        self._affinage_enabled = enabled
+        self.do_search()
 
     # ── Cache pickle ──────────────────────────────────────────────────────────
 

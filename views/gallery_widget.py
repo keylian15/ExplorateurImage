@@ -202,6 +202,11 @@ class GalleryWidget(QWidget):
         dock.visibilityChanged.connect(self.btn_search_dock.setChecked)
         self.btn_search_dock.clicked.connect(dock.setVisible)
 
+        # Connecter les signaux de la barre de recherche galerie
+        self.search_bar.textChanged.connect(self._gvm.schedule_search)
+        self.btn_save_search.clicked.connect(self._gvm.save_search)
+        self.checkbox_affinage.toggled.connect(self._gvm.set_affinage)
+
         self._search_dock = dock
         return dock
 
