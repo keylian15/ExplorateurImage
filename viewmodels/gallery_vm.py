@@ -336,10 +336,14 @@ class GalleryViewModel(QObject):
     def save_search(self) -> None:
         """Enregistre la recherche dans l'historique."""
 
+        text = self._search_text.strip()
+        if not text:
+            return
+
         if self._affinage_enabled is False:
             self.search_tree.return_to_root()
 
-        self.search_tree.push_search(query=self._search_text.strip(), results=self._result_images)
+        self.search_tree.push_search(query=text, results=self._result_images)
         self.saved_search.emit()
 
     def set_affinage(self, enabled: bool) -> None:

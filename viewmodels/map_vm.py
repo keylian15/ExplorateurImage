@@ -224,11 +224,16 @@ class MapViewModel(QObject):
 
     def save_search(self) -> None:
         """Enregistre la recherche courante dans l'arbre de recherche."""
+
+        text = self._search_text.strip()
+        if not text:
+            return
+
         if not self._affinage_enabled:
             self.search_tree.return_to_root()
 
         self.search_tree.push_search(
-            query=self._search_text.strip(),
+            query=text,
             results=self._result_names,
         )
         self.saved_search.emit()
