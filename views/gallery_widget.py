@@ -33,6 +33,7 @@ from PyQt6.QtGui import QAction, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
+    QDockWidget,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -62,6 +63,7 @@ class GalleryWidget(QWidget):
         super().__init__(parent)
         self._gvm = gallery_vm
         self._avm = autocomplete_vm
+        self._search_dock: QDockWidget | None = None
 
         self.build_ui()
         self.connect_vm()
@@ -88,26 +90,13 @@ class GalleryWidget(QWidget):
         self.btn_cancel.setVisible(False)
         top.addWidget(self.btn_cancel)
 
-        self.search_bar = QLineEdit()
-        self.search_bar.setObjectName("search_bar")
-        self.search_bar.setPlaceholderText("Rechercher…")
-        top.addWidget(self.search_bar, stretch=1)
+        # Bouton pour afficher/masquer le dock de recherche
+        self.btn_search_dock = QPushButton("🔍 Recherche")
+        self.btn_search_dock.setCheckable(True)
+        self.btn_search_dock.setToolTip("Afficher / masquer le panneau de recherche")
+        top.addWidget(self.btn_search_dock)
 
-        action_search = QAction("Search", self)
-        action_search.setShortcut(QKeySequence("Ctrl+F"))
-        action_search.triggered.connect(lambda: self.search_bar.setFocus())
-        self.addAction(action_search)
-
-        self.btn_save_search = QPushButton("Enregistrer la recherche")
-        self.btn_save_search.setToolTip("Enregistrer la recherche dans l'historique")
-        top.addWidget(self.btn_save_search)
-
-        self.checkbox_affinage = QCheckBox("Affinage")
-        self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
-        top.addWidget(self.checkbox_affinage)
-
-        self.tree_widget = TreeViewWidget(self._gvm.search_tree)
-        top.addWidget(self.tree_widget)
+        top.addStretch()
 
         layout.addLayout(top)
 
@@ -144,12 +133,81 @@ class GalleryWidget(QWidget):
         self._prefetch_timer.setSingleShot(True)
         self._prefetch_timer.timeout.connect(self.prefetch_visible)
 
+    def build_search_dock(self, main_window) -> QDockWidget:
+        """Construit et retourne le dock de recherche.
+
+        Doit être appelé depuis WorkspaceWidget après construction,
+        une fois que main_window est disponible.
+
+        Args:
+            main_window: La QMainWindow à laquelle rattacher le dock.
+
+        Returns:
+            QDockWidget: Le dock de recherche.
+        """
+        dock = QDockWidget("Recherche dans la Galerie", main_window)
+        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
+        dock.setMinimumWidth(220)
+
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
+
+        # ── Barre de recherche ────────────────────────────────────────────────
+        self.search_bar = QLineEdit()
+        self.search_bar.setObjectName("search_bar")
+        self.search_bar.setPlaceholderText("Rechercher…")
+        self.search_bar.setClearButtonEnabled(True)
+        layout.addWidget(self.search_bar)
+
+        # ── Actions sous la barre ─────────────────────────────────────────────
+        actions_row = QHBoxLayout()
+        actions_row.setSpacing(6)
+
+        self.btn_save_search = QPushButton("💾 Sauvegarder")
+        self.btn_save_search.setToolTip("Enregistrer la recherche dans l'historique")
+        actions_row.addWidget(self.btn_save_search)
+
+        self.checkbox_affinage = QCheckBox("Affinage")
+        self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
+        actions_row.addWidget(self.checkbox_affinage)
+
+        layout.addLayout(actions_row)
+
+        # ── Séparateur ────────────────────────────────────────────────────────
+        from PyQt6.QtWidgets import QFrame
+
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet("color: #1f2937;")
+        layout.addWidget(sep)
+
+        # ── Arbre de recherche ────────────────────────────────────────────────
+        self.tree_widget = TreeViewWidget(self._gvm.search_tree)
+        self.tree_widget.node_clicked.connect(self._on_tree_node_clicked)
+        layout.addWidget(self.tree_widget)
+
+        layout.addStretch()
+        dock.setWidget(content)
+
+        # Raccourci Ctrl+F → focus barre de recherche
+        action_search = QAction("Search", self)
+        action_search.setShortcut(QKeySequence("Ctrl+F"))
+        action_search.triggered.connect(lambda: (dock.setVisible(True), self.search_bar.setFocus()))
+        self.addAction(action_search)
+
+        # Sync bouton ↔ visibilité dock
+        dock.visibilityChanged.connect(self.btn_search_dock.setChecked)
+        self.btn_search_dock.clicked.connect(dock.setVisible)
+
+        self._search_dock = dock
+        return dock
+
     def connect_vm(self):
         """Connect la view au viewmodel."""
         # View → ViewModel
-        self.search_bar.textChanged.connect(self._gvm.schedule_search)
-        self.btn_save_search.clicked.connect(self._gvm.save_search)
-        self.checkbox_affinage.toggled.connect(self._gvm.set_affinage)
         self.btn_batch.clicked.connect(self._avm.start)
         self.btn_cancel.clicked.connect(self.on_cancel)
         self.list_view.clicked.connect(self.on_item_clicked)
@@ -158,11 +216,32 @@ class GalleryWidget(QWidget):
 
         # ViewModel → View
         self._gvm.cell_size_changed.connect(self.on_cell_size_changed)
-        self._gvm.saved_search.connect(self.tree_widget.refresh)
+        self._gvm.saved_search.connect(self._on_search_saved)
 
         self._avm.started.connect(self.on_batch_started)
         self._avm.progress.connect(self.on_batch_progress)
         self._avm.finished.connect(self.on_batch_finished)
+
+    # ── Slots internes ─────────────────────────────────────────────────────
+
+    def _on_search_saved(self):
+        """Rafraîchit l'arbre après sauvegarde d'une recherche."""
+        if hasattr(self, "tree_widget"):
+            self.tree_widget.refresh()
+
+    def _on_tree_node_clicked(self, node_id: str):
+        """Navigue vers le noeud cliqué dans l'arbre.
+
+        Args:
+            node_id (str): Identifiant du noeud.
+        """
+        node = self._gvm.search_tree.get_node(node_id)
+        if node is None:
+            return
+        self._gvm.search_tree.set_current(node_id)
+        if hasattr(node, "query") and hasattr(self, "search_bar"):
+            self.search_bar.setText(node.query)
+        self.tree_widget.refresh()
 
     # ── Slots View → ViewModel ─────────────────────────────────────────────
 

@@ -118,7 +118,6 @@ class Tree:
 
         if node is not None:
             self.current = node
-            print("chagenement de noeud courant : ", node_id)
         else:
             print("noeud non trouvé : ", node_id)
 
