@@ -32,6 +32,7 @@ from PyQt6.QtCore import QModelIndex, QPoint, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QKeySequence, QPixmap
 from PyQt6.QtWidgets import (
     QAbstractItemView,
+    QCheckBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -82,6 +83,10 @@ class GalleryWidget(QWidget):
         self.btn_batch = QPushButton("Tout auto-compléter")
         top.addWidget(self.btn_batch)
 
+        self.btn_cancel = QPushButton("Annuler")
+        self.btn_cancel.setVisible(False)
+        top.addWidget(self.btn_cancel)
+
         self.search_bar = QLineEdit()
         self.search_bar.setObjectName("search_bar")
         self.search_bar.setPlaceholderText("Rechercher…")
@@ -90,12 +95,15 @@ class GalleryWidget(QWidget):
         action_search = QAction("Search", self)
         action_search.setShortcut(QKeySequence("Ctrl+F"))
         action_search.triggered.connect(lambda: self.search_bar.setFocus())
-
         self.addAction(action_search)
 
-        self.btn_cancel = QPushButton("Annuler")
-        self.btn_cancel.setVisible(False)
-        top.addWidget(self.btn_cancel)
+        self.btn_save_search = QPushButton("Enregistrer la recherche")
+        self.btn_save_search.setToolTip("Enregistrer la recherche dans l'historique")
+        top.addWidget(self.btn_save_search)
+
+        self.checkbox_affinage = QCheckBox("Affinage")
+        self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
+        top.addWidget(self.checkbox_affinage)
 
         layout.addLayout(top)
 
@@ -136,6 +144,8 @@ class GalleryWidget(QWidget):
         """Connect la view au viewmodel."""
         # View → ViewModel
         self.search_bar.textChanged.connect(self._gvm.schedule_search)
+        self.btn_save_search.clicked.connect(self._gvm.save_search)
+        self.checkbox_affinage.toggled.connect(self._gvm.set_affinage)
         self.btn_batch.clicked.connect(self._avm.start)
         self.btn_cancel.clicked.connect(self.on_cancel)
         self.list_view.clicked.connect(self.on_item_clicked)

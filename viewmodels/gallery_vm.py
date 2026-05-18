@@ -40,6 +40,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from models import config_repository, index_repository
 from models import workspace_repository as ws_repo
 from models.image_model import ImageGridDelegate, ImageListModel
+from models.tree.search_tree import SearchTree
 from services.ollama_wrapper import OllamaWrapper
 from services.thumbnail_cache import ThumbnailCache
 from services.workers import ThumbnailScheduler
@@ -77,6 +78,8 @@ class GalleryViewModel(QObject):
 
         self.current_folder: str | None = None
         self.index: dict = {}
+        self._result_images: list[str] = []
+        self._affinage_enabled = False
 
         # Images épinglées (liste ordonnée pour conserver l'ordre d'épinglage)
         self._pinned: list[str] = ws_repo.get_pinned_images(ws_data) if ws_data else []
@@ -89,7 +92,8 @@ class GalleryViewModel(QObject):
 
         # Modèle + delegate
         self.model = ImageListModel()
-        self.model.set_pinned(set(self._pinned))  # Restauration des épingles au démarrage
+        # Restauration des épingles au démarrage
+        self.model.set_pinned(set(self._pinned))
         self.delegate = ImageGridDelegate(self.cache, self.scheduler, THUMB["default_size"])
         self.delegate.repaint_requested.connect(self.on_repaint_requested)
 
@@ -103,6 +107,9 @@ class GalleryViewModel(QObject):
         self._search_timer.setSingleShot(True)
         self._search_timer.timeout.connect(self.do_search)
         self._search_text = ""
+
+        self.search_tree = SearchTree()
+        self.search_tree.create_root(query="__root__", results=[])
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
@@ -276,12 +283,19 @@ class GalleryViewModel(QObject):
         self._search_timer.start()
 
     def do_search(self):
-        """Fait la recherche."""
+        """Effectue la recherche sémantique et met à jour la liste des images."""
+
         text = self._search_text.strip()
-        if text:
-            self.refresh(self.filtered_images(text))
-        else:
+        if not text:
             self.refresh(None)
+            return
+
+        context = None
+        if self._affinage_enabled and self.search_tree.current:
+            context = self.search_tree.current.results
+
+        self._result_images = self.filtered_images(filter_text=text, context=context)
+        self.refresh(self._result_images)
 
     def filtered_images(self, filter_text: str, context: list[str] = None) -> list[str]:
         """Renvoi les 100 images les plus proches de la requête.
@@ -299,7 +313,7 @@ class GalleryViewModel(QObject):
         query_emb = self._client.embed(model=MODEL_EMBED, text=ft)
 
         # Récupère les embeddings des images selon le context
-        if context is None:
+        if context is None or context == []:
             images = self.index
         else:
             images = {key: self.index[key] for key in context if key in self.index}
@@ -317,6 +331,23 @@ class GalleryViewModel(QObject):
             scores[key] = score
         sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return [name for name, _ in sorted_items[:100]]
+
+    def save_search(self) -> None:
+        """Enregistre la recherche dans l'historique."""
+
+        if self._affinage_enabled is False:
+            self.search_tree.return_to_root()
+
+        self.search_tree.push_search(query=self._search_text.strip(), results=self._result_images)
+
+    def set_affinage(self, enabled: bool) -> None:
+        """Active ou désactive l'affinage des recherches.
+
+        Args:
+            enabled (bool): Si True, les recherches suivantes seront affinées à partir des résultats actuels.
+        """
+        self._affinage_enabled = enabled
+        self.do_search()
 
     # ── Sélection ─────────────────────────────────────────────────────────────
 
