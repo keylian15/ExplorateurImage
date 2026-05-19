@@ -21,3 +21,20 @@ class SearchNode(TreeNode):
 
         self.query: str = query
         self.results: list[str] = results or []
+
+    def to_dict(self) -> dict:
+        """
+        Sérialise le noeud de recherche.
+        """
+
+        base = super().to_dict()
+
+        base.update(
+            {
+                "type": "SearchNode",
+                "query": self.query,
+                "results": self.results,
+            }
+        )
+
+        return base

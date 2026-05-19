@@ -61,3 +61,15 @@ class SearchTree(Tree):
 
         self.current = self.root
         return self.current
+
+    def to_dict(self) -> dict:
+        """
+        Sérialise l'arbre de recherche.
+        """
+
+        return {
+            "type": "SearchTree",
+            "root_id": self.root.id if self.root else None,
+            "current_id": self.current.id if self.current else None,
+            "nodes": [node.to_dict() for node in self.iter_nodes()],
+        }

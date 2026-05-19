@@ -358,6 +358,8 @@ class GalleryViewModel(QObject):
         self.search_tree.push_search(query=text, results=self._result_images)
         self.signal_saved_search.emit()
 
+        print("L'arbre : \n\n", self.search_tree.to_dict())
+
     def set_affinage(self, enabled: bool) -> None:
         """Active ou désactive l'affinage des recherches.
 
