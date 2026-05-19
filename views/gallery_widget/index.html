@@ -1107,17 +1107,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#views.gallery_widget.GalleryWidget.on_cell_size_changed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_cell_size_changed
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#views.gallery_widget.GalleryWidget.on_item_clicked" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1133,6 +1122,39 @@
     <span class="md-ellipsis">
       
         on_right_click
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.gallery_widget.GalleryWidget.on_signal_cell_size_changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_cell_size_changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.gallery_widget.GalleryWidget.on_signal_search_saved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_search_saved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.gallery_widget.GalleryWidget.on_signal_tree_node_clicked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_tree_node_clicked
       
     </span>
   </a>
@@ -1408,17 +1430,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#views.gallery_widget.GalleryWidget.on_cell_size_changed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_cell_size_changed
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#views.gallery_widget.GalleryWidget.on_item_clicked" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1434,6 +1445,39 @@
     <span class="md-ellipsis">
       
         on_right_click
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.gallery_widget.GalleryWidget.on_signal_cell_size_changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_cell_size_changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.gallery_widget.GalleryWidget.on_signal_search_saved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_search_saved
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.gallery_widget.GalleryWidget.on_signal_tree_node_clicked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_tree_node_clicked
       
     </span>
   </a>
@@ -2033,7 +2077,7 @@ et gestion du batch d'auto-complétion.</p>
 
         <span class="c1"># ── Arbre de recherche ────────────────────────────────────────────────</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span> <span class="o">=</span> <span class="n">TreeViewWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">search_tree</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">node_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_tree_node_clicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">signal_node_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_tree_node_clicked</span><span class="p">)</span>
         <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="p">)</span>
 
         <span class="n">layout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
@@ -2067,21 +2111,21 @@ et gestion du batch d'auto-complétion.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">verticalScrollBar</span><span class="p">()</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefetch_timer</span><span class="o">.</span><span class="n">start</span><span class="p">())</span>
 
         <span class="c1"># ViewModel → View</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">cell_size_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_cell_size_changed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_search_saved</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">signal_cell_size_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_cell_size_changed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">signal_saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_search_saved</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">started</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_started</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_progress</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_finished</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">signal_started</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_started</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_progress</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_finished</span><span class="p">)</span>
 
     <span class="c1"># ── Slots internes ─────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_search_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_search_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rafraîchit l&#39;arbre après sauvegarde d&#39;une recherche.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;tree_widget&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_tree_node_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_tree_node_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Navigue vers le noeud cliqué dans l&#39;arbre.</span>
 
 <span class="sd">        Args:</span>
@@ -2132,7 +2176,7 @@ et gestion du batch d'auto-complétion.</p>
 
     <span class="c1"># ── Slots ViewModel → View ─────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_cell_size_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_cell_size_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Redimensionne la gallery.</span>
 
 <span class="sd">        Args:</span>
@@ -2529,7 +2573,7 @@ une fois que main_window est disponible.</p>
 
     <span class="c1"># ── Arbre de recherche ────────────────────────────────────────────────</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span> <span class="o">=</span> <span class="n">TreeViewWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">search_tree</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">node_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_tree_node_clicked</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">signal_node_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_tree_node_clicked</span><span class="p">)</span>
     <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="p">)</span>
 
     <span class="n">layout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
@@ -2744,12 +2788,12 @@ une fois que main_window est disponible.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">verticalScrollBar</span><span class="p">()</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefetch_timer</span><span class="o">.</span><span class="n">start</span><span class="p">())</span>
 
     <span class="c1"># ViewModel → View</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">cell_size_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_cell_size_changed</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_search_saved</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">signal_cell_size_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_cell_size_changed</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">signal_saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_search_saved</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">started</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_started</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_progress</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_finished</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">signal_started</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_started</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_progress</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_avm</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_batch_finished</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3058,74 +3102,6 @@ une fois que main_window est disponible.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="views.gallery_widget.GalleryWidget.on_cell_size_changed" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_cell_size_changed</span><span class="p">(</span><span class="n">size</span><span class="p">)</span></code>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Redimensionne la gallery.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>size</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Nouvelle taille des cellules.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>views/gallery_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_cell_size_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Redimensionne la gallery.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        size (int): Nouvelle taille des cellules.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">setGridSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">8</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">doItemsLayout</span><span class="p">()</span>
-    <span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefetch_visible</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h4 id="views.gallery_widget.GalleryWidget.on_item_clicked" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">on_item_clicked</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></code>
 
@@ -3271,6 +3247,181 @@ une fois que main_window est disponible.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
         <span class="n">dlg</span> <span class="o">=</span> <span class="n">FullscreenDialog</span><span class="p">(</span><span class="n">pixmap</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">dlg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.gallery_widget.GalleryWidget.on_signal_cell_size_changed" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_cell_size_changed</span><span class="p">(</span><span class="n">size</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Redimensionne la gallery.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>size</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nouvelle taille des cellules.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/gallery_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_cell_size_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Redimensionne la gallery.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size (int): Nouvelle taille des cellules.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">setGridSize</span><span class="p">(</span><span class="n">QSize</span><span class="p">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">doItemsLayout</span><span class="p">()</span>
+    <span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefetch_visible</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.gallery_widget.GalleryWidget.on_signal_search_saved" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_search_saved</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Rafraîchit l'arbre après sauvegarde d'une recherche.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/gallery_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_search_saved</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rafraîchit l&#39;arbre après sauvegarde d&#39;une recherche.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;tree_widget&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.gallery_widget.GalleryWidget.on_signal_tree_node_clicked" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_tree_node_clicked</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Navigue vers le noeud cliqué dans l'arbre.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>node_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Identifiant du noeud.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/gallery_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_tree_node_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Navigue vers le noeud cliqué dans l&#39;arbre.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        node_id (str): Identifiant du noeud.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">search_tree</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span><span class="o">.</span><span class="n">search_tree</span><span class="o">.</span><span class="n">set_current</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;query&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;search_bar&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_bar</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tree_widget</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

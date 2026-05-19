@@ -1889,19 +1889,19 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
     <span class="c1"># ── Signaux vers la View ──────────────────────────────────────────────────</span>
     <span class="c1"># (img_name, desc, keywords)</span>
-    <span class="n">metadata_loaded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
-    <span class="n">preview_ready</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (pixmap, img_name)</span>
-    <span class="n">neighbors_ready</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>  <span class="c1"># {name: score}</span>
-    <span class="n">save_started</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
-    <span class="n">save_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
-    <span class="n">save_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="n">autocomplete_started</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
-    <span class="n">autocomplete_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>  <span class="c1"># (desc, keywords)</span>
-    <span class="n">autocomplete_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="n">rename_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># nouveau nom</span>
-    <span class="n">rename_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="n">index_updated</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>  <span class="c1"># noms indexés</span>
-    <span class="n">pin_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>  <span class="c1"># (img_name, is_pinned)</span>
+    <span class="n">signal_metadata_loaded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="n">signal_preview_ready</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="n">QPixmap</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (pixmap, img_name)</span>
+    <span class="n">signal_neighbors_ready</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>  <span class="c1"># {name: score}</span>
+    <span class="n">signal_save_started</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">signal_save_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">signal_save_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_autocomplete_started</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">signal_autocomplete_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>  <span class="c1"># (desc, keywords)</span>
+    <span class="n">signal_autocomplete_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_rename_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># nouveau nom</span>
+    <span class="n">signal_rename_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_index_updated</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>  <span class="c1"># noms indexés</span>
+    <span class="n">signal_pin_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>  <span class="c1"># (img_name, is_pinned)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1942,7 +1942,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending_keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Relayer le signal pin du gallery_vm vers la vue</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">pin_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_changed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="p">)</span>
 
     <span class="c1"># ── Propriétés ────────────────────────────────────────────────────────────</span>
 
@@ -2007,19 +2007,19 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
             <span class="n">pixmap</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">preview_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">pixmap</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_preview_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">pixmap</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
 
         <span class="c1"># Métadonnées</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
         <span class="n">desc</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
         <span class="n">keywords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_metadata_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
 
         <span class="c1"># Voisins</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_neighbors</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
 
         <span class="c1"># État épingle courant</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pin_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">is_pinned</span><span class="p">(</span><span class="n">img_name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">is_pinned</span><span class="p">(</span><span class="n">img_name</span><span class="p">))</span>
 
     <span class="c1"># ── Épinglage ─────────────────────────────────────────────────────────────</span>
 
@@ -2060,7 +2060,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">isRunning</span><span class="p">():</span>
             <span class="k">return</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_save_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span> <span class="o">=</span> <span class="n">SaveMetadataWorker</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span>
@@ -2068,15 +2068,15 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pending_keywords</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_save_done</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_save_done</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback de la fin de la sauvegarde.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_save_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
     <span class="c1"># ── Auto-complétion ───────────────────────────────────────────────────────</span>
 
@@ -2088,17 +2088,17 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
             <span class="k">return</span>
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span> <span class="o">=</span> <span class="n">AutoCompleteWorker</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_autocomplete_done</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_autocomplete_done</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback de la fin de l&#39;auto-complétion.&quot;&quot;&quot;</span>
         <span class="n">desc</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
         <span class="n">keywords</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
 
     <span class="c1"># ── Voisins ───────────────────────────────────────────────────────────────</span>
 
@@ -2109,11 +2109,11 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="sd">            img_name (str): Nom de l&#39;image.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">img_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
             <span class="k">return</span>
         <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">[</span><span class="n">img_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="s2">&quot;embedding&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
             <span class="k">return</span>
 
         <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2122,7 +2122,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
                 <span class="k">continue</span>
             <span class="n">scores</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">similarite_cosinus</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">])</span>
         <span class="n">top</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_neighbors</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">refresh_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rafraichi les voisins de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
@@ -2149,13 +2149,13 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">new_path</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Un fichier avec ce nom existe déjà.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Un fichier avec ce nom existe déjà.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">old_path</span><span class="p">,</span> <span class="n">new_path</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
             <span class="k">return</span>
 
         <span class="c1"># Mettre à jour l&#39;épingle si l&#39;image était épinglée</span>
@@ -2168,8 +2168,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="o">=</span> <span class="n">new_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rename_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_rename_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2420,7 +2420,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_pending_keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Relayer le signal pin du gallery_vm vers la vue</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">pin_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pin_changed</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2463,10 +2463,10 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="k">return</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span> <span class="o">=</span> <span class="n">AutoCompleteWorker</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_autocomplete_done</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_error</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_autocomplete_done</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_error</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2548,11 +2548,11 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="sd">        img_name (str): Nom de l&#39;image.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">img_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
         <span class="k">return</span>
     <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">[</span><span class="n">img_name</span><span class="p">]</span>
     <span class="k">if</span> <span class="s2">&quot;embedding&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">({})</span>
         <span class="k">return</span>
 
     <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
@@ -2561,7 +2561,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
             <span class="k">continue</span>
         <span class="n">scores</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">similarite_cosinus</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">])</span>
     <span class="n">top</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_neighbors</span><span class="p">])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2608,7 +2608,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">isRunning</span><span class="p">():</span>
         <span class="k">return</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">save_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_save_started</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span> <span class="o">=</span> <span class="n">SaveMetadataWorker</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span>
@@ -2616,8 +2616,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending_keywords</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_save_done</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_error</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_save_done</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2711,7 +2711,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback de la fin de l&#39;auto-complétion.&quot;&quot;&quot;</span>
     <span class="n">desc</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2801,19 +2801,19 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
         <span class="n">pixmap</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preview_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">pixmap</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_preview_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">pixmap</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
 
     <span class="c1"># Métadonnées</span>
     <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
     <span class="n">desc</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="p">[]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">metadata_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_metadata_loaded</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
 
     <span class="c1"># Voisins</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compute_neighbors</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
 
     <span class="c1"># État épingle courant</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pin_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">is_pinned</span><span class="p">(</span><span class="n">img_name</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">is_pinned</span><span class="p">(</span><span class="n">img_name</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2843,8 +2843,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback de la fin de la sauvegarde.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">save_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_save_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2983,13 +2983,13 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
     <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">new_path</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Un fichier avec ce nom existe déjà.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Un fichier avec ce nom existe déjà.&quot;</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">old_path</span><span class="p">,</span> <span class="n">new_path</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_rename_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">return</span>
 
     <span class="c1"># Mettre à jour l&#39;épingle si l&#39;image était épinglée</span>
@@ -3002,8 +3002,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="o">=</span> <span class="n">new_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">rename_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_rename_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

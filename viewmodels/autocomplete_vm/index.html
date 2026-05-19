@@ -747,32 +747,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_all_done" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_all_done
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_image_done" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_image_done
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_image_error" class="md-nav__link">
     <span class="md-ellipsis">
       
         on_image_error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_signal_all_done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_all_done
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_signal_image_done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_image_done
       
     </span>
   </a>
@@ -1287,32 +1287,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_all_done" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_all_done
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_image_done" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_image_done
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_image_error" class="md-nav__link">
     <span class="md-ellipsis">
       
         on_image_error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_signal_all_done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_all_done
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewmodels.autocomplete_vm.AutocompleteViewModel.on_signal_image_done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_image_done
       
     </span>
   </a>
@@ -1541,11 +1541,11 @@ avec la vue grâce à des signaux Qt.</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class pour la vue d&#39;auto-complétion.&quot;&quot;&quot;</span>
 
     <span class="c1"># ── Signaux vers la View ──────────────────────────────────────────────────</span>
-    <span class="n">started</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># total d&#39;images à traiter</span>
-    <span class="n">image_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (idx, img_name)</span>
-    <span class="n">image_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (idx, img_name, msg)</span>
-    <span class="n">finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>  <span class="c1"># cancelled=True/False</span>
-    <span class="n">progress</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (done, total, label)</span>
+    <span class="n">signal_started</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># total d&#39;images à traiter</span>
+    <span class="n">signal_image_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (idx, img_name)</span>
+    <span class="n">signal_image_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (idx, img_name, msg)</span>
+    <span class="n">signal_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>  <span class="c1"># cancelled=True/False</span>
+    <span class="n">signal_progress</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (done, total, label)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1572,11 +1572,11 @@ avec la vue grâce à des signaux Qt.</p>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">images</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_started</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span> <span class="o">=</span> <span class="n">AutoCompleteAllWorker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">current_folder</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">image_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_image_done</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">image_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_image_error</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">all_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_all_done</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_image_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_image_done</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_image_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_image_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_all_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_all_done</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1588,7 +1588,7 @@ avec la vue grâce à des signaux Qt.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test si l&#39;auto-complétion est en cours.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_worker</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">isRunning</span><span class="p">())</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_image_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_image_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback quand une image est traitée.</span>
 
 <span class="sd">        Args:</span>
@@ -1609,8 +1609,8 @@ avec la vue grâce à des signaux Qt.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
 
         <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">on_image_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback quand une image ne peut pas être traitée.</span>
@@ -1622,13 +1622,13 @@ avec la vue grâce à des signaux Qt.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_all_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_all_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback quand toutes les images ont été traitées.&quot;&quot;&quot;</span>
         <span class="n">cancelled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">_cancelled</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cancelled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cancelled</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1801,165 +1801,6 @@ avec la vue grâce à des signaux Qt.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="viewmodels.autocomplete_vm.AutocompleteViewModel.on_all_done" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_all_done</span><span class="p">()</span></code>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Callback quand toutes les images ont été traitées.</p>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>viewmodels/autocomplete_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_all_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback quand toutes les images ont été traitées.&quot;&quot;&quot;</span>
-    <span class="n">cancelled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">_cancelled</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cancelled</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="viewmodels.autocomplete_vm.AutocompleteViewModel.on_image_done" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_image_done</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span></code>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Callback quand une image est traitée.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>idx</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Index de l'image.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>img_name</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Nom de l'image.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>result</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Résultat de l'auto-complétion.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>viewmodels/autocomplete_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_image_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback quand une image est traitée.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        idx (int): Index de l&#39;image.</span>
-<span class="sd">        img_name (str): Nom de l&#39;image.</span>
-<span class="sd">        result (dict): Résultat de l&#39;auto-complétion.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">current_folder</span>
-    <span class="n">desc</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
-    <span class="n">keywords</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span>
-
-    <span class="n">embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">MODEL_EMBED</span><span class="p">,</span>
-        <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">build_embedding</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="n">entry</span> <span class="o">=</span> <span class="n">index_repository</span><span class="o">.</span><span class="n">build_entry</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">,</span> <span class="n">embedding</span><span class="p">)</span>
-    <span class="n">index_repository</span><span class="o">.</span><span class="n">upsert_entry</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
-
-    <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h4 id="viewmodels.autocomplete_vm.AutocompleteViewModel.on_image_error" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">on_image_error</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span></code>
 
@@ -2057,8 +1898,167 @@ avec la vue grâce à des signaux Qt.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="viewmodels.autocomplete_vm.AutocompleteViewModel.on_signal_all_done" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_all_done</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Callback quand toutes les images ont été traitées.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>viewmodels/autocomplete_vm.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_all_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback quand toutes les images ont été traitées.&quot;&quot;&quot;</span>
+    <span class="n">cancelled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">_cancelled</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cancelled</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="viewmodels.autocomplete_vm.AutocompleteViewModel.on_signal_image_done" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_image_done</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Callback quand une image est traitée.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>idx</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Index de l'image.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>img_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nom de l'image.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>result</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Résultat de l'auto-complétion.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>viewmodels/autocomplete_vm.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_image_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback quand une image est traitée.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        idx (int): Index de l&#39;image.</span>
+<span class="sd">        img_name (str): Nom de l&#39;image.</span>
+<span class="sd">        result (dict): Résultat de l&#39;auto-complétion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">current_folder</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span>
+
+    <span class="n">embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">MODEL_EMBED</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">build_embedding</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">index_repository</span><span class="o">.</span><span class="n">build_entry</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">,</span> <span class="n">embedding</span><span class="p">)</span>
+    <span class="n">index_repository</span><span class="o">.</span><span class="n">upsert_entry</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
+
+    <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2104,11 +2104,11 @@ avec la vue grâce à des signaux Qt.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">images</span><span class="p">:</span>
         <span class="k">return</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_started</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span> <span class="o">=</span> <span class="n">AutoCompleteAllWorker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">current_folder</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">image_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_image_done</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">image_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_image_error</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">all_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_all_done</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_image_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_image_done</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_image_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_image_error</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_all_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_all_done</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>

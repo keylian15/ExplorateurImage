@@ -488,10 +488,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#models.image_model.ImageGridDelegate.on_thumbnail_ready" class="md-nav__link">
+  <a href="#models.image_model.ImageGridDelegate.on_signal_thumbnail_ready" class="md-nav__link">
     <span class="md-ellipsis">
       
-        on_thumbnail_ready
+        on_signal_thumbnail_ready
       
     </span>
   </a>
@@ -1381,10 +1381,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#models.image_model.ImageGridDelegate.on_thumbnail_ready" class="md-nav__link">
+  <a href="#models.image_model.ImageGridDelegate.on_signal_thumbnail_ready" class="md-nav__link">
     <span class="md-ellipsis">
       
-        on_thumbnail_ready
+        on_signal_thumbnail_ready
       
     </span>
   </a>
@@ -1818,7 +1818,7 @@
 <span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ImageGridDelegate</span><span class="p">(</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dessine chaque cellule : thumbnail, bordure de sélection, point indexé, badge épinglé.&quot;&quot;&quot;</span>
 
-    <span class="n">repaint_requested</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_repaint_requested</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="n">BORDER</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;border_width&quot;</span><span class="p">]</span>
     <span class="n">DOT_RADIUS</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;dot_radius&quot;</span><span class="p">]</span>
@@ -1848,7 +1848,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cell_size</span> <span class="o">=</span> <span class="n">cell_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">thumbnail_ready</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_thumbnail_ready</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">signal_thumbnail_ready</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_thumbnail_ready</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_option</span><span class="p">,</span> <span class="n">_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSize</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Override de la méthode sizeHint pour retourner la taille des cellules.</span>
@@ -1958,14 +1958,14 @@
         <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">_COL_PIN_ICON</span><span class="p">)</span>
         <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="n">badge_rect</span><span class="p">,</span> <span class="n">Qt</span><span class="o">.</span><span class="n">AlignmentFlag</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">,</span> <span class="s2">&quot;📌&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Emet un signal pour indiquer que le thumbnail d&#39;une image est prêt, afin que la cellule correspondante soit redessinée.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            img_name (str): Le nom de fichier de l&#39;image dont le thumbnail est prêt.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">repaint_requested</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_repaint_requested</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2117,7 +2117,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">scheduler</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cell_size</span> <span class="o">=</span> <span class="n">cell_size</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">thumbnail_ready</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_thumbnail_ready</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">signal_thumbnail_ready</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_thumbnail_ready</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2256,8 +2256,8 @@
 <div class="doc doc-object doc-function">
 
 
-<h4 id="models.image_model.ImageGridDelegate.on_thumbnail_ready" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_thumbnail_ready</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span></code>
+<h4 id="models.image_model.ImageGridDelegate.on_signal_thumbnail_ready" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_thumbnail_ready</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span></code>
 
 </h4>
 
@@ -2307,14 +2307,14 @@
 <span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
-<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_thumbnail_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Emet un signal pour indiquer que le thumbnail d&#39;une image est prêt, afin que la cellule correspondante soit redessinée.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        img_name (str): Le nom de fichier de l&#39;image dont le thumbnail est prêt.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">repaint_requested</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_repaint_requested</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

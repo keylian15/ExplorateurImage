@@ -854,10 +854,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#services.workers.ThumbnailScheduler.on_done" class="md-nav__link">
+  <a href="#services.workers.ThumbnailScheduler.on_signal_done" class="md-nav__link">
     <span class="md-ellipsis">
       
-        on_done
+        on_signal_done
       
     </span>
   </a>
@@ -865,10 +865,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#services.workers.ThumbnailScheduler.on_error" class="md-nav__link">
+  <a href="#services.workers.ThumbnailScheduler.on_signal_error" class="md-nav__link">
     <span class="md-ellipsis">
       
-        on_error
+        on_signal_error
       
     </span>
   </a>
@@ -1715,10 +1715,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#services.workers.ThumbnailScheduler.on_done" class="md-nav__link">
+  <a href="#services.workers.ThumbnailScheduler.on_signal_done" class="md-nav__link">
     <span class="md-ellipsis">
       
-        on_done
+        on_signal_done
       
     </span>
   </a>
@@ -1726,10 +1726,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#services.workers.ThumbnailScheduler.on_error" class="md-nav__link">
+  <a href="#services.workers.ThumbnailScheduler.on_signal_error" class="md-nav__link">
     <span class="md-ellipsis">
       
-        on_error
+        on_signal_error
       
     </span>
   </a>
@@ -1963,9 +1963,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AutoCompleteAllWorker</span><span class="p">(</span><span class="n">QThread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class pour effectuer une recherche d&#39;auto-complétion sur toutes les images d&#39;un dossier.&quot;&quot;&quot;</span>
 
-    <span class="n">image_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-    <span class="n">image_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-    <span class="n">all_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">signal_image_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+    <span class="n">signal_image_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_all_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1993,10 +1993,10 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
             <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_description_and_keywords_from_image</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">all_done</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_all_done</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2184,10 +2184,10 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
         <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_description_and_keywords_from_image</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">all_done</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_image_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">img_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_all_done</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2255,8 +2255,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">AutoCompleteWorker</span><span class="p">(</span><span class="n">QThread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class pour effectuer une recherche d&#39;auto-complétion sur une image.&quot;&quot;&quot;</span>
 
-    <span class="n">finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">signal_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2272,9 +2272,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance l&#39;auto-complétion sur l&#39;image.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_description_and_keywords_from_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_path</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2402,9 +2402,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance l&#39;auto-complétion sur l&#39;image.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_description_and_keywords_from_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2605,10 +2605,10 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MapWorker</span><span class="p">(</span><span class="n">QThread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class pour générer une carte UMAP + HDBSCAN.&quot;&quot;&quot;</span>
 
-    <span class="n">finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-    <span class="n">cluster_named</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-    <span class="n">progress</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+    <span class="n">signal_cluster_named</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_progress</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2639,14 +2639,14 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calcule les embeddings et les clusters.&quot;&quot;&quot;</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
         <span class="c1"># ── 1. Embeddings ─────────────────────────────────────</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Extraction des embeddings…&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Extraction des embeddings…&quot;</span><span class="p">)</span>
         <span class="n">names</span><span class="p">,</span> <span class="n">vectors</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">emb</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;embedding&quot;</span><span class="p">)</span>
@@ -2655,13 +2655,13 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
                 <span class="n">vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">emb</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pas assez d&#39;embeddings (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span><span class="si">}</span><span class="s2"> / min 2).&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pas assez d&#39;embeddings (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span><span class="si">}</span><span class="s2"> / min 2).&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="c1"># ── 2. UMAP ───────────────────────────────────────────</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UMAP sur </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2"> images…&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UMAP sur </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2"> images…&quot;</span><span class="p">)</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">umap</span>  <span class="c1"># type: ignore</span>
 
         <span class="n">embedding_2d</span> <span class="o">=</span> <span class="n">umap</span><span class="o">.</span><span class="n">UMAP</span><span class="p">(</span>
@@ -2674,7 +2674,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
         <span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
         <span class="c1"># ── 3. HDBSCAN ────────────────────────────────────────</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Clustering HDBSCAN…&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Clustering HDBSCAN…&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">hdbscan</span>  <span class="c1"># type: ignore</span>
 
@@ -2687,19 +2687,19 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
                 <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;hdbscan absent → pas de clustering&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;hdbscan absent → pas de clustering&quot;</span><span class="p">)</span>
             <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 
         <span class="c1"># ── 4. Affichage Non Bloquant ────────────────────────────────────────</span>
         <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">embedding_2d</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Carte prête.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Carte prête.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
 
         <span class="c1"># ── 5. Nommer les clusters en fond ────────────────────────────────────────</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name_clusters_async</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Nommage des clusters terminé, carte prête.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Nommage des clusters terminé, carte prête.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">name_clusters_async</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Nomme les clusters en fonction des descriptions et mots clés des images.</span>
@@ -2722,7 +2722,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 
         <span class="c1"># Pour chaque cluster</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nommage cluster </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span><span class="si">}</span><span class="s2">…&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nommage cluster </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span><span class="si">}</span><span class="s2">…&quot;</span><span class="p">)</span>
             <span class="n">members</span> <span class="o">=</span> <span class="n">cluster_members</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span>
             <span class="c1"># Nombre aléatoire pour eviter de prendre trop d&#39;images</span>
             <span class="n">sample</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">members</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">)))</span>
@@ -2738,7 +2738,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
                     <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kws</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptions</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cluster </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">signal_cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cluster </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Prompt</span>
@@ -2756,7 +2756,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
                 <span class="n">name</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">40</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cluster </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2998,7 +2998,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
     <span class="c1"># ── 1. Embeddings ─────────────────────────────────────</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Extraction des embeddings…&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Extraction des embeddings…&quot;</span><span class="p">)</span>
     <span class="n">names</span><span class="p">,</span> <span class="n">vectors</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">emb</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;embedding&quot;</span><span class="p">)</span>
@@ -3007,13 +3007,13 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
             <span class="n">vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">emb</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pas assez d&#39;embeddings (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span><span class="si">}</span><span class="s2"> / min 2).&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pas assez d&#39;embeddings (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span><span class="si">}</span><span class="s2"> / min 2).&quot;</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
     <span class="c1"># ── 2. UMAP ───────────────────────────────────────────</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UMAP sur </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2"> images…&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UMAP sur </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2"> images…&quot;</span><span class="p">)</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">umap</span>  <span class="c1"># type: ignore</span>
 
     <span class="n">embedding_2d</span> <span class="o">=</span> <span class="n">umap</span><span class="o">.</span><span class="n">UMAP</span><span class="p">(</span>
@@ -3026,7 +3026,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
     <span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
     <span class="c1"># ── 3. HDBSCAN ────────────────────────────────────────</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Clustering HDBSCAN…&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Clustering HDBSCAN…&quot;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">hdbscan</span>  <span class="c1"># type: ignore</span>
 
@@ -3039,19 +3039,19 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
             <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;hdbscan absent → pas de clustering&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;hdbscan absent → pas de clustering&quot;</span><span class="p">)</span>
         <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
 
     <span class="c1"># ── 4. Affichage Non Bloquant ────────────────────────────────────────</span>
     <span class="n">points</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">embedding_2d</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Carte prête.&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Carte prête.&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
 
     <span class="c1"># ── 5. Nommer les clusters en fond ────────────────────────────────────────</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">name_clusters_async</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Nommage des clusters terminé, carte prête.&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;Nommage des clusters terminé, carte prête.&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3198,7 +3198,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 
     <span class="c1"># Pour chaque cluster</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">unique</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nommage cluster </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span><span class="si">}</span><span class="s2">…&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_progress</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Nommage cluster </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span><span class="si">}</span><span class="s2">…&quot;</span><span class="p">)</span>
         <span class="n">members</span> <span class="o">=</span> <span class="n">cluster_members</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span>
         <span class="c1"># Nombre aléatoire pour eviter de prendre trop d&#39;images</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">members</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">)))</span>
@@ -3214,7 +3214,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
                 <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">kws</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cluster </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cluster </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">continue</span>
 
         <span class="c1"># Prompt</span>
@@ -3232,7 +3232,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
             <span class="n">name</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">40</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cluster </span><span class="si">{</span><span class="n">cid</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_cluster_named</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">cid</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cluster_names</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3266,7 +3266,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
     <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3359,8 +3359,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">286</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SaveMetadataWorker</span><span class="p">(</span><span class="n">QThread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class pour sauvegarder les métadonnées des images.&quot;&quot;&quot;</span>
 
-    <span class="n">finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_finished</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">signal_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3401,9 +3401,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3629,9 +3629,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">index_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3681,8 +3681,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">TaskSignals</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Défini deux signaux. Un pour les erreurs, un pour les résultats.&quot;&quot;&quot;</span>
 
-    <span class="n">done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">)</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">signal_done</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">)</span>
+    <span class="n">signal_error</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3812,7 +3812,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ThumbnailScheduler</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class qui gère la création de miniatures.&quot;&quot;&quot;</span>
 
-    <span class="n">thumbnail_ready</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">)</span>
+    <span class="n">signal_thumbnail_ready</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">)</span>
     <span class="n">POOL_THREADS</span> <span class="o">=</span> <span class="mi">4</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache</span><span class="p">:</span> <span class="n">ThumbnailCache</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -3852,8 +3852,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
                 <span class="k">return</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
         <span class="n">task</span> <span class="o">=</span> <span class="n">ThumbnailTask</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
-        <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_done</span><span class="p">)</span>
-        <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_error</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_done</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">flush_pending</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3865,7 +3865,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attend que toutes les miniatures soient créées.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">waitForDone</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback appelé quand une miniature est créée.</span>
 
 <span class="sd">        Args:</span>
@@ -3874,9 +3874,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_thumbnail_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback appelé quand une erreur se produit lors de la création d&#39;une miniature.</span>
 
 <span class="sd">        Args:</span>
@@ -4025,8 +4025,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <div class="doc doc-object doc-function">
 
 
-<h4 id="services.workers.ThumbnailScheduler.on_done" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_done</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span></code>
+<h4 id="services.workers.ThumbnailScheduler.on_signal_done" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_done</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span></code>
 
 </h4>
 
@@ -4094,7 +4094,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
-<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback appelé quand une miniature est créée.</span>
 
 <span class="sd">    Args:</span>
@@ -4103,7 +4103,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">signal_thumbnail_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4113,8 +4113,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <div class="doc doc-object doc-function">
 
 
-<h4 id="services.workers.ThumbnailScheduler.on_error" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_error</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span></code>
+<h4 id="services.workers.ThumbnailScheduler.on_signal_error" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_error</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span></code>
 
 </h4>
 
@@ -4164,7 +4164,7 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
-<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback appelé quand une erreur se produit lors de la création d&#39;une miniature.</span>
 
 <span class="sd">    Args:</span>
@@ -4323,8 +4323,8 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
     <span class="n">task</span> <span class="o">=</span> <span class="n">ThumbnailTask</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
-    <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_done</span><span class="p">)</span>
-    <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_error</span><span class="p">)</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_done</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_done</span><span class="p">)</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_error</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -4437,9 +4437,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance le chargement de la miniature.&quot;&quot;&quot;</span>
         <span class="n">pixmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">make_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">pixmap</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -4573,9 +4573,9 @@ liées aux thumbnails, à l'IA, à la sauvegarde des métadonnées et au cluster
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance le chargement de la miniature.&quot;&quot;&quot;</span>
     <span class="n">pixmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">make_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">pixmap</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_done</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">img_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

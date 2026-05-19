@@ -1102,6 +1102,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#views.main_window.MainWindow.on_signal_tab_double_clicked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_tab_double_clicked
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#views.main_window.MainWindow.on_tab_changed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1117,17 +1128,6 @@
     <span class="md-ellipsis">
       
         on_tab_close_requested
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#views.main_window.MainWindow.on_tab_double_clicked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_tab_double_clicked
       
     </span>
   </a>
@@ -1414,6 +1414,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#views.main_window.MainWindow.on_signal_tab_double_clicked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        on_signal_tab_double_clicked
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#views.main_window.MainWindow.on_tab_changed" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1429,17 +1440,6 @@
     <span class="md-ellipsis">
       
         on_tab_close_requested
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#views.main_window.MainWindow.on_tab_double_clicked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        on_tab_double_clicked
       
     </span>
   </a>
@@ -2249,7 +2249,7 @@ La fenêtre gère leur cycle de vie complet :
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">tab_bar</span> <span class="o">=</span> <span class="n">RenamableTabBar</span><span class="p">()</span>
-        <span class="n">tab_bar</span><span class="o">.</span><span class="n">tab_double_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_tab_double_clicked</span><span class="p">)</span>
+        <span class="n">tab_bar</span><span class="o">.</span><span class="n">signal_tab_double_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_tab_double_clicked</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span> <span class="o">=</span> <span class="n">QTabWidget</span><span class="p">()</span>
 
@@ -2371,7 +2371,7 @@ La fenêtre gère leur cycle de vie complet :
             <span class="n">ws_data</span><span class="o">=</span><span class="n">ws_data</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">widget</span><span class="o">.</span><span class="n">folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">signal_folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">[</span><span class="n">ws_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span>
 
@@ -2513,7 +2513,7 @@ La fenêtre gère leur cycle de vie complet :
             <span class="k">if</span> <span class="n">ws_widget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">widget</span><span class="p">:</span>
                 <span class="n">ws_widget</span><span class="o">.</span><span class="n">hide_dock</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ouvre une boîte de dialogue de renommage d&#39;onglet.</span>
 
@@ -2688,7 +2688,7 @@ La fenêtre gère leur cycle de vie complet :
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">tab_bar</span> <span class="o">=</span> <span class="n">RenamableTabBar</span><span class="p">()</span>
-    <span class="n">tab_bar</span><span class="o">.</span><span class="n">tab_double_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_tab_double_clicked</span><span class="p">)</span>
+    <span class="n">tab_bar</span><span class="o">.</span><span class="n">signal_tab_double_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_signal_tab_double_clicked</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span> <span class="o">=</span> <span class="n">QTabWidget</span><span class="p">()</span>
 
@@ -3013,7 +3013,7 @@ La fenêtre gère leur cycle de vie complet :
         <span class="n">ws_data</span><span class="o">=</span><span class="n">ws_data</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="n">widget</span><span class="o">.</span><span class="n">folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">signal_folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">[</span><span class="n">ws_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span>
 
@@ -3161,6 +3161,114 @@ La fenêtre gère leur cycle de vie complet :
         <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Workspace </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.main_window.MainWindow.on_signal_tab_double_clicked" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">on_signal_tab_double_clicked</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ouvre une boîte de dialogue de renommage d'onglet.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>index</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Index de l'onglet renommé.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/main_window.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ouvre une boîte de dialogue de renommage d&#39;onglet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        index (int):</span>
+<span class="sd">            Index de l&#39;onglet renommé.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">WorkspaceWidget</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="n">new_name</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="s2">&quot;Renommer l&#39;espace de travail&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Nouveau nom :&quot;</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="n">widget</span><span class="o">.</span><span class="n">ws_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">new_name</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+        <span class="n">new_name</span> <span class="o">=</span> <span class="n">new_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">setTabText</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
+
+        <span class="n">widget</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_workspaces</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3358,114 +3466,6 @@ La fenêtre gère leur cycle de vie complet :
         <span class="k">return</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">remove_workspace</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="views.main_window.MainWindow.on_tab_double_clicked" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">on_tab_double_clicked</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></code>
-
-</h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Ouvre une boîte de dialogue de renommage d'onglet.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>index</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Index de l'onglet renommé.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Ouvre une boîte de dialogue de renommage d&#39;onglet.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        index (int):</span>
-<span class="sd">            Index de l&#39;onglet renommé.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">WorkspaceWidget</span><span class="p">):</span>
-        <span class="k">return</span>
-
-    <span class="n">new_name</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="s2">&quot;Renommer l&#39;espace de travail&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Nouveau nom :&quot;</span><span class="p">,</span>
-        <span class="n">text</span><span class="o">=</span><span class="n">widget</span><span class="o">.</span><span class="n">ws_name</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">ok</span> <span class="ow">and</span> <span class="n">new_name</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-        <span class="n">new_name</span> <span class="o">=</span> <span class="n">new_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="o">.</span><span class="n">setTabText</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
-
-        <span class="n">widget</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_workspaces</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4052,7 +4052,7 @@ double-clique sur un onglet.</p>
 <span class="sd">    double-clique sur un onglet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">tab_double_clicked</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">signal_tab_double_clicked</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4064,7 +4064,7 @@ double-clique sur un onglet.</p>
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tab_double_clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_tab_double_clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -4151,7 +4151,7 @@ double-clique sur un onglet.</p>
     <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
 
     <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tab_double_clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_tab_double_clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>

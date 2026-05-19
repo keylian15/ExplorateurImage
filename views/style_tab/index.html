@@ -1673,7 +1673,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
 <span class="normal">329</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ColorRow</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ligne d&#39;édition pour une couleur : swatch + champ hex.&quot;&quot;&quot;</span>
 
-    <span class="n">changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (key, new_hex)</span>
+    <span class="n">signal_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (key, new_hex)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hex_color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
@@ -1720,7 +1720,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
         <span class="k">if</span> <span class="n">QColor</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_hex</span> <span class="o">=</span> <span class="n">text</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_swatch</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">open_picker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ouvre le QColorDialog.&quot;&quot;&quot;</span>
@@ -1871,7 +1871,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
     <span class="k">if</span> <span class="n">QColor</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_hex</span> <span class="o">=</span> <span class="n">text</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_swatch</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signal_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2157,7 +2157,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
 <span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">PresetCard</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bouton carte représentant un thème prédéfini avec swatches de prévisualisation.&quot;&quot;&quot;</span>
 
-    <span class="n">clicked</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># nom du preset</span>
+    <span class="n">signal_clicked</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># nom du preset</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">colors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
@@ -2216,7 +2216,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
 
     <span class="k">def</span><span class="w"> </span><span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">MouseButton</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signal_clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2503,7 +2503,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
         <span class="n">presets_row</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">preset_name</span><span class="p">,</span> <span class="n">preset_colors</span> <span class="ow">in</span> <span class="n">PRESETS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">card</span> <span class="o">=</span> <span class="n">PresetCard</span><span class="p">(</span><span class="n">preset_name</span><span class="p">,</span> <span class="n">preset_colors</span><span class="p">)</span>
-            <span class="n">card</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_preset</span><span class="p">)</span>
+            <span class="n">card</span><span class="o">.</span><span class="n">signal_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_preset</span><span class="p">)</span>
             <span class="n">presets_row</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
         <span class="n">presets_row</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
         <span class="n">root</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">presets_row</span><span class="p">)</span>
@@ -2583,7 +2583,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
 
             <span class="c1"># Swatch + champ hex</span>
             <span class="n">color_row</span> <span class="o">=</span> <span class="n">ColorRow</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">hex_val</span><span class="p">)</span>
-            <span class="n">color_row</span><span class="o">.</span><span class="n">changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_color_changed</span><span class="p">)</span>
+            <span class="n">color_row</span><span class="o">.</span><span class="n">signal_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_color_changed</span><span class="p">)</span>
             <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">color_row</span><span class="p">,</span> <span class="n">row_idx</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_row</span>
 
@@ -2890,7 +2890,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
 
         <span class="c1"># Swatch + champ hex</span>
         <span class="n">color_row</span> <span class="o">=</span> <span class="n">ColorRow</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">hex_val</span><span class="p">)</span>
-        <span class="n">color_row</span><span class="o">.</span><span class="n">changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_color_changed</span><span class="p">)</span>
+        <span class="n">color_row</span><span class="o">.</span><span class="n">signal_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_color_changed</span><span class="p">)</span>
         <span class="n">grid</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">color_row</span><span class="p">,</span> <span class="n">row_idx</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rows</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">color_row</span>
 
@@ -3035,7 +3035,7 @@ colors.json, puis appliquées en temps réel via la mise à jour du stylesheet g
     <span class="n">presets_row</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">preset_name</span><span class="p">,</span> <span class="n">preset_colors</span> <span class="ow">in</span> <span class="n">PRESETS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">card</span> <span class="o">=</span> <span class="n">PresetCard</span><span class="p">(</span><span class="n">preset_name</span><span class="p">,</span> <span class="n">preset_colors</span><span class="p">)</span>
-        <span class="n">card</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_preset</span><span class="p">)</span>
+        <span class="n">card</span><span class="o">.</span><span class="n">signal_clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_preset</span><span class="p">)</span>
         <span class="n">presets_row</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">card</span><span class="p">)</span>
     <span class="n">presets_row</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
     <span class="n">root</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="n">presets_row</span><span class="p">)</span>
