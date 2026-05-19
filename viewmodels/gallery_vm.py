@@ -296,17 +296,25 @@ class GalleryViewModel(QObject):
             context = self.search_tree.current.results
 
         self._result_images = self.filtered_images(filter_text=text, context=context)
+
+        # Les épinglées présentes dans le dossier restent toujours en tête
+        all_imgs = set(self.all_images())
+        pinned_first = [p for p in self._pinned if p in all_imgs]
+        result_without_pinned = [img for img in self._result_images if img not in set(self._pinned)]
+        self._result_images = pinned_first + result_without_pinned
+
         self.refresh(self._result_images)
 
     def filtered_images(self, filter_text: str, context: list[str] = None) -> list[str]:
         """Renvoi les 100 images les plus proches de la requête.
+        Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.
 
         Args:
             filter_text (str): Requête de recherche.
             context (list[str]): Liste de nom d'images servant de base. Si none ce base sur toutes les images.
 
         Returns:
-            list[str]: Liste des images.
+            list[str]: Liste des images. Les épinglées sont en tête.
         """
 
         # Récupère les embeddings de la requête
@@ -319,9 +327,13 @@ class GalleryViewModel(QObject):
         else:
             images = {key: self.index[key] for key in context if key in self.index}
 
-        # Calcule la similarité entre la requête et les embeddings
+        pinned_set = set(self._pinned)
         scores = {}
         for key, data in images.items():
+            # Exclut les images épinglées.
+            if key in pinned_set:
+                continue
+
             sim = self._client.similarite_cosinus(query_emb, data["embedding"])
             text_match = ft in data.get("description", "").lower() or ft in " ".join(data.get("keywords", [])).lower()
             score = sim * 1.0
