@@ -2219,7 +2219,19 @@ logique d'interface graphique.</p>
 <span class="normal">396</span>
 <span class="normal">397</span>
 <span class="normal">398</span>
-<span class="normal">399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GalleryViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GalleryViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class qui gère la logique de la vue de la galerie.&quot;&quot;&quot;</span>
 
     <span class="c1"># ── Signaux émis vers la View ─────────────────────────────────────────────</span>
@@ -2465,17 +2477,25 @@ logique d'interface graphique.</p>
             <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_tree</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">results</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_images</span><span class="p">(</span><span class="n">filter_text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="c1"># Les épinglées présentes dans le dossier restent toujours en tête</span>
+        <span class="n">all_imgs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_images</span><span class="p">())</span>
+        <span class="n">pinned_first</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_imgs</span><span class="p">]</span>
+        <span class="n">result_without_pinned</span> <span class="o">=</span> <span class="p">[</span><span class="n">img</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span> <span class="k">if</span> <span class="n">img</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span> <span class="o">=</span> <span class="n">pinned_first</span> <span class="o">+</span> <span class="n">result_without_pinned</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Renvoi les 100 images les plus proches de la requête.</span>
+<span class="sd">        Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            filter_text (str): Requête de recherche.</span>
 <span class="sd">            context (list[str]): Liste de nom d&#39;images servant de base. Si none ce base sur toutes les images.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list[str]: Liste des images.</span>
+<span class="sd">            list[str]: Liste des images. Les épinglées sont en tête.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Récupère les embeddings de la requête</span>
@@ -2488,9 +2508,13 @@ logique d'interface graphique.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">images</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">context</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">}</span>
 
-        <span class="c1"># Calcule la similarité entre la requête et les embeddings</span>
+        <span class="n">pinned_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">)</span>
         <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">images</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Exclut les images épinglées.</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pinned_set</span><span class="p">:</span>
+                <span class="k">continue</span>
+
             <span class="n">sim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">similarite_cosinus</span><span class="p">(</span><span class="n">query_emb</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">])</span>
             <span class="n">text_match</span> <span class="o">=</span> <span class="n">ft</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">ft</span> <span class="ow">in</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="p">[]))</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="n">score</span> <span class="o">=</span> <span class="n">sim</span> <span class="o">*</span> <span class="mf">1.0</span>
@@ -2965,13 +2989,13 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Applique le zoom.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_cell_size</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;size_levels&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cell_size</span><span class="p">)</span>
@@ -3013,7 +3037,14 @@ logique d'interface graphique.</p>
 <span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
-<span class="normal">299</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_search</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Effectue la recherche sémantique et met à jour la liste des images.&quot;&quot;&quot;</span>
 
     <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -3026,6 +3057,13 @@ logique d'interface graphique.</p>
         <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_tree</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">results</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_images</span><span class="p">(</span><span class="n">filter_text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="c1"># Les épinglées présentes dans le dossier restent toujours en tête</span>
+    <span class="n">all_imgs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_images</span><span class="p">())</span>
+    <span class="n">pinned_first</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_imgs</span><span class="p">]</span>
+    <span class="n">result_without_pinned</span> <span class="o">=</span> <span class="p">[</span><span class="n">img</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span> <span class="k">if</span> <span class="n">img</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">)]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span> <span class="o">=</span> <span class="n">pinned_first</span> <span class="o">+</span> <span class="n">result_without_pinned</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3044,7 +3082,8 @@ logique d'interface graphique.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Renvoi les 100 images les plus proches de la requête.</p>
+        <p>Renvoi les 100 images les plus proches de la requête.
+Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3109,7 +3148,7 @@ logique d'interface graphique.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>list[str]: Liste des images.</p>
+                <p>list[str]: Liste des images. Les épinglées sont en tête.</p>
               </div>
             </td>
           </tr>
@@ -3119,14 +3158,7 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
 <span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
@@ -3152,15 +3184,28 @@ logique d'interface graphique.</p>
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Renvoi les 100 images les plus proches de la requête.</span>
+<span class="sd">    Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filter_text (str): Requête de recherche.</span>
 <span class="sd">        context (list[str]): Liste de nom d&#39;images servant de base. Si none ce base sur toutes les images.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list[str]: Liste des images.</span>
+<span class="sd">        list[str]: Liste des images. Les épinglées sont en tête.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Récupère les embeddings de la requête</span>
@@ -3173,9 +3218,13 @@ logique d'interface graphique.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">images</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">context</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">}</span>
 
-    <span class="c1"># Calcule la similarité entre la requête et les embeddings</span>
+    <span class="n">pinned_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">)</span>
     <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">images</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Exclut les images épinglées.</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pinned_set</span><span class="p">:</span>
+            <span class="k">continue</span>
+
         <span class="n">sim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">similarite_cosinus</span><span class="p">(</span><span class="n">query_emb</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;embedding&quot;</span><span class="p">])</span>
         <span class="n">text_match</span> <span class="o">=</span> <span class="n">ft</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">ft</span> <span class="ow">in</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;keywords&quot;</span><span class="p">,</span> <span class="p">[]))</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="n">score</span> <span class="o">=</span> <span class="n">sim</span> <span class="o">*</span> <span class="mf">1.0</span>
@@ -3392,12 +3441,12 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_repaint_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_repaint_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Notifie quand une image a été modifiée.</span>
 
 <span class="sd">    Args:</span>
@@ -3731,18 +3780,18 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enregistre la recherche dans l&#39;historique.&quot;&quot;&quot;</span>
 
     <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -3873,14 +3922,14 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">select_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">select_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Selectionne l&#39;image.</span>
 
 <span class="sd">    Args:</span>
@@ -3941,14 +3990,14 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_affinage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_affinage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Active ou désactive l&#39;affinage des recherches.</span>
 
 <span class="sd">    Args:</span>
@@ -4260,12 +4309,12 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Zoom in sur les images.&quot;&quot;&quot;</span>
     <span class="n">levels</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;size_levels&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -4293,11 +4342,11 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Zoom out sur les images.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">-=</span> <span class="mi">1</span>
