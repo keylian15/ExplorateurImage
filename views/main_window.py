@@ -58,7 +58,7 @@ class RenamableTabBar(QTabBar):
     double-clique sur un onglet.
     """
 
-    tab_double_clicked = pyqtSignal(int)
+    signal_tab_double_clicked = pyqtSignal(int)
 
     def mouseDoubleClickEvent(self, event):
         """
@@ -70,7 +70,7 @@ class RenamableTabBar(QTabBar):
         index = self.tabAt(event.pos())
 
         if index >= 0:
-            self.tab_double_clicked.emit(index)
+            self.signal_tab_double_clicked.emit(index)
 
         super().mouseDoubleClickEvent(event)
 
@@ -195,7 +195,7 @@ class MainWindow(QMainWindow):
         """
 
         tab_bar = RenamableTabBar()
-        tab_bar.tab_double_clicked.connect(self.on_tab_double_clicked)
+        tab_bar.signal_tab_double_clicked.connect(self.on_signal_tab_double_clicked)
 
         self.tabs = QTabWidget()
 
@@ -317,7 +317,7 @@ class MainWindow(QMainWindow):
             ws_data=ws_data,
         )
 
-        widget.folder_changed.connect(self.on_workspace_folder_changed)
+        widget.signal_folder_changed.connect(self.on_workspace_folder_changed)
 
         self.workspaces[ws_id] = widget
 
@@ -459,7 +459,7 @@ class MainWindow(QMainWindow):
             if ws_widget is not widget:
                 ws_widget.hide_dock()
 
-    def on_tab_double_clicked(self, index: int):
+    def on_signal_tab_double_clicked(self, index: int):
         """
         Ouvre une boîte de dialogue de renommage d'onglet.
 

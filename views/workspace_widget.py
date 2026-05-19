@@ -50,8 +50,8 @@ from views.style_tab import StyleTab
 class WorkspaceWidget(QWidget):
     """Espace de travail autonome : galerie + carte + thème + dock détail."""
 
-    folder_changed = pyqtSignal(str, str)  # (ws_id, folder_path)
-    closed = pyqtSignal(str)  # ws_id
+    signal_folder_changed = pyqtSignal(str, str)  # (ws_id, folder_path)
+    signal_closed = pyqtSignal(str)  # ws_id
 
     def __init__(
         self,
@@ -137,9 +137,9 @@ class WorkspaceWidget(QWidget):
         main_window.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._map_search_dock)
 
         # ── Connexions inter-VM ───────────────────────────────────────────────
-        self.gallery_vm.image_selected.connect(self._on_image_selected)
-        self.gallery_vm.image_selected.connect(self._map_tab.on_image_selected)
-        self.gallery_vm.folder_changed.connect(self._on_folder_changed)
+        self.gallery_vm.signal_image_selected.connect(self._on_image_selected)
+        self.gallery_vm.signal_image_selected.connect(self._map_tab.on_image_selected)
+        self.gallery_vm.signal_folder_changed.connect(self._on_folder_changed)
 
         # ── Restauration du dossier ───────────────────────────────────────────
         if folder and os.path.exists(folder):
@@ -181,7 +181,7 @@ class WorkspaceWidget(QWidget):
 
     def _on_folder_changed(self, folder: str):
         """Propage le changement de dossier vers MainWindow pour persistance."""
-        self.folder_changed.emit(self.ws_id, folder)
+        self.signal_folder_changed.emit(self.ws_id, folder)
 
     # ── API publique ──────────────────────────────────────────────────────────
 

@@ -36,11 +36,11 @@ class AutocompleteViewModel(QObject):
     """Class pour la vue d'auto-complétion."""
 
     # ── Signaux vers la View ──────────────────────────────────────────────────
-    started = pyqtSignal(int)  # total d'images à traiter
-    image_done = pyqtSignal(int, str)  # (idx, img_name)
-    image_error = pyqtSignal(int, str, str)  # (idx, img_name, msg)
-    finished = pyqtSignal(bool)  # cancelled=True/False
-    progress = pyqtSignal(int, int, str)  # (done, total, label)
+    signal_started = pyqtSignal(int)  # total d'images à traiter
+    signal_image_done = pyqtSignal(int, str)  # (idx, img_name)
+    signal_image_error = pyqtSignal(int, str, str)  # (idx, img_name, msg)
+    signal_finished = pyqtSignal(bool)  # cancelled=True/False
+    signal_progress = pyqtSignal(int, int, str)  # (done, total, label)
 
     def __init__(
         self,
@@ -67,11 +67,11 @@ class AutocompleteViewModel(QObject):
         if not images:
             return
 
-        self.started.emit(len(images))
+        self.signal_started.emit(len(images))
         self._worker = AutoCompleteAllWorker(self._gallery_vm.current_folder, images, self._client)
-        self._worker.image_done.connect(self.on_image_done)
-        self._worker.image_error.connect(self.on_image_error)
-        self._worker.all_done.connect(self.on_all_done)
+        self._worker.signal_image_done.connect(self.on_signal_image_done)
+        self._worker.signal_image_error.connect(self.on_image_error)
+        self._worker.signal_all_done.connect(self.on_signal_all_done)
         self._worker.start()
 
     def cancel(self):
@@ -83,7 +83,7 @@ class AutocompleteViewModel(QObject):
         """Test si l'auto-complétion est en cours."""
         return bool(self._worker and self._worker.isRunning())
 
-    def on_image_done(self, idx: int, img_name: str, result: dict):
+    def on_signal_image_done(self, idx: int, img_name: str, result: dict):
         """Callback quand une image est traitée.
 
         Args:
@@ -104,8 +104,8 @@ class AutocompleteViewModel(QObject):
         self._gallery_vm.reload_index()
 
         total = self._worker.images.__len__()
-        self.image_done.emit(idx, img_name)
-        self.progress.emit(idx + 1, total, img_name)
+        self.signal_image_done.emit(idx, img_name)
+        self.signal_progress.emit(idx + 1, total, img_name)
 
     def on_image_error(self, idx: int, img_name: str, msg: str):
         """Callback quand une image ne peut pas être traitée.
@@ -117,10 +117,10 @@ class AutocompleteViewModel(QObject):
         """
 
         total = self._worker.images.__len__()
-        self.image_error.emit(idx, img_name, msg)
-        self.progress.emit(idx + 1, total, img_name)
+        self.signal_image_error.emit(idx, img_name, msg)
+        self.signal_progress.emit(idx + 1, total, img_name)
 
-    def on_all_done(self):
+    def on_signal_all_done(self):
         """Callback quand toutes les images ont été traitées."""
         cancelled = self._worker._cancelled
-        self.finished.emit(cancelled)
+        self.signal_finished.emit(cancelled)

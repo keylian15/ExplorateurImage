@@ -51,8 +51,8 @@ MODEL_EMBED = "nomic-embed-text:v1.5"
 class TaskSignals(QObject):
     """Défini deux signaux. Un pour les erreurs, un pour les résultats."""
 
-    done = pyqtSignal(str, QPixmap)
-    error = pyqtSignal(str)
+    signal_done = pyqtSignal(str, QPixmap)
+    signal_error = pyqtSignal(str)
 
 
 class ThumbnailTask(QRunnable):
@@ -75,15 +75,15 @@ class ThumbnailTask(QRunnable):
         """Lance le chargement de la miniature."""
         pixmap = self.cache.make_thumbnail(self.img_name)
         if pixmap and not pixmap.isNull():
-            self.signals.done.emit(self.img_name, pixmap)
+            self.signals.signal_done.emit(self.img_name, pixmap)
         else:
-            self.signals.error.emit(self.img_name)
+            self.signals.signal_error.emit(self.img_name)
 
 
 class ThumbnailScheduler(QObject):
     """Class qui gère la création de miniatures."""
 
-    thumbnail_ready = pyqtSignal(str, QPixmap)
+    signal_thumbnail_ready = pyqtSignal(str, QPixmap)
     POOL_THREADS = 4
 
     def __init__(self, cache: ThumbnailCache, parent=None):
@@ -123,8 +123,8 @@ class ThumbnailScheduler(QObject):
                 return
             self._pending.add(img_name)
         task = ThumbnailTask(img_name, self.cache)
-        task.signals.done.connect(self.on_done)
-        task.signals.error.connect(self.on_error)
+        task.signals.signal_done.connect(self.on_signal_done)
+        task.signals.signal_error.connect(self.on_signal_error)
         self._pool.start(task)
 
     def flush_pending(self):
@@ -136,7 +136,7 @@ class ThumbnailScheduler(QObject):
         """Attend que toutes les miniatures soient créées."""
         self._pool.waitForDone()
 
-    def on_done(self, img_name: str, pixmap: QPixmap):
+    def on_signal_done(self, img_name: str, pixmap: QPixmap):
         """Callback appelé quand une miniature est créée.
 
         Args:
@@ -145,9 +145,9 @@ class ThumbnailScheduler(QObject):
         """
         with QMutexLocker(self._mutex):
             self._pending.discard(img_name)
-        self.thumbnail_ready.emit(img_name, pixmap)
+        self.signal_thumbnail_ready.emit(img_name, pixmap)
 
-    def on_error(self, img_name: str):
+    def on_signal_error(self, img_name: str):
         """Callback appelé quand une erreur se produit lors de la création d'une miniature.
 
         Args:
@@ -165,8 +165,8 @@ class ThumbnailScheduler(QObject):
 class AutoCompleteWorker(QThread):
     """Class pour effectuer une recherche d'auto-complétion sur une image."""
 
-    finished = pyqtSignal(dict)
-    error = pyqtSignal(str)
+    signal_finished = pyqtSignal(dict)
+    signal_error = pyqtSignal(str)
 
     def __init__(self, image_path: str, client: OllamaWrapper):
         """
@@ -182,9 +182,9 @@ class AutoCompleteWorker(QThread):
         """Lance l'auto-complétion sur l'image."""
         try:
             result = self.client.get_description_and_keywords_from_image(self.image_path)
-            self.finished.emit(result)
+            self.signal_finished.emit(result)
         except Exception as e:
-            self.error.emit(str(e))
+            self.signal_error.emit(str(e))
 
 
 # ═══════════════════════════════════════════════════════════
@@ -195,9 +195,9 @@ class AutoCompleteWorker(QThread):
 class AutoCompleteAllWorker(QThread):
     """Class pour effectuer une recherche d'auto-complétion sur toutes les images d'un dossier."""
 
-    image_done = pyqtSignal(int, str, dict)
-    image_error = pyqtSignal(int, str, str)
-    all_done = pyqtSignal()
+    signal_image_done = pyqtSignal(int, str, dict)
+    signal_image_error = pyqtSignal(int, str, str)
+    signal_all_done = pyqtSignal()
 
     def __init__(self, folder: str, images: list[str], client: OllamaWrapper):
         """
@@ -225,10 +225,10 @@ class AutoCompleteAllWorker(QThread):
             path = os.path.join(self.folder, img_name)
             try:
                 result = self.client.get_description_and_keywords_from_image(path)
-                self.image_done.emit(i, img_name, result)
+                self.signal_image_done.emit(i, img_name, result)
             except Exception as e:
-                self.image_error.emit(i, img_name, str(e))
-        self.all_done.emit()
+                self.signal_image_error.emit(i, img_name, str(e))
+        self.signal_all_done.emit()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -239,8 +239,8 @@ class AutoCompleteAllWorker(QThread):
 class SaveMetadataWorker(QThread):
     """Class pour sauvegarder les métadonnées des images."""
 
-    finished = pyqtSignal()
-    error = pyqtSignal(str)
+    signal_finished = pyqtSignal()
+    signal_error = pyqtSignal(str)
 
     def __init__(self, image_name: str, folder: str, desc: str, keywords: list[str], client: OllamaWrapper):
         """
@@ -281,9 +281,9 @@ class SaveMetadataWorker(QThread):
             with open(index_path, "w", encoding="utf-8") as f:
                 json.dump(index, f, indent=2, ensure_ascii=False)
 
-            self.finished.emit()
+            self.signal_finished.emit()
         except Exception as e:
-            self.error.emit(str(e))
+            self.signal_error.emit(str(e))
 
 
 # ═══════════════════════════════════════════════════════════
@@ -294,10 +294,10 @@ class SaveMetadataWorker(QThread):
 class MapWorker(QThread):
     """Class pour générer une carte UMAP + HDBSCAN."""
 
-    finished = pyqtSignal(list, list, list, dict)
-    cluster_named = pyqtSignal(int, str)
-    progress = pyqtSignal(str)
-    error = pyqtSignal(str)
+    signal_finished = pyqtSignal(list, list, list, dict)
+    signal_cluster_named = pyqtSignal(int, str)
+    signal_progress = pyqtSignal(str)
+    signal_error = pyqtSignal(str)
 
     def __init__(
         self,
@@ -328,14 +328,14 @@ class MapWorker(QThread):
         try:
             self.compute()
         except Exception as exc:
-            self.error.emit(str(exc))
+            self.signal_error.emit(str(exc))
 
     def compute(self):
         """Calcule les embeddings et les clusters."""
         import numpy as np
 
         # ── 1. Embeddings ─────────────────────────────────────
-        self.progress.emit("Extraction des embeddings…")
+        self.signal_progress.emit("Extraction des embeddings…")
         names, vectors = [], []
         for name, data in self.index.items():
             emb = data.get("embedding")
@@ -344,13 +344,13 @@ class MapWorker(QThread):
                 vectors.append(emb)
 
         if len(vectors) < 2:
-            self.error.emit(f"Pas assez d'embeddings ({len(vectors)} / min 2).")
+            self.signal_error.emit(f"Pas assez d'embeddings ({len(vectors)} / min 2).")
             return
 
         X = np.array(vectors, dtype=np.float32)
 
         # ── 2. UMAP ───────────────────────────────────────────
-        self.progress.emit(f"UMAP sur {len(names)} images…")
+        self.signal_progress.emit(f"UMAP sur {len(names)} images…")
         import umap  # type: ignore
 
         embedding_2d = umap.UMAP(
@@ -363,7 +363,7 @@ class MapWorker(QThread):
         ).fit_transform(X)
 
         # ── 3. HDBSCAN ────────────────────────────────────────
-        self.progress.emit("Clustering HDBSCAN…")
+        self.signal_progress.emit("Clustering HDBSCAN…")
         try:
             import hdbscan  # type: ignore
 
@@ -376,19 +376,19 @@ class MapWorker(QThread):
                 .tolist()
             )
         except ImportError:
-            self.progress.emit("hdbscan absent → pas de clustering")
+            self.signal_progress.emit("hdbscan absent → pas de clustering")
             labels = [0] * len(names)
 
         # ── 4. Affichage Non Bloquant ────────────────────────────────────────
         points = [(float(x), float(y)) for x, y in embedding_2d]
-        self.progress.emit("Carte prête.")
-        self.finished.emit(points, labels, names, self.cluster_names)
+        self.signal_progress.emit("Carte prête.")
+        self.signal_finished.emit(points, labels, names, self.cluster_names)
 
         # ── 5. Nommer les clusters en fond ────────────────────────────────────────
         self.cluster_names.clear()
         self.name_clusters_async(names, labels)
-        self.progress.emit("Nommage des clusters terminé, carte prête.")
-        self.finished.emit(points, labels, names, self.cluster_names)
+        self.signal_progress.emit("Nommage des clusters terminé, carte prête.")
+        self.signal_finished.emit(points, labels, names, self.cluster_names)
 
     def name_clusters_async(self, names: list[str], labels: list[int]):
         """Nomme les clusters en fonction des descriptions et mots clés des images.
@@ -411,7 +411,7 @@ class MapWorker(QThread):
 
         # Pour chaque cluster
         for i, cid in enumerate(unique):
-            self.progress.emit(f"Nommage cluster {i + 1}/{len(unique)}…")
+            self.signal_progress.emit(f"Nommage cluster {i + 1}/{len(unique)}…")
             members = cluster_members[cid]
             # Nombre aléatoire pour eviter de prendre trop d'images
             sample = random.sample(members, min(8, len(members)))
@@ -427,7 +427,7 @@ class MapWorker(QThread):
                     descriptions.append(", ".join(kws))
 
             if not descriptions:
-                self.cluster_named.emit(cid, f"Cluster {cid}")
+                self.signal_cluster_named.emit(cid, f"Cluster {cid}")
                 continue
 
             # Prompt
@@ -445,5 +445,5 @@ class MapWorker(QThread):
                 name = result.response.strip().splitlines()[0][:40]
             except Exception:
                 name = f"Cluster {cid}"
-            self.cluster_named.emit(cid, name)
+            self.signal_cluster_named.emit(cid, name)
             self.cluster_names[cid] = name

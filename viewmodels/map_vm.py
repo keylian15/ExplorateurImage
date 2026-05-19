@@ -52,17 +52,17 @@ class MapViewModel(QObject):
     """Class qui représente la carte 2D sémantique."""
 
     # ── Signaux vers la View ──────────────────────────────────────────────────
-    compute_started = pyqtSignal()
-    compute_progress = pyqtSignal(str)
+    signal_compute_started = pyqtSignal()
+    signal_compute_progress = pyqtSignal(str)
     # points, labels, names, cluster_names
-    compute_finished = pyqtSignal(list, list, list, dict)
-    cluster_named = pyqtSignal(int, str)
-    compute_error = pyqtSignal(str)
-    params_changed = pyqtSignal(dict)
+    signal_compute_finished = pyqtSignal(list, list, list, dict)
+    signal_cluster_named = pyqtSignal(int, str)
+    signal_compute_error = pyqtSignal(str)
+    signal_params_changed = pyqtSignal(dict)
     # noms des images à mettre en valeur (liste vide = tout afficher)
-    search_results_changed = pyqtSignal(list)
+    signal_search_results_changed = pyqtSignal(list)
     # une recherche a été sauvegardée dans l'arbre
-    saved_search = pyqtSignal()
+    signal_saved_search = pyqtSignal()
 
     def __init__(
         self,
@@ -123,7 +123,7 @@ class MapViewModel(QObject):
         """
         self._params = params
         self.save_params_to_workspace(params)
-        self.params_changed.emit(params)
+        self.signal_params_changed.emit(params)
         self.compute()
 
     def save_params_to_workspace(self, params: dict):
@@ -146,10 +146,10 @@ class MapViewModel(QObject):
 
         indexed = {k: v for k, v in self._gallery_vm.index.items() if v.get("embedding") and len(v["embedding"]) > 0}
         if len(indexed) < 2:
-            self.compute_error.emit(f"Pas assez d'embeddings ({len(indexed)} / min 2).")
+            self.signal_compute_error.emit(f"Pas assez d'embeddings ({len(indexed)} / min 2).")
             return
 
-        self.compute_started.emit()
+        self.signal_compute_started.emit()
         self._worker = MapWorker(
             indexed,
             self._client,
@@ -157,17 +157,17 @@ class MapViewModel(QObject):
             umap_min_dist=self._params["umap_min_dist"],
             hdbscan_min_cluster=self._params["hdbscan_min_cluster"],
         )
-        self._worker.progress.connect(self.compute_progress)
-        self._worker.cluster_named.connect(self.cluster_named)
-        self._worker.finished.connect(self.on_finished)
-        self._worker.error.connect(self.compute_error)
+        self._worker.signal_progress.connect(self.signal_compute_progress)
+        self._worker.signal_cluster_named.connect(self.signal_cluster_named)
+        self._worker.signal_finished.connect(self.on_finished)
+        self._worker.signal_error.connect(self.signal_compute_error)
         self._worker.start()
 
     def autoload(self):
         """Lance depuis le cache si disponible, sinon calcule."""
         cache = self.load_cache()
         if cache:
-            self.compute_finished.emit(
+            self.signal_compute_finished.emit(
                 cache["points"],
                 cache["labels"],
                 cache["names"],
@@ -187,7 +187,7 @@ class MapViewModel(QObject):
         """
 
         self.save_cache(points, labels, names, cluster_names)
-        self.compute_finished.emit(points, labels, names, cluster_names)
+        self.signal_compute_finished.emit(points, labels, names, cluster_names)
 
     # ── Recherche sémantique ──────────────────────────────────────────────────
 
@@ -205,7 +205,7 @@ class MapViewModel(QObject):
         text = self._search_text.strip()
         if not text:
             self._result_names = []
-            self.search_results_changed.emit([])
+            self.signal_search_results_changed.emit([])
             return
 
         context = None
@@ -213,14 +213,14 @@ class MapViewModel(QObject):
             context = self.search_tree.current.results
 
         self._result_names = self._gallery_vm.filtered_images(filter_text=text, context=context)
-        self.search_results_changed.emit(self._result_names)
+        self.signal_search_results_changed.emit(self._result_names)
 
     def clear_search(self):
         """Vide la recherche et réaffiche tous les noeuds."""
         self._search_text = ""
         self._result_names = []
         self._search_timer.stop()
-        self.search_results_changed.emit([])
+        self.signal_search_results_changed.emit([])
 
     def save_search(self) -> None:
         """Enregistre la recherche courante dans l'arbre de recherche."""
@@ -236,7 +236,7 @@ class MapViewModel(QObject):
             query=text,
             results=self._result_names,
         )
-        self.saved_search.emit()
+        self.signal_saved_search.emit()
 
     def set_affinage(self, enabled: bool) -> None:
         """Active ou désactive l'affinage des recherches.

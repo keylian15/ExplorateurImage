@@ -332,13 +332,13 @@ class MapTab(QWidget):
         self._settings_dock.visibilityChanged.connect(lambda v: self._btn_settings.setChecked(v))
 
         # Câblage ViewModel → View
-        self._vm.compute_started.connect(self.on_compute_started)
-        self._vm.compute_progress.connect(self._lbl_status.setText)
-        self._vm.compute_finished.connect(self.on_finished)
-        self._vm.cluster_named.connect(self.on_cluster_named)
-        self._vm.compute_error.connect(self.on_error)
-        self._vm.params_changed.connect(self._settings_dock.set_params)
-        self._vm.search_results_changed.connect(self.on_search_results)
+        self._vm.signal_compute_started.connect(self.on_signal_compute_started)
+        self._vm.signal_compute_progress.connect(self._lbl_status.setText)
+        self._vm.signal_compute_finished.connect(self.on_finished)
+        self._vm.signal_cluster_named.connect(self.on_cluster_named)
+        self._vm.signal_compute_error.connect(self.on_error)
+        self._vm.signal_params_changed.connect(self._settings_dock.set_params)
+        self._vm.signal_search_results_changed.connect(self.on_search_results)
 
         QTimer.singleShot(500, self._vm.autoload)
 
@@ -461,7 +461,7 @@ class MapTab(QWidget):
 
         # ── Arbre de recherche ────────────────────────────────────────────────
         self.tree_widget = TreeViewWidget(self._vm.search_tree)
-        self.tree_widget.node_clicked.connect(self._on_tree_node_clicked)
+        self.tree_widget.signal_node_clicked.connect(self.on_signal_tree_node_clicked)
         layout.addWidget(self.tree_widget)
 
         layout.addStretch()
@@ -483,19 +483,19 @@ class MapTab(QWidget):
         self.checkbox_affinage.toggled.connect(self._vm.set_affinage)
 
         # Signal sauvegarde → refresh arbre
-        self._vm.saved_search.connect(self._on_search_saved)
+        self._vm.signal_saved_search.connect(self.on_signal_search_saved)
 
         self._search_dock = dock
         return dock
 
     # ── Slots internes ─────────────────────────────────────────────────────
 
-    def _on_search_saved(self):
+    def on_signal_search_saved(self):
         """Rafraîchit l'arbre après sauvegarde d'une recherche."""
         if hasattr(self, "tree_widget"):
             self.tree_widget.refresh()
 
-    def _on_tree_node_clicked(self, node_id: str):
+    def on_signal_tree_node_clicked(self, node_id: str):
         """Navigue vers le noeud cliqué dans l'arbre.
 
         Args:
@@ -526,7 +526,7 @@ class MapTab(QWidget):
 
     # ── Slots ─────────────────────────────────────────────────────────────────
 
-    def on_compute_started(self):
+    def on_signal_compute_started(self):
         """Callback pour tout nettoyer"""
         self._btn_compute.setEnabled(False)
         self._scene.clear()

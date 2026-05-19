@@ -182,7 +182,7 @@ _PRESET_META: dict[str, tuple[str, str]] = {
 class PresetCard(QWidget):
     """Bouton carte représentant un thème prédéfini avec swatches de prévisualisation."""
 
-    clicked = pyqtSignal(str)  # nom du preset
+    signal_clicked = pyqtSignal(str)  # nom du preset
 
     def __init__(self, name: str, colors: dict[str, str], parent=None):
         super().__init__(parent)
@@ -241,7 +241,7 @@ class PresetCard(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self.clicked.emit(self._name)
+            self.signal_clicked.emit(self._name)
         super().mousePressEvent(event)
 
 
@@ -253,7 +253,7 @@ class PresetCard(QWidget):
 class ColorRow(QWidget):
     """Ligne d'édition pour une couleur : swatch + champ hex."""
 
-    changed = pyqtSignal(str, str)  # (key, new_hex)
+    signal_changed = pyqtSignal(str, str)  # (key, new_hex)
 
     def __init__(self, key: str, hex_color: str, parent=None):
         super().__init__(parent)
@@ -300,7 +300,7 @@ class ColorRow(QWidget):
         if QColor(text).isValid():
             self._hex = text
             self.update_swatch(text)
-            self.changed.emit(self._key, text)
+            self.signal_changed.emit(self._key, text)
 
     def open_picker(self):
         """Ouvre le QColorDialog."""
@@ -384,7 +384,7 @@ class StyleTab(QWidget):
         presets_row.setSpacing(10)
         for preset_name, preset_colors in PRESETS.items():
             card = PresetCard(preset_name, preset_colors)
-            card.clicked.connect(self.load_preset)
+            card.signal_clicked.connect(self.load_preset)
             presets_row.addWidget(card)
         presets_row.addStretch()
         root.addLayout(presets_row)
@@ -464,7 +464,7 @@ class StyleTab(QWidget):
 
             # Swatch + champ hex
             color_row = ColorRow(key, hex_val)
-            color_row.changed.connect(self.on_color_changed)
+            color_row.signal_changed.connect(self.on_color_changed)
             grid.addWidget(color_row, row_idx, 2)
             self._rows[key] = color_row
 

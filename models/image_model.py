@@ -206,7 +206,7 @@ class ImageListModel(QAbstractListModel):
 class ImageGridDelegate(QStyledItemDelegate):
     """Dessine chaque cellule : thumbnail, bordure de sélection, point indexé, badge épinglé."""
 
-    repaint_requested = pyqtSignal(str)
+    signal_repaint_requested = pyqtSignal(str)
 
     BORDER = THUMB["border_width"]
     DOT_RADIUS = THUMB["dot_radius"]
@@ -236,7 +236,7 @@ class ImageGridDelegate(QStyledItemDelegate):
         self.cache = cache
         self.scheduler = scheduler
         self.cell_size = cell_size
-        self.scheduler.thumbnail_ready.connect(self.on_thumbnail_ready)
+        self.scheduler.signal_thumbnail_ready.connect(self.on_signal_thumbnail_ready)
 
     def sizeHint(self, _option, _index) -> QSize:
         """Override de la méthode sizeHint pour retourner la taille des cellules.
@@ -346,11 +346,11 @@ class ImageGridDelegate(QStyledItemDelegate):
         painter.setPen(_COL_PIN_ICON)
         painter.drawText(badge_rect, Qt.AlignmentFlag.AlignCenter, "📌")
 
-    def on_thumbnail_ready(self, img_name: str):
+    def on_signal_thumbnail_ready(self, img_name: str):
         """Emet un signal pour indiquer que le thumbnail d'une image est prêt, afin que la cellule correspondante soit redessinée.
 
         Args:
             img_name (str): Le nom de fichier de l'image dont le thumbnail est prêt.
         """
 
-        self.repaint_requested.emit(img_name)
+        self.signal_repaint_requested.emit(img_name)

@@ -177,27 +177,27 @@ class DetailWidget(QWidget):
         self.keywords_edit.textChanged.connect(lambda: self._save_timer.start())
 
         # ViewModel → View
-        self._vm.preview_ready.connect(self.on_preview_ready)
-        self._vm.metadata_loaded.connect(self.on_metadata_loaded)
-        self._vm.neighbors_ready.connect(self.display_neighbors)
-        self._vm.save_started.connect(lambda: self.lbl_loading.setVisible(True))
-        self._vm.save_finished.connect(lambda: self.lbl_loading.setVisible(False))
-        self._vm.save_error.connect(
+        self._vm.signal_preview_ready.connect(self.on_signal_preview_ready)
+        self._vm.signal_metadata_loaded.connect(self.on_signal_metadata_loaded)
+        self._vm.signal_neighbors_ready.connect(self.display_neighbors)
+        self._vm.signal_save_started.connect(lambda: self.lbl_loading.setVisible(True))
+        self._vm.signal_save_finished.connect(lambda: self.lbl_loading.setVisible(False))
+        self._vm.signal_save_error.connect(
             lambda msg: (
                 self.lbl_loading.setVisible(False),
                 print(f"[SAVE ERROR] {msg}"),
             )
         )
-        self._vm.autocomplete_started.connect(self.on_autocomplete_started)
-        self._vm.autocomplete_finished.connect(self.on_autocomplete_finished)
-        self._vm.autocomplete_error.connect(self.on_autocomplete_error)
-        self._vm.rename_done.connect(self.on_rename_done)
-        self._vm.rename_error.connect(self.on_rename_error)
-        self._vm.pin_changed.connect(self.on_pin_changed)
+        self._vm.signal_autocomplete_started.connect(self.on_signal_autocomplete_started)
+        self._vm.signal_autocomplete_finished.connect(self.on_signal_autocomplete_finished)
+        self._vm.signal_autocomplete_error.connect(self.on_signal_autocomplete_error)
+        self._vm.signal_rename_done.connect(self.on_signal_rename_done)
+        self._vm.signal_rename_error.connect(self.on_signal_rename_error)
+        self._vm.signal_pin_changed.connect(self.on_signal_pin_changed)
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
-    def on_preview_ready(self, pixmap: QPixmap, _img_name: str):
+    def on_signal_preview_ready(self, pixmap: QPixmap, _img_name: str):
         """Callback appelé lorsque la preview est prête pour l'afficher.
 
         Args:
@@ -214,7 +214,7 @@ class DetailWidget(QWidget):
             )
             self.preview.setPixmap(scaled)
 
-    def on_metadata_loaded(self, img_name: str, desc: str, keywords: list[str]):
+    def on_signal_metadata_loaded(self, img_name: str, desc: str, keywords: list[str]):
         """Callback appelé lorsque les métadonnées sont chargées pour les afficher.
 
         Args:
@@ -234,7 +234,7 @@ class DetailWidget(QWidget):
         self.desc_edit.blockSignals(False)
         self.keywords_edit.blockSignals(False)
 
-    def on_pin_changed(self, img_name: str, is_pinned: bool):
+    def on_signal_pin_changed(self, img_name: str, is_pinned: bool):
         """Met à jour le bouton 📌 selon l'état d'épinglage de l'image affichée.
 
         Args:
@@ -321,12 +321,12 @@ class DetailWidget(QWidget):
             if col == 3:
                 col, row = 0, row + 1
 
-    def on_autocomplete_started(self):
+    def on_signal_autocomplete_started(self):
         """Callback lorsque l'auto-completion est en cours."""
         self.lbl_loading.setVisible(True)
         self.btn_autocomplete.setEnabled(False)
 
-    def on_autocomplete_finished(self, desc: str, keywords: list[str]):
+    def on_signal_autocomplete_finished(self, desc: str, keywords: list[str]):
         """Callback lorsque l'auto-completion est terminé.
 
         Args:
@@ -337,7 +337,7 @@ class DetailWidget(QWidget):
         self.lbl_loading.setVisible(False)
         self.btn_autocomplete.setEnabled(True)
 
-    def on_autocomplete_error(self, msg: str):
+    def on_signal_autocomplete_error(self, msg: str):
         """Callback lorsque l'auto-completion échoue.
 
         Args:
@@ -347,7 +347,7 @@ class DetailWidget(QWidget):
         self.lbl_loading.setVisible(False)
         self.btn_autocomplete.setEnabled(True)
 
-    def on_rename_done(self, new_name: str):
+    def on_signal_rename_done(self, new_name: str):
         """Met a jour le titre de l'item.
 
         Args:
@@ -356,7 +356,7 @@ class DetailWidget(QWidget):
         self.title_edit.setStyleSheet("")
         self.title_edit.setToolTip("")
 
-    def on_rename_error(self, msg: str):
+    def on_signal_rename_error(self, msg: str):
         """Indique que la modification du titre a échoué."""
         self.title_edit.setStyleSheet(rename_error_style())
         self.title_edit.setToolTip(f"❌ {msg}")

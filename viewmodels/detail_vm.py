@@ -45,19 +45,19 @@ MODEL_EMBED = "nomic-embed-text:v1.5"
 class DetailViewModel(QObject):
     # ── Signaux vers la View ──────────────────────────────────────────────────
     # (img_name, desc, keywords)
-    metadata_loaded = pyqtSignal(str, str, list)
-    preview_ready = pyqtSignal(QPixmap, str)  # (pixmap, img_name)
-    neighbors_ready = pyqtSignal(dict)  # {name: score}
-    save_started = pyqtSignal()
-    save_finished = pyqtSignal()
-    save_error = pyqtSignal(str)
-    autocomplete_started = pyqtSignal()
-    autocomplete_finished = pyqtSignal(str, list)  # (desc, keywords)
-    autocomplete_error = pyqtSignal(str)
-    rename_done = pyqtSignal(str)  # nouveau nom
-    rename_error = pyqtSignal(str)
-    index_updated = pyqtSignal(set)  # noms indexés
-    pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
+    signal_metadata_loaded = pyqtSignal(str, str, list)
+    signal_preview_ready = pyqtSignal(QPixmap, str)  # (pixmap, img_name)
+    signal_neighbors_ready = pyqtSignal(dict)  # {name: score}
+    signal_save_started = pyqtSignal()
+    signal_save_finished = pyqtSignal()
+    signal_save_error = pyqtSignal(str)
+    signal_autocomplete_started = pyqtSignal()
+    signal_autocomplete_finished = pyqtSignal(str, list)  # (desc, keywords)
+    signal_autocomplete_error = pyqtSignal(str)
+    signal_rename_done = pyqtSignal(str)  # nouveau nom
+    signal_rename_error = pyqtSignal(str)
+    signal_index_updated = pyqtSignal(set)  # noms indexés
+    signal_pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
 
     def __init__(
         self,
@@ -98,7 +98,7 @@ class DetailViewModel(QObject):
         self._pending_keywords: list[str] = []
 
         # Relayer le signal pin du gallery_vm vers la vue
-        self._gallery_vm.pin_changed.connect(self.pin_changed)
+        self._gallery_vm.signal_pin_changed.connect(self.signal_pin_changed)
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
@@ -163,19 +163,19 @@ class DetailViewModel(QObject):
         if self._folder:
             path = os.path.join(self._folder, img_name)
             pixmap = QPixmap(path)
-            self.preview_ready.emit(pixmap, img_name)
+            self.signal_preview_ready.emit(pixmap, img_name)
 
         # Métadonnées
         data = self._index.get(img_name)
         desc = data.get("description", "") if data else ""
         keywords = data.get("keywords", []) if data else []
-        self.metadata_loaded.emit(img_name, desc, keywords)
+        self.signal_metadata_loaded.emit(img_name, desc, keywords)
 
         # Voisins
         self.compute_neighbors(img_name)
 
         # État épingle courant
-        self.pin_changed.emit(img_name, self._gallery_vm.is_pinned(img_name))
+        self.signal_pin_changed.emit(img_name, self._gallery_vm.is_pinned(img_name))
 
     # ── Épinglage ─────────────────────────────────────────────────────────────
 
@@ -216,7 +216,7 @@ class DetailViewModel(QObject):
         if self._save_worker and self._save_worker.isRunning():
             return
 
-        self.save_started.emit()
+        self.signal_save_started.emit()
         self._save_worker = SaveMetadataWorker(
             self.selected_image,
             self._folder,
@@ -224,15 +224,15 @@ class DetailViewModel(QObject):
             self._pending_keywords,
             self._client,
         )
-        self._save_worker.finished.connect(self.on_save_done)
-        self._save_worker.error.connect(self.save_error)
+        self._save_worker.signal_finished.connect(self.on_save_done)
+        self._save_worker.error.connect(self.signal_save_error)
         self._save_worker.start()
 
     def on_save_done(self):
         """Callback de la fin de la sauvegarde."""
         self._gallery_vm.reload_index()
-        self.save_finished.emit()
-        self.index_updated.emit(set(self._index.keys()))
+        self.signal_save_finished.emit()
+        self.signal_index_updated.emit(set(self._index.keys()))
 
     # ── Auto-complétion ───────────────────────────────────────────────────────
 
@@ -244,17 +244,17 @@ class DetailViewModel(QObject):
             return
 
         path = os.path.join(self._folder, self.selected_image)
-        self.autocomplete_started.emit()
+        self.signal_autocomplete_started.emit()
         self._worker = AutoCompleteWorker(path, self._client)
-        self._worker.finished.connect(self.on_autocomplete_done)
-        self._worker.error.connect(self.autocomplete_error)
+        self._worker.signal_finished.connect(self.on_autocomplete_done)
+        self._worker.signal_error.connect(self.signal_autocomplete_error)
         self._worker.start()
 
     def on_autocomplete_done(self, result: dict):
         """Callback de la fin de l'auto-complétion."""
         desc = result["description"]
         keywords = result["keywords"]
-        self.autocomplete_finished.emit(desc, keywords)
+        self.signal_autocomplete_finished.emit(desc, keywords)
 
     # ── Voisins ───────────────────────────────────────────────────────────────
 
@@ -265,11 +265,11 @@ class DetailViewModel(QObject):
             img_name (str): Nom de l'image.
         """
         if img_name not in self._index:
-            self.neighbors_ready.emit({})
+            self.signal_neighbors_ready.emit({})
             return
         entry = self._index[img_name]
         if "embedding" not in entry:
-            self.neighbors_ready.emit({})
+            self.signal_neighbors_ready.emit({})
             return
 
         scores = {}
@@ -278,7 +278,7 @@ class DetailViewModel(QObject):
                 continue
             scores[key] = self._client.similarite_cosinus(entry["embedding"], data["embedding"])
         top = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True)[: self._k_neighbors])
-        self.neighbors_ready.emit(top)
+        self.signal_neighbors_ready.emit(top)
 
     def refresh_neighbors(self):
         """Rafraichi les voisins de l'image sélectionnée."""
@@ -305,13 +305,13 @@ class DetailViewModel(QObject):
         new_path = os.path.join(self._folder, new_name)
 
         if os.path.exists(new_path):
-            self.rename_error.emit("Un fichier avec ce nom existe déjà.")
+            self.signal_rename_error.emit("Un fichier avec ce nom existe déjà.")
             return
 
         try:
             os.rename(old_path, new_path)
         except OSError as e:
-            self.rename_error.emit(str(e))
+            self.signal_rename_error.emit(str(e))
             return
 
         # Mettre à jour l'épingle si l'image était épinglée
@@ -324,5 +324,5 @@ class DetailViewModel(QObject):
         self._gallery_vm.reload_index()
 
         self.selected_image = new_name
-        self.rename_done.emit(new_name)
-        self.index_updated.emit(set(self._index.keys()))
+        self.signal_rename_done.emit(new_name)
+        self.signal_index_updated.emit(set(self._index.keys()))

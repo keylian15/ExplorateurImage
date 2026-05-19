@@ -54,13 +54,13 @@ class GalleryViewModel(QObject):
     """Class qui gère la logique de la vue de la galerie."""
 
     # ── Signaux émis vers la View ─────────────────────────────────────────────
-    images_changed = pyqtSignal(list)  # nouvelle liste de noms
-    cell_size_changed = pyqtSignal(int)  # zoom modifié
-    folder_changed = pyqtSignal(str)  # dossier courant
-    index_changed = pyqtSignal(set)  # ensemble des noms indexés
-    image_selected = pyqtSignal(str)  # image cliquée
-    pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
-    saved_search = pyqtSignal()  # une recherche a été sauvegardée
+    signal_images_changed = pyqtSignal(list)  # nouvelle liste de noms
+    signal_cell_size_changed = pyqtSignal(int)  # zoom modifié
+    signal_folder_changed = pyqtSignal(str)  # dossier courant
+    signal_index_changed = pyqtSignal(set)  # ensemble des noms indexés
+    signal_image_selected = pyqtSignal(str)  # image cliquée
+    signal_pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
+    signal_saved_search = pyqtSignal()  # une recherche a été sauvegardée
 
     def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None, parent=None):
         """
@@ -96,7 +96,7 @@ class GalleryViewModel(QObject):
         # Restauration des épingles au démarrage
         self.model.set_pinned(set(self._pinned))
         self.delegate = ImageGridDelegate(self.cache, self.scheduler, THUMB["default_size"])
-        self.delegate.repaint_requested.connect(self.on_repaint_requested)
+        self.delegate.signal_repaint_requested.connect(self.on_signal_repaint_requested)
 
         # Taille cellule
         self._size_index = THUMB["size_index_default"]
@@ -147,13 +147,13 @@ class GalleryViewModel(QObject):
 
         self.load_index()
         self.refresh(None)
-        self.folder_changed.emit(folder)
+        self.signal_folder_changed.emit(folder)
 
     def load_index(self):
         """Charge l'index du dossier courant."""
         self.index = index_repository.load(self.current_folder)
         self.model.set_indexed(set(self.index.keys()))
-        self.index_changed.emit(set(self.index.keys()))
+        self.signal_index_changed.emit(set(self.index.keys()))
 
     def reload_index(self):
         """Recharge l'index du dossier courant."""
@@ -175,7 +175,7 @@ class GalleryViewModel(QObject):
 
         images = self.sort_with_pinned(images)
         self.model.set_images(images)
-        self.images_changed.emit(images)
+        self.signal_images_changed.emit(images)
 
     def sort_with_pinned(self, images: list[str]) -> list[str]:
         """Trie la liste en mettant les épinglées en premier (dans leur ordre d'épinglage).
@@ -237,7 +237,7 @@ class GalleryViewModel(QObject):
         self.model.set_pinned(set(self._pinned))
         self.save_pinned()
         self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
-        self.pin_changed.emit(img_name, True)
+        self.signal_pin_changed.emit(img_name, True)
 
     def unpin_image(self, img_name: str):
         """Désépingle une image.
@@ -251,7 +251,7 @@ class GalleryViewModel(QObject):
         self.model.set_pinned(set(self._pinned))
         self.save_pinned()
         self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
-        self.pin_changed.emit(img_name, False)
+        self.signal_pin_changed.emit(img_name, False)
 
     def toggle_pin(self, img_name: str):
         """Bascule l'état épinglé d'une image.
@@ -356,7 +356,7 @@ class GalleryViewModel(QObject):
             self.search_tree.return_to_root()
 
         self.search_tree.push_search(query=text, results=self._result_images)
-        self.saved_search.emit()
+        self.signal_saved_search.emit()
 
     def set_affinage(self, enabled: bool) -> None:
         """Active ou désactive l'affinage des recherches.
@@ -376,7 +376,7 @@ class GalleryViewModel(QObject):
             img_name (str): Nom de l'image.
         """
         self.model.set_selected(img_name)
-        self.image_selected.emit(img_name)
+        self.signal_image_selected.emit(img_name)
 
     # ── Zoom ──────────────────────────────────────────────────────────────────
 
@@ -399,11 +399,11 @@ class GalleryViewModel(QObject):
         self.cache.resize(self._cell_size)
         self.scheduler.flush_pending()
         self.delegate.set_cell_size(self._cell_size)
-        self.cell_size_changed.emit(self._cell_size)
+        self.signal_cell_size_changed.emit(self._cell_size)
 
     # ── Repaint ───────────────────────────────────────────────────────────────
 
-    def on_repaint_requested(self, img_name: str):
+    def on_signal_repaint_requested(self, img_name: str):
         """Notifie quand une image a été modifiée.
 
         Args:

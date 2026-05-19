@@ -16,7 +16,7 @@ from models.tree.search_tree import SearchTree
 class SearchNodeLabel(QLabel):
     """Label cliquable représentant un noeud de l'arbre de recherche."""
 
-    clicked = pyqtSignal(str)  # node_id
+    signal_clicked = pyqtSignal(str)  # node_id
 
     def __init__(self, text: str, node_id: str, is_root: bool = False, is_current: bool = False, depth: int = 0, parent=None):
         super().__init__(parent)
@@ -38,7 +38,7 @@ class SearchNodeLabel(QLabel):
 
     def mousePressEvent(self, event):
         if not self._is_root and event.button() == Qt.MouseButton.LeftButton:
-            self.clicked.emit(self._node_id)
+            self.signal_clicked.emit(self._node_id)
         super().mousePressEvent(event)
 
 
@@ -49,7 +49,7 @@ class TreeViewWidget(QWidget):
     Chaque noeud affiche le texte de la requête associée.
     """
 
-    node_clicked = pyqtSignal(str)  # node_id
+    signal_node_clicked = pyqtSignal(str)  # node_id
 
     def __init__(self, tree: SearchTree, parent=None):
         super().__init__(parent)
@@ -118,7 +118,7 @@ class TreeViewWidget(QWidget):
                     is_current=is_current,
                     depth=depth,
                 )
-                lbl.clicked.connect(self.node_clicked)
+                lbl.signal_clicked.connect(self.signal_node_clicked)
                 self._tree_layout.addWidget(lbl)
 
                 if child.children:

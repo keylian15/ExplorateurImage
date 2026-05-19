@@ -186,7 +186,7 @@ class GalleryWidget(QWidget):
 
         # ── Arbre de recherche ────────────────────────────────────────────────
         self.tree_widget = TreeViewWidget(self._gvm.search_tree)
-        self.tree_widget.node_clicked.connect(self._on_tree_node_clicked)
+        self.tree_widget.signal_node_clicked.connect(self.on_signal_tree_node_clicked)
         layout.addWidget(self.tree_widget)
 
         layout.addStretch()
@@ -220,21 +220,21 @@ class GalleryWidget(QWidget):
         self.list_view.verticalScrollBar().valueChanged.connect(lambda: self._prefetch_timer.start())
 
         # ViewModel → View
-        self._gvm.cell_size_changed.connect(self.on_cell_size_changed)
-        self._gvm.saved_search.connect(self._on_search_saved)
+        self._gvm.signal_cell_size_changed.connect(self.on_signal_cell_size_changed)
+        self._gvm.signal_saved_search.connect(self.on_signal_search_saved)
 
-        self._avm.started.connect(self.on_batch_started)
-        self._avm.progress.connect(self.on_batch_progress)
-        self._avm.finished.connect(self.on_batch_finished)
+        self._avm.signal_started.connect(self.on_batch_started)
+        self._avm.signal_progress.connect(self.on_batch_progress)
+        self._avm.signal_finished.connect(self.on_batch_finished)
 
     # ── Slots internes ─────────────────────────────────────────────────────
 
-    def _on_search_saved(self):
+    def on_signal_search_saved(self):
         """Rafraîchit l'arbre après sauvegarde d'une recherche."""
         if hasattr(self, "tree_widget"):
             self.tree_widget.refresh()
 
-    def _on_tree_node_clicked(self, node_id: str):
+    def on_signal_tree_node_clicked(self, node_id: str):
         """Navigue vers le noeud cliqué dans l'arbre.
 
         Args:
@@ -285,7 +285,7 @@ class GalleryWidget(QWidget):
 
     # ── Slots ViewModel → View ─────────────────────────────────────────────
 
-    def on_cell_size_changed(self, size: int):
+    def on_signal_cell_size_changed(self, size: int):
         """Redimensionne la gallery.
 
         Args:
