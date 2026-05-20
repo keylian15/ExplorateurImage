@@ -1600,7 +1600,7 @@ ou à l'IA n'est implémentée ici.</p>
 <li>Supprimer dynamiquement des workspaces</li>
 <li>Renommer un workspace par double-clic sur son onglet</li>
 <li>Persister automatiquement tous les changements
-   (y compris k_neighbors, map_params et pinned_images)</li>
+   (y compris k_neighbors, map_params, pinned_images et history_search)</li>
 <li>Synchroniser la visibilité des docks entre workspaces</li>
 <li>Garantir qu'au moins un workspace reste ouvert</li>
 </ol>
@@ -1648,7 +1648,7 @@ La fenêtre gère leur cycle de vie complet :
     - suppression
     - renommage
     - restauration
-    - persistance (dossier, k_neighbors, map_params, pinned_images)</p>
+    - persistance (dossier, k_neighbors, map_params, pinned_images, history_search)</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2150,7 +2150,11 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MainWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fenêtre principale multi-workspace de l&#39;application.</span>
 
@@ -2160,7 +2164,7 @@ La fenêtre gère leur cycle de vie complet :
 <span class="sd">        - suppression</span>
 <span class="sd">        - renommage</span>
 <span class="sd">        - restauration</span>
-<span class="sd">        - persistance (dossier, k_neighbors, map_params, pinned_images)</span>
+<span class="sd">        - persistance (dossier, k_neighbors, map_params, pinned_images, history_search)</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        client (OllamaWrapper):</span>
@@ -2372,6 +2376,8 @@ La fenêtre gère leur cycle de vie complet :
         <span class="p">)</span>
 
         <span class="n">widget</span><span class="o">.</span><span class="n">signal_folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">signal_saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_workspaces</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">map_vm</span><span class="o">.</span><span class="n">signal_saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_workspaces</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">[</span><span class="n">ws_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span>
 
@@ -2442,7 +2448,8 @@ La fenêtre gère leur cycle de vie complet :
 <span class="sd">        Sauvegarde tous les workspaces dans la configuration.</span>
 
 <span class="sd">        Les workspaces sont sauvegardés dans l&#39;ordre actuel des onglets,</span>
-<span class="sd">        y compris k_neighbors, map_params et pinned_images propres à chaque workspace.</span>
+<span class="sd">        y compris k_neighbors, map_params, pinned_images et history_search</span>
+<span class="sd">        propres à chaque workspace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">workspaces</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -2458,6 +2465,7 @@ La fenêtre gère leur cycle de vie complet :
                         <span class="s2">&quot;k_neighbors&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_k_neighbors</span><span class="p">,</span>
                         <span class="s2">&quot;map_params&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_map_params</span><span class="p">,</span>
                         <span class="s2">&quot;pinned_images&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_pinned_images</span><span class="p">,</span>
+                        <span class="s2">&quot;history_search&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_search_trees</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
 
@@ -2969,7 +2977,9 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">335</span>
 <span class="normal">336</span>
 <span class="normal">337</span>
-<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_workspace</span><span class="p">(</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_workspace</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3014,6 +3024,8 @@ La fenêtre gère leur cycle de vie complet :
     <span class="p">)</span>
 
     <span class="n">widget</span><span class="o">.</span><span class="n">signal_folder_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_workspace_folder_changed</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">signal_saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_workspaces</span><span class="p">)</span>
+    <span class="n">widget</span><span class="o">.</span><span class="n">map_vm</span><span class="o">.</span><span class="n">signal_saved_search</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">save_workspaces</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">workspaces</span><span class="p">[</span><span class="n">ws_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">widget</span>
 
@@ -3214,11 +3226,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">466</span>
 <span class="normal">467</span>
 <span class="normal">468</span>
 <span class="normal">469</span>
@@ -3241,7 +3249,11 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">486</span>
 <span class="normal">487</span>
 <span class="normal">488</span>
-<span class="normal">489</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_tab_double_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ouvre une boîte de dialogue de renommage d&#39;onglet.</span>
 
@@ -3330,11 +3342,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
@@ -3350,7 +3358,11 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
-<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Déclenché lorsqu&#39;un onglet devient actif.</span>
 
@@ -3425,11 +3437,7 @@ La fenêtre gère leur cycle de vie complet :
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">422</span>
 <span class="normal">423</span>
 <span class="normal">424</span>
 <span class="normal">425</span>
@@ -3445,7 +3453,11 @@ La fenêtre gère leur cycle de vie complet :
 <span class="normal">435</span>
 <span class="normal">436</span>
 <span class="normal">437</span>
-<span class="normal">438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_close_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_tab_close_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Déclenché lorsqu&#39;un utilisateur ferme un onglet.</span>
 
@@ -3537,11 +3549,7 @@ il est renommé avec le nom du dossier sélectionné.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
-<span class="normal">494</span>
-<span class="normal">495</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">495</span>
 <span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span>
@@ -3565,7 +3573,11 @@ il est renommé avec le nom du dossier sélectionné.</p>
 <span class="normal">516</span>
 <span class="normal">517</span>
 <span class="normal">518</span>
-<span class="normal">519</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_workspace_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">519</span>
+<span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_workspace_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Déclenché lorsqu&#39;un workspace change de dossier.</span>
 
@@ -3650,9 +3662,7 @@ de l'onglet « + ».</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
@@ -3686,7 +3696,9 @@ de l'onglet « + ».</p>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
-<span class="normal">380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tab_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Supprime un workspace à partir de son index d&#39;onglet.</span>
 
@@ -3803,14 +3815,13 @@ automatiquement.</p>
 
         <p>Sauvegarde tous les workspaces dans la configuration.</p>
 <p>Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
-y compris k_neighbors, map_params et pinned_images propres à chaque workspace.</p>
+y compris k_neighbors, map_params, pinned_images et history_search
+propres à chaque workspace.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
 <span class="normal">391</span>
@@ -3834,12 +3845,17 @@ y compris k_neighbors, map_params et pinned_images propres à chaque workspace.<
 <span class="normal">409</span>
 <span class="normal">410</span>
 <span class="normal">411</span>
-<span class="normal">412</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_workspaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_workspaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Sauvegarde tous les workspaces dans la configuration.</span>
 
 <span class="sd">    Les workspaces sont sauvegardés dans l&#39;ordre actuel des onglets,</span>
-<span class="sd">    y compris k_neighbors, map_params et pinned_images propres à chaque workspace.</span>
+<span class="sd">    y compris k_neighbors, map_params, pinned_images et history_search</span>
+<span class="sd">    propres à chaque workspace.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">workspaces</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -3855,6 +3871,7 @@ y compris k_neighbors, map_params et pinned_images propres à chaque workspace.<
                     <span class="s2">&quot;k_neighbors&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_k_neighbors</span><span class="p">,</span>
                     <span class="s2">&quot;map_params&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_map_params</span><span class="p">,</span>
                     <span class="s2">&quot;pinned_images&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_pinned_images</span><span class="p">,</span>
+                    <span class="s2">&quot;history_search&quot;</span><span class="p">:</span> <span class="n">widget</span><span class="o">.</span><span class="n">current_search_trees</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="p">)</span>
 
@@ -3884,11 +3901,7 @@ y compris k_neighbors, map_params et pinned_images propres à chaque workspace.<
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/main_window.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">529</span>
 <span class="normal">530</span>
 <span class="normal">531</span>
 <span class="normal">532</span>
@@ -3902,7 +3915,11 @@ y compris k_neighbors, map_params et pinned_images propres à chaque workspace.<
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_close_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_close_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Met à jour la visibilité des boutons de fermeture.</span>
 
