@@ -19,7 +19,7 @@ Responsabilités :
     4. Supprimer dynamiquement des workspaces
     5. Renommer un workspace par double-clic sur son onglet
     6. Persister automatiquement tous les changements
-       (y compris k_neighbors, map_params et pinned_images)
+       (y compris k_neighbors, map_params, pinned_images et history_search)
     7. Synchroniser la visibilité des docks entre workspaces
     8. Garantir qu'au moins un workspace reste ouvert
 """
@@ -106,7 +106,7 @@ class MainWindow(QMainWindow):
         - suppression
         - renommage
         - restauration
-        - persistance (dossier, k_neighbors, map_params, pinned_images)
+        - persistance (dossier, k_neighbors, map_params, pinned_images, history_search)
 
     Args:
         client (OllamaWrapper):
@@ -318,6 +318,8 @@ class MainWindow(QMainWindow):
         )
 
         widget.signal_folder_changed.connect(self.on_workspace_folder_changed)
+        widget.gallery_vm.signal_saved_search.connect(self.save_workspaces)
+        widget.map_vm.signal_saved_search.connect(self.save_workspaces)
 
         self.workspaces[ws_id] = widget
 
@@ -388,7 +390,8 @@ class MainWindow(QMainWindow):
         Sauvegarde tous les workspaces dans la configuration.
 
         Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
-        y compris k_neighbors, map_params et pinned_images propres à chaque workspace.
+        y compris k_neighbors, map_params, pinned_images et history_search
+        propres à chaque workspace.
         """
         workspaces = []
 
@@ -404,6 +407,7 @@ class MainWindow(QMainWindow):
                         "k_neighbors": widget.current_k_neighbors,
                         "map_params": widget.current_map_params,
                         "pinned_images": widget.current_pinned_images,
+                        "history_search": widget.current_search_trees,
                     }
                 )
 

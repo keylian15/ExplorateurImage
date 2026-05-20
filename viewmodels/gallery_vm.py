@@ -68,7 +68,7 @@ class GalleryViewModel(QObject):
             client (OllamaWrapper): client Ollama
             config (dict): configuration
             ws_id (str): identifiant du workspace (pour la persistance des épingles)
-            ws_data (dict | None): données du workspace (pour restaurer les épingles)
+            ws_data (dict | None): données du workspace (pour restaurer les épingles et l'arbre)
             parent (QObject, optional): parent. Defaults to None.
         """
 
@@ -109,8 +109,14 @@ class GalleryViewModel(QObject):
         self._search_timer.timeout.connect(self.do_search)
         self._search_text = ""
 
-        self.search_tree = SearchTree()
-        self.search_tree.create_root(query="__root__", results=[])
+        # Restauration de l'arbre de recherche depuis ws_data
+        search_trees = ws_repo.get_search_trees(ws_data) if ws_data else {"gallery": {}, "map": {}}
+        gallery_tree_data = search_trees.get("gallery", {})
+        if gallery_tree_data:
+            self.search_tree = SearchTree.from_dict(gallery_tree_data)
+        else:
+            self.search_tree = SearchTree()
+            self.search_tree.create_root(query="__root__", results=[])
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 

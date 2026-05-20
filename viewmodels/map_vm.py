@@ -79,7 +79,7 @@ class MapViewModel(QObject):
             config (dict): configuration globale
             gallery_vm (GalleryViewModel): ViewModel de la gallerie
             ws_id (str): identifiant du workspace
-            ws_data (dict): données du workspace (contient map_params)
+            ws_data (dict): données du workspace (contient map_params et history_search)
         """
 
         super().__init__(parent)
@@ -101,9 +101,14 @@ class MapViewModel(QObject):
         self._search_timer.setSingleShot(True)
         self._search_timer.timeout.connect(self.do_search)
 
-        # Arbre de recherche (identique à la galerie)
-        self.search_tree = SearchTree()
-        self.search_tree.create_root(query="__root__", results=[])
+        # Restauration de l'arbre de recherche depuis ws_data
+        search_trees = ws_repo.get_search_trees(ws_data) if ws_data else {"gallery": {}, "map": {}}
+        map_tree_data = search_trees.get("map", {})
+        if map_tree_data:
+            self.search_tree = SearchTree.from_dict(map_tree_data)
+        else:
+            self.search_tree = SearchTree()
+            self.search_tree.create_root(query="__root__", results=[])
 
     # ── Paramètres ────────────────────────────────────────────────────────────
 

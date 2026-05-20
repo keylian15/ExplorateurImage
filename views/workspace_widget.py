@@ -6,7 +6,7 @@ Chaque workspace est autonome : il possède ses propres instances de ViewModels
 propres vues (GalleryWidget, DetailWidget, MapTab, StyleTab).
 
 Chaque workspace stocke également ses propres paramètres (k_neighbors, map_params,
-pinned_images).
+pinned_images, history_search).
 
 La communication avec la fenêtre principale se fait uniquement via des signaux :
 - folder_changed : quand l'utilisateur ouvre un dossier
@@ -18,7 +18,7 @@ Responsabilités :
  3. Assembler les 3 onglets (Galerie, Carte 2D, Thème)
  4. Gérer le dock de détail en interne
  5. Ouvrir automatiquement le dossier restauré depuis la config
- 6. Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres, épingles)
+ 6. Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres, épingles, arbres)
 """
 
 from __future__ import annotations
@@ -84,7 +84,7 @@ class WorkspaceWidget(QWidget):
         _ws_data = ws_data or ws_repo.make_workspace(name=name, folder=folder)
 
         # ── ViewModels ────────────────────────────────────────────────────────
-        # GalleryViewModel reçoit ws_id et ws_data pour gérer les épingles
+        # GalleryViewModel reçoit ws_id et ws_data pour gérer les épingles et l'arbre
         self.gallery_vm = GalleryViewModel(client, config, ws_id=ws_id, ws_data=_ws_data)
         self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
@@ -170,6 +170,18 @@ class WorkspaceWidget(QWidget):
             list[str]: Noms des images épinglées dans leur ordre d'épinglage.
         """
         return self.gallery_vm.pinned_images
+
+    @property
+    def current_search_trees(self) -> dict:
+        """Sérialisation des arbres de recherche (galerie + carte) du workspace.
+
+        Returns:
+            dict: {"gallery": {...}, "map": {...}} prêt à être stocké dans config.json.
+        """
+        return {
+            "gallery": self.gallery_vm.search_tree.to_dict(),
+            "map": self.map_vm.search_tree.to_dict(),
+        }
 
     # ── Slots internes ────────────────────────────────────────────────────────
 

@@ -13,6 +13,7 @@ Responsabilités :
  3. Construire des entrées de workspace standardisées
  4. Garantir au moins un workspace par défaut
  5. Fournir les valeurs par défaut de map_params, k_neighbors et pinned_images
+ 6. Fournir les arbres de recherche (history_search) de la galerie et de la carte
 """
 
 from __future__ import annotations
@@ -49,6 +50,7 @@ def make_workspace(name: str = "Workspace", folder: str | None = None) -> dict:
         "k_neighbors": _DEFAULT_K_NEIGHBORS,
         "map_params": dict(_DEFAULT_MAP_PARAMS),
         "pinned_images": [],
+        "history_search": {"gallery": {}, "map": {}},
     }
 
 
@@ -115,6 +117,27 @@ def get_pinned_images(ws_data: dict) -> list[str]:
     return []
 
 
+def get_search_trees(ws_data: dict) -> dict:
+    """Extrait les données sérialisées des arbres de recherche d'un workspace.
+
+    Retourne un dict avec les clés « gallery » et « map », chacune contenant
+    le to_dict() du SearchTree correspondant (ou {} si absent).
+
+    Args:
+        ws_data (dict): Données du workspace.
+
+    Returns:
+        dict: {"gallery": {...}, "map": {...}}
+    """
+    raw = ws_data.get("history_search", {})
+    if not isinstance(raw, dict):
+        raw = {}
+    return {
+        "gallery": raw.get("gallery", {}),
+        "map": raw.get("map", {}),
+    }
+
+
 # ── Lecture / écriture ────────────────────────────────────────────────────────
 
 
@@ -147,6 +170,9 @@ def load(config: dict) -> list[dict]:
             if "pinned_images" not in ws:
                 ws = dict(ws)
                 ws["pinned_images"] = []
+            if "history_search" not in ws:
+                ws = dict(ws)
+                ws["history_search"] = {"gallery": {}, "map": {}}
             validated.append(ws)
 
     return validated if validated else [make_workspace("Workspace 1")]
