@@ -198,6 +198,14 @@ class GalleryWidget(QWidget):
         action_search.triggered.connect(lambda: (dock.setVisible(True), self.search_bar.setFocus()))
         self.addAction(action_search)
 
+        action_zoom_in = QAction("Zoom In", self)
+        action_zoom_in.setShortcut(QKeySequence("Ctrl+="))
+        action_zoom_in.triggered.connect(self._gvm.zoom_in)
+
+        action_zoom_out = QAction("Zoom Out", self)
+        action_zoom_out.setShortcut(QKeySequence("Ctrl+-"))
+        action_zoom_out.triggered.connect(self._gvm.zoom_out)
+
         # Sync bouton ↔ visibilité dock
         dock.visibilityChanged.connect(self.btn_search_dock.setChecked)
         self.btn_search_dock.clicked.connect(dock.setVisible)
@@ -336,23 +344,6 @@ class GalleryWidget(QWidget):
                 self.progress_label.setVisible(False),
             ),
         )
-
-    # ── Zoom (Ctrl + molette) ─────────────────────────────────────────────────
-
-    def wheelEvent(self, event):
-        """Gére le zoom avec la molette de la souris.
-
-        Args:
-            event (QWheelEvent): Evènement de la molette.
-        """
-
-        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            if event.angleDelta().y() > 0:
-                self._gvm.zoom_in()
-            else:
-                self._gvm.zoom_out()
-        else:
-            super().wheelEvent(event)
 
     # ── Prefetch ──────────────────────────────────────────────────────────────
 

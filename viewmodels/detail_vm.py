@@ -225,7 +225,7 @@ class DetailViewModel(QObject):
             self._client,
         )
         self._save_worker.signal_finished.connect(self.on_save_done)
-        self._save_worker.error.connect(self.signal_save_error)
+        self._save_worker.signal_error.connect(self.signal_save_error)
         self._save_worker.start()
 
     def on_save_done(self):
