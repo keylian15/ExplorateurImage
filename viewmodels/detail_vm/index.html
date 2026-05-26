@@ -2069,7 +2069,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_save_done</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2617,7 +2617,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_save_done</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
