@@ -443,7 +443,6 @@ class Sam3Sidebar(QWidget):
 
     def set_status(self, text: str) -> None:
         self.lbl_status.setText(text)
-        print(text)
 
     def set_busy(self, busy: bool, message: str = "") -> None:
         self.set_ready(not busy)
@@ -594,11 +593,15 @@ class Sam3Dialog(QDialog):
     # ── Initialisation image ──────────────────────────────────────────────────
 
     def _init_image(self):
-        """Lance l'encodage si le modèle est prêt, sinon attend signal_model_ready."""
+        """Lance l'encodage si le modèle est prêt, sinon attend signal_model_ready.
+        Ne relance jamais load_model() si c'est déjà en cours (chargement en fond au démarrage).
+        """
         if self._vm.is_model_loaded:
-            if not self._vm.is_image_encoded:
-                self._vm.encode_image(self._pixmap, self._img_path)
+            self._vm.encode_image(self._pixmap, self._img_path)
         else:
+            # Le modèle est peut-être déjà en cours de chargement depuis WorkspaceWidget.
+            # On attend simplement signal_model_ready — _on_model_ready lancera l'encodage.
+            self._sidebar.set_status("⏳ Chargement du modèle en cours…")
             if not self._vm.is_busy:
                 self._vm.load_model()
 
