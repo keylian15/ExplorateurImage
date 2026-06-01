@@ -335,6 +335,7 @@ class Sam3Sidebar(QWidget):
         self.btn_segment.setFixedWidth(32)
         self.btn_segment.setToolTip("Segmenter")
         self.btn_segment.setEnabled(False)
+        self.btn_segment.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_segment.clicked.connect(self._on_text_submit)
         row.addWidget(self.btn_segment)
         layout.addLayout(row)
@@ -350,6 +351,7 @@ class Sam3Sidebar(QWidget):
         self.btn_positive.setCheckable(True)
         self.btn_positive.setChecked(True)
         self.btn_positive.setEnabled(False)
+        self.btn_positive.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_positive.clicked.connect(self._on_box_mode)
         self.btn_positive.setToolTip("Inclure la zone dessinée")
         box_row.addWidget(self.btn_positive)
@@ -357,6 +359,7 @@ class Sam3Sidebar(QWidget):
         self.btn_negative = QPushButton("✖ Négative")
         self.btn_negative.setCheckable(True)
         self.btn_negative.setEnabled(False)
+        self.btn_negative.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_negative.clicked.connect(self._on_box_mode)
         self.btn_negative.setToolTip("Exclure la zone dessinée")
         box_row.addWidget(self.btn_negative)
@@ -379,6 +382,7 @@ class Sam3Sidebar(QWidget):
         self.slider_conf.setRange(0, 100)
         self.slider_conf.setValue(50)
         self.slider_conf.setEnabled(False)
+        self.slider_conf.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.slider_conf.valueChanged.connect(self._on_confidence)
         layout.addWidget(self.slider_conf)
 
@@ -386,6 +390,7 @@ class Sam3Sidebar(QWidget):
         self._sep(layout)
         self.btn_reset = QPushButton("↺ Réinitialiser les prompts")
         self.btn_reset.setEnabled(False)
+        self.btn_reset.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_reset.clicked.connect(self.signal_reset)
         layout.addWidget(self.btn_reset)
 
@@ -440,6 +445,9 @@ class Sam3Sidebar(QWidget):
         """Active ou désactive tous les contrôles."""
         for w in (self.text_input, self.btn_segment, self.btn_positive, self.btn_negative, self.slider_conf, self.btn_reset):
             w.setEnabled(ready)
+        # Redonner le focus au champ texte quand on est prêt
+        if ready:
+            self.text_input.setFocus()
 
     def set_status(self, text: str) -> None:
         self.lbl_status.setText(text)
@@ -534,6 +542,8 @@ class Sam3Dialog(QDialog):
         self._scroll.setWidget(self._canvas)
         self._scroll.setStyleSheet(f"background: {COLORS['bg_card']}; border: none;")
         self._scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Intercepter la molette sur le scroll pour zoomer au lieu de scroller
+        self._scroll.wheelEvent = self._on_scroll_wheel
         center.addWidget(self._scroll, stretch=1)
 
         # Sidebar
@@ -559,6 +569,7 @@ class Sam3Dialog(QDialog):
 
         for btn in (self._btn_zoom_out, self._btn_zoom_in, self._btn_zoom_reset):
             btn.setFixedHeight(28)
+            btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
             bar.addWidget(btn)
         bar.addWidget(self._lbl_zoom)
         bar.addStretch()
@@ -640,9 +651,7 @@ class Sam3Dialog(QDialog):
         self._canvas.set_zoom(self._zoom)
         self._lbl_zoom.setText(f"{int(self._zoom * 100)}%")
 
-    def wheelEvent(self, event):
-        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            delta = 0.1 if event.angleDelta().y() > 0 else -0.1
-            self._apply_zoom(self._zoom + delta)
-        else:
-            super().wheelEvent(event)
+    def _on_scroll_wheel(self, event):
+        """Intercepte la molette sur le QScrollArea pour zoomer."""
+        delta = 0.1 if event.angleDelta().y() > 0 else -0.1
+        self._apply_zoom(self._zoom + delta)
