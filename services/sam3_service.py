@@ -190,8 +190,14 @@ class Sam3Service:
         """
         self._check_loaded()
         new_state = self._processor.reset_all_prompts(state)
+        if new_state is None:
+            new_state = {k: v for k, v in state.items()}
         new_state.pop("prompted_boxes", None)
+        new_state.pop("masks", None)
+        new_state.pop("boxes", None)
+        new_state.pop("scores", None)
         return new_state
+
 
     def set_confidence_threshold(self, threshold: float, state: dict[str, Any]) -> dict[str, Any]:
         """
