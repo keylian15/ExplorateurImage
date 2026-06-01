@@ -14,7 +14,7 @@ Contenu :
  - Barre de progression pour les traitements batch
  - Support du zoom dynamique (Ctrl + molette)
  - Préchargement intelligent des thumbnails (prefetch)
- - Ouverture d'images en plein écran
+ - Ouverture d'images en plein écran avec segmentation SAM3 (clic droit)
 
 Responsabilités :
  1. Afficher la grille d'images du dossier courant
@@ -22,11 +22,13 @@ Responsabilités :
  3. Gérer le zoom de la grille (taille des cellules)
  4. Lancer et suivre les traitements batch d'auto-complétion
  5. Précharger les thumbnails visibles pour fluidifier l'affichage
- 6. Ouvrir les images en plein écran sur interaction utilisateur
+ 6. Ouvrir les images dans Sam3Dialog sur clic droit
  7. Relayer les événements UI vers les ViewModels sans logique métier
 """
 
 from __future__ import annotations
+
+import os
 
 from PyQt6.QtCore import QModelIndex, QPoint, QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QKeySequence, QPixmap
@@ -34,6 +36,7 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QDockWidget,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -48,21 +51,31 @@ from models.image_model import IMG_NAME_ROLE
 from styles import THUMB
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.gallery_vm import GalleryViewModel
-from views.components.fullscreen_dialog import FullscreenDialog
+from viewmodels.sam3_vm import Sam3ViewModel
+from views.components.sam3_dialog import Sam3Dialog
 from views.tree_widget import TreeViewWidget
 
 PREFETCH_ROWS = THUMB["prefetch_rows"]
 
 
 class GalleryWidget(QWidget):
-    def __init__(self, gallery_vm: GalleryViewModel, autocomplete_vm: AutocompleteViewModel, parent=None):
+    def __init__(
+        self,
+        gallery_vm: GalleryViewModel,
+        autocomplete_vm: AutocompleteViewModel,
+        sam3_vm: Sam3ViewModel,
+        parent=None,
+    ):
         """
         Args:
-            gallery_vm (GalleryViewModel): ViewModel de la galerie.
-            autocomplete_vm (AutocompleteViewModel): ViewModel de l'autocomplétion."""
+            gallery_vm: ViewModel de la galerie.
+            autocomplete_vm: ViewModel de l'auto-complétion.
+            sam3_vm: ViewModel SAM3 partagé du workspace.
+        """
         super().__init__(parent)
         self._gvm = gallery_vm
         self._avm = autocomplete_vm
+        self._sam3_vm = sam3_vm
         self._search_dock: QDockWidget | None = None
 
         self.build_ui()
@@ -71,7 +84,6 @@ class GalleryWidget(QWidget):
     # ── Construction ─────────────────────────────────────────────────────────
 
     def build_ui(self):
-        """Construit le widget."""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 4)
         layout.setSpacing(6)
@@ -90,7 +102,6 @@ class GalleryWidget(QWidget):
         self.btn_cancel.setVisible(False)
         top.addWidget(self.btn_cancel)
 
-        # Bouton pour afficher/masquer le dock de recherche
         self.btn_search_dock = QPushButton("🔍 Recherche")
         self.btn_search_dock.setCheckable(True)
         self.btn_search_dock.setToolTip("Afficher / masquer le panneau de recherche")
@@ -115,7 +126,7 @@ class GalleryWidget(QWidget):
         self.list_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list_view.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.list_view.setToolTip("Clic gauche : sélectionner | Clic droit : voir en plein écran")
+        self.list_view.setToolTip("Clic gauche : sélectionner | Clic droit : SAM3 segmentation")
         layout.addWidget(self.list_view)
 
         # ── Progression batch ─────────────────────────────────────────────────
@@ -134,17 +145,6 @@ class GalleryWidget(QWidget):
         self._prefetch_timer.timeout.connect(self.prefetch_visible)
 
     def build_search_dock(self, main_window) -> QDockWidget:
-        """Construit et retourne le dock de recherche.
-
-        Doit être appelé depuis WorkspaceWidget après construction,
-        une fois que main_window est disponible.
-
-        Args:
-            main_window: La QMainWindow à laquelle rattacher le dock.
-
-        Returns:
-            QDockWidget: Le dock de recherche.
-        """
         dock = QDockWidget("Recherche dans la Galerie", main_window)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea)
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
@@ -155,14 +155,12 @@ class GalleryWidget(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(10)
 
-        # ── Barre de recherche ────────────────────────────────────────────────
         self.search_bar = QLineEdit()
         self.search_bar.setObjectName("search_bar")
         self.search_bar.setPlaceholderText("Rechercher…")
         self.search_bar.setClearButtonEnabled(True)
         layout.addWidget(self.search_bar)
 
-        # ── Actions sous la barre ─────────────────────────────────────────────
         actions_row = QHBoxLayout()
         actions_row.setSpacing(6)
 
@@ -176,15 +174,11 @@ class GalleryWidget(QWidget):
 
         layout.addLayout(actions_row)
 
-        # ── Séparateur ────────────────────────────────────────────────────────
-        from PyQt6.QtWidgets import QFrame
-
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
         sep.setStyleSheet("color: #1f2937;")
         layout.addWidget(sep)
 
-        # ── Arbre de recherche ────────────────────────────────────────────────
         self.tree_widget = TreeViewWidget(self._gvm.search_tree)
         self.tree_widget.signal_node_clicked.connect(self.on_signal_tree_node_clicked)
         layout.addWidget(self.tree_widget)
@@ -192,7 +186,6 @@ class GalleryWidget(QWidget):
         layout.addStretch()
         dock.setWidget(content)
 
-        # Raccourci Ctrl+F → focus barre de recherche
         action_search = QAction("Search", self)
         action_search.setShortcut(QKeySequence("Ctrl+F"))
         action_search.triggered.connect(lambda: (dock.setVisible(True), self.search_bar.setFocus()))
@@ -201,16 +194,16 @@ class GalleryWidget(QWidget):
         action_zoom_in = QAction("Zoom In", self)
         action_zoom_in.setShortcut(QKeySequence("Ctrl+="))
         action_zoom_in.triggered.connect(self._gvm.zoom_in)
+        self.addAction(action_zoom_in)
 
         action_zoom_out = QAction("Zoom Out", self)
         action_zoom_out.setShortcut(QKeySequence("Ctrl+-"))
         action_zoom_out.triggered.connect(self._gvm.zoom_out)
+        self.addAction(action_zoom_out)
 
-        # Sync bouton ↔ visibilité dock
         dock.visibilityChanged.connect(self.btn_search_dock.setChecked)
         self.btn_search_dock.clicked.connect(dock.setVisible)
 
-        # Connecter les signaux de la barre de recherche galerie
         self.search_bar.textChanged.connect(self._gvm.schedule_search)
         self.btn_save_search.clicked.connect(self._gvm.save_search)
         self.checkbox_affinage.toggled.connect(self._gvm.set_affinage)
@@ -219,15 +212,12 @@ class GalleryWidget(QWidget):
         return dock
 
     def connect_vm(self):
-        """Connect la view au viewmodel."""
-        # View → ViewModel
         self.btn_batch.clicked.connect(self._avm.start)
         self.btn_cancel.clicked.connect(self.on_cancel)
         self.list_view.clicked.connect(self.on_item_clicked)
         self.list_view.customContextMenuRequested.connect(self.on_right_click)
         self.list_view.verticalScrollBar().valueChanged.connect(lambda: self._prefetch_timer.start())
 
-        # ViewModel → View
         self._gvm.signal_cell_size_changed.connect(self.on_signal_cell_size_changed)
         self._gvm.signal_saved_search.connect(self.on_signal_search_saved)
 
@@ -235,19 +225,13 @@ class GalleryWidget(QWidget):
         self._avm.signal_progress.connect(self.on_batch_progress)
         self._avm.signal_finished.connect(self.on_batch_finished)
 
-    # ── Slots internes ─────────────────────────────────────────────────────
+    # ── Slots internes ────────────────────────────────────────────────────────
 
     def on_signal_search_saved(self):
-        """Rafraîchit l'arbre après sauvegarde d'une recherche."""
         if hasattr(self, "tree_widget"):
             self.tree_widget.refresh()
 
     def on_signal_tree_node_clicked(self, node_id: str):
-        """Navigue vers le noeud cliqué dans l'arbre.
-
-        Args:
-            node_id (str): Identifiant du noeud.
-        """
         node = self._gvm.search_tree.get_node(node_id)
         if node is None:
             return
@@ -256,85 +240,65 @@ class GalleryWidget(QWidget):
             self.search_bar.setText(node.query)
         self.tree_widget.refresh()
 
-    # ── Slots View → ViewModel ─────────────────────────────────────────────
+    # ── Slots View → ViewModel ────────────────────────────────────────────────
 
     def on_item_clicked(self, index: QModelIndex):
-        """Selectionne l'image.
-
-        Args:
-            index (QModelIndex): Index de l'image."""
         img_name = index.data(IMG_NAME_ROLE)
         if img_name:
             self._gvm.select_image(img_name)
 
     def on_right_click(self, pos: QPoint):
-        """Affiche l'image en plein ecran.
-
-        Args:
-            pos (QPoint): Position du clic."""
+        """Ouvre Sam3Dialog pour l'image cliquée."""
         index = self.list_view.indexAt(pos)
         if not index.isValid():
             return
         img_name = index.data(IMG_NAME_ROLE)
         if not img_name or not self._gvm.current_folder:
             return
-        import os
 
-        pixmap = QPixmap(os.path.join(self._gvm.current_folder, img_name))
-        if not pixmap.isNull():
-            dlg = FullscreenDialog(pixmap, img_name, self)
-            dlg.exec()
+        img_path = os.path.join(self._gvm.current_folder, img_name)
+        pixmap = QPixmap(img_path)
+        if pixmap.isNull():
+            return
+
+        dlg = Sam3Dialog(
+            pixmap=pixmap,
+            sam3_vm=self._sam3_vm,
+            title=img_name,
+            img_path=img_path,
+            parent=self,
+        )
+        dlg.exec()
 
     def on_cancel(self):
-        """Annule le batch."""
         self._avm.cancel()
         self.btn_cancel.setEnabled(False)
         self.progress_label.setText("⛔ Annulation…")
 
-    # ── Slots ViewModel → View ─────────────────────────────────────────────
+    # ── Slots ViewModel → View ────────────────────────────────────────────────
 
     def on_signal_cell_size_changed(self, size: int):
-        """Redimensionne la gallery.
-
-        Args:
-            size (int): Nouvelle taille des cellules."""
         self.list_view.setGridSize(QSize(size + 8, size + 8))
         self.list_view.doItemsLayout()
         QTimer.singleShot(50, self.prefetch_visible)
 
     def on_batch_started(self, total: int):
-        """Démarre le batch.
-
-        Args:
-            total (int): Nombre d'images à traiter."""
-
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
-        self.progress_label.setText(f"0 / {total} — en attente…")
+        self.progress_label.setText(f"0 / {total} - en attente…")
         self.progress_label.setVisible(True)
         self.btn_batch.setEnabled(False)
         self.btn_cancel.setVisible(True)
         self.btn_cancel.setEnabled(True)
 
     def on_batch_progress(self, done: int, total: int, label: str):
-        """Callback pour la progression du batch.
-
-        Args:
-            done (int): Nombre d'images traitées.
-            total (int): Nombre d'images à traiter.
-            label (str): Label à afficher."""
         self.progress_bar.setValue(done)
-        self.progress_label.setText(f"{done} / {total} — {label}")
+        self.progress_label.setText(f"{done} / {total} - {label}")
 
     def on_batch_finished(self, cancelled: bool):
-        """Callback pour la fin du batch.
-
-        Args:
-            cancelled (bool): True si le batch a été annulé, False sinon.
-        """
         total = self.progress_bar.maximum()
-        self.progress_label.setText("⛔ Annulé" if cancelled else f"✅ Terminé — {total} images traitées")
+        self.progress_label.setText("⛔ Annulé" if cancelled else f"✅ Terminé - {total} images traitées")
         self.btn_batch.setEnabled(True)
         self.btn_cancel.setVisible(False)
         QTimer.singleShot(
@@ -348,7 +312,6 @@ class GalleryWidget(QWidget):
     # ── Prefetch ──────────────────────────────────────────────────────────────
 
     def prefetch_visible(self):
-        """Précharge les images visibles."""
         vp = self.list_view.viewport()
         rect = vp.rect()
         size = self._gvm.cell_size

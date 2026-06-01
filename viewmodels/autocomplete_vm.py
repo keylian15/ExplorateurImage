@@ -27,7 +27,6 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 from models import index_repository
 from services.ollama_wrapper import OllamaWrapper
-from services.workers import AutoCompleteAllWorker
 
 MODEL_EMBED = "nomic-embed-text:v1.5"
 

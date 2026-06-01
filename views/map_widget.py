@@ -554,7 +554,7 @@ class MapTab(QWidget):
         self.build_scene(points, labels, names, cluster_names)
         n_clusters = len({label for label in labels if label >= 0})
         n_noise = labels.count(-1)
-        self._lbl_status.setText(f"{len(names)} images — {n_clusters} clusters" + (f" — {n_noise} bruit" if n_noise else ""))
+        self._lbl_status.setText(f"{len(names)} images - {n_clusters} clusters" + (f" - {n_noise} bruit" if n_noise else ""))
         self._btn_compute.setEnabled(True)
         self._btn_reset_filter.setEnabled(True)
         if self._current_selected:

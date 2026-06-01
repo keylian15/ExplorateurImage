@@ -224,3 +224,4 @@ Images/Dataset/
 # Ignore tous les thumbanils.
 .thumbnails/
 map_cache.pkl
+.vscode/settings.json

@@ -447,3 +447,109 @@ class MapWorker(QThread):
                 name = f"Cluster {cid}"
             self.signal_cluster_named.emit(cid, name)
             self.cluster_names[cid] = name
+
+
+# ═══════════════════════════════════════════════════════════
+#  SAM3 WORKERS
+# ═══════════════════════════════════════════════════════════
+
+
+class Sam3LoadWorker(QThread):
+    """Charge le modèle SAM3 en arrière-plan."""
+
+    signal_finished = pyqtSignal()
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, service, parent=None):
+        """
+        Args:
+            service (Sam3Service): instance du service SAM3.
+        """
+        super().__init__(parent)
+        self._service = service
+
+    def run(self):
+        """Lance le chargement du modèle."""
+        try:
+            self._service.load_model()
+            self.signal_finished.emit()
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
+
+
+class Sam3EncodeWorker(QThread):
+    """Encode une image PIL dans l'état SAM3."""
+
+    signal_finished = pyqtSignal(object)  # state dict
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, service, pil_image, parent=None):
+        """
+        Args:
+            service (Sam3Service): instance du service SAM3.
+            pil_image: PIL.Image RGB à encoder.
+        """
+        super().__init__(parent)
+        self._service = service
+        self._image = pil_image
+
+    def run(self):
+        """Lance l'encodage de l'image."""
+        try:
+            state = self._service.set_image(self._image)
+            self.signal_finished.emit(state)
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
+
+
+class Sam3SegmentWorker(QThread):
+    """Applique un prompt (texte ou boîte) et émet le résultat."""
+
+    signal_finished = pyqtSignal(object, object)  # (new_state, SegmentationResult)
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, service, state: dict, prompt_fn, parent=None):
+        """
+        Args:
+            service (Sam3Service): instance du service SAM3.
+            state (dict): état SAM3 courant.
+            prompt_fn: callable(state) -> new_state appliquant le prompt.
+        """
+        super().__init__(parent)
+        self._service = service
+        self._state = state
+        self._prompt_fn = prompt_fn
+
+    def run(self):
+        """Applique le prompt et extrait le résultat."""
+        try:
+            new_state = self._prompt_fn(self._state)
+            result = self._service.extract_result(new_state)
+            self.signal_finished.emit(new_state, result)
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
+
+
+class Sam3ResetWorker(QThread):
+    """Réinitialise les prompts SAM3 en arrière-plan."""
+
+    signal_finished = pyqtSignal(object)  # new_state
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, service, state: dict, parent=None):
+        """
+        Args:
+            service (Sam3Service): instance du service SAM3.
+            state (dict): état SAM3 courant.
+        """
+        super().__init__(parent)
+        self._service = service
+        self._state = state
+
+    def run(self):
+        """Réinitialise les prompts."""
+        try:
+            new_state = self._service.reset_prompts(state=self._state)
+            self.signal_finished.emit(new_state)
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
