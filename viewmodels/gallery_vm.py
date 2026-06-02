@@ -175,7 +175,7 @@ class GalleryViewModel(QObject):
         """
         if images is None:
             try:
-                images = [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
+                images = self.all_images()
             except (FileNotFoundError, TypeError):
                 images = []
 

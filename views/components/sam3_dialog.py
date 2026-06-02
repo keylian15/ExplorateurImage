@@ -291,6 +291,7 @@ class Sam3Sidebar(QWidget):
     """
 
     signal_text_prompt = pyqtSignal(str)
+    signal_object_search_requested = pyqtSignal(str)
     signal_box_positive = pyqtSignal(bool)  # True=positif / False=négatif
     signal_confidence_changed = pyqtSignal(float)
     signal_reset = pyqtSignal()
@@ -324,20 +325,27 @@ class Sam3Sidebar(QWidget):
         lbl_text.setStyleSheet(self._section_style())
         layout.addWidget(lbl_text)
 
-        row = QHBoxLayout()
         self.text_input = QLineEdit()
         self.text_input.setPlaceholderText("ex: shoe, dog, person…")
         self.text_input.setEnabled(False)
         self.text_input.returnPressed.connect(self._on_text_submit)
-        row.addWidget(self.text_input)
+        layout.addWidget(self.text_input)
 
+        row = QHBoxLayout()
         self.btn_segment = QPushButton("▶")
-        self.btn_segment.setFixedWidth(32)
         self.btn_segment.setToolTip("Segmenter")
         self.btn_segment.setEnabled(False)
         self.btn_segment.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_segment.clicked.connect(self._on_text_submit)
         row.addWidget(self.btn_segment)
+        
+        self.btn_all_segment = QPushButton("Trouver tous")
+        self.btn_all_segment.setToolTip("Trouver sur toutes les images")
+        self.btn_all_segment.setEnabled(False)
+        self.btn_all_segment.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.btn_all_segment.clicked.connect(self._on_search_objects_requested)
+        row.addWidget(self.btn_all_segment)
+        
         layout.addLayout(row)
 
         # ── Mode boîte ────────────────────────────────────────────────────────
@@ -443,7 +451,7 @@ class Sam3Sidebar(QWidget):
 
     def set_ready(self, ready: bool) -> None:
         """Active ou désactive tous les contrôles."""
-        for w in (self.text_input, self.btn_segment, self.btn_positive, self.btn_negative, self.slider_conf, self.btn_reset):
+        for w in (self.text_input, self.btn_segment, self.btn_all_segment, self.btn_positive, self.btn_negative, self.slider_conf, self.btn_reset):
             w.setEnabled(ready)
         # Redonner le focus au champ texte quand on est prêt
         if ready:
@@ -477,6 +485,11 @@ class Sam3Sidebar(QWidget):
         f = value / 100.0
         self.lbl_conf_val.setText(f"{f:.2f}")
         self.signal_confidence_changed.emit(f)
+        
+    def _on_search_objects_requested(self):
+        text = self.text_input.text().strip()
+        if text:
+            self.signal_object_search_requested.emit(text)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -549,6 +562,7 @@ class Sam3Dialog(QDialog):
         # Sidebar
         self._sidebar = Sam3Sidebar()
         self._sidebar.signal_text_prompt.connect(self._vm.apply_text_prompt)
+        self._sidebar.signal_object_search_requested.connect(self._vm.search_objects)
         self._sidebar.signal_box_positive.connect(self._canvas.set_box_positive)
         self._sidebar.signal_confidence_changed.connect(self._vm.set_confidence)
         self._sidebar.signal_reset.connect(self._vm.reset_prompts)

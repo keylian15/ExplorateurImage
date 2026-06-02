@@ -30,6 +30,7 @@ Responsabilités :
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import os
 
 import numpy as np
 from PIL import Image as PILImage
@@ -37,6 +38,7 @@ from PIL import Image as PILImage
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 
+from services.ollama_wrapper import OllamaWrapper
 from services.sam3_service import Sam3Service, SegmentationResult
 from services.workers import (
     Sam3EncodeWorker,
@@ -44,6 +46,8 @@ from services.workers import (
     Sam3ResetWorker,
     Sam3SegmentWorker,
 )
+from viewmodels.gallery_vm import GalleryViewModel
+from models import workspace_repository as ws_repo
 
 
 # ── Type View-friendly (pas de dépendance vers services/) ────────────────────
@@ -96,9 +100,22 @@ class Sam3ViewModel(QObject):
     signal_resetting = pyqtSignal()
     signal_reset_done = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self,
+        client: OllamaWrapper,
+        config: dict,
+        gallery_vm: GalleryViewModel,
+        ws_id: str,
+        ws_data: dict,
+        parent=None):
+        
         super().__init__(parent)
-
+        
+        self._client = client
+        self._config = config
+        self._gallery_vm = gallery_vm
+        self._ws_id = ws_id
+        self._params = ws_repo.get_map_params(ws_data)
+        
         self._service = Sam3Service()
         self._state: dict | None = None
         self._confidence: float = 0.5
@@ -238,6 +255,31 @@ class Sam3ViewModel(QObject):
 
             self._run_segment(fn)
 
+    def search_objects(self, text: str) -> None:
+        """Recherche des objets correspondant au texte sur toutes les images.
+        
+        Args : 
+            text(str) : le texte à rechercher
+        """
+        
+        # Récupérer toutes les images de la galerie
+        # for image in self._gallery_vm.all_images():
+        
+        image = self._gallery_vm.all_images()[0]
+            
+        img_path = os.path.join(self._gallery_vm.current_folder, image)
+        pixmap = QPixmap(img_path)
+        if pixmap.isNull():
+            return
+        
+        print(f"Encodage de l'image : {image}")
+        
+        # Encodage de l'image (cela mettra à jour self._state)
+        self.encode_image(pixmap, img_path)
+        dico = self._service.apply_text_prompt(text, self._state)
+        
+        print(dico)
+        
     # ── Interne ───────────────────────────────────────────────────────────────
 
     def _can_segment(self) -> bool:

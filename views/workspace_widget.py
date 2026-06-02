@@ -87,9 +87,7 @@ class WorkspaceWidget(QWidget):
         self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
         self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
-
-        # SAM3 ViewModel - partagé dans tout le workspace, modèle chargé une fois
-        self.sam3_vm = Sam3ViewModel(self)
+        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
 
         # ── Vues ──────────────────────────────────────────────────────────────
         self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, self)
