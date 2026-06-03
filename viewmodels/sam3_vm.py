@@ -14,6 +14,7 @@ Contenu :
  - Encodage asynchrone d'une image PIL ou QPixmap (Sam3EncodeWorker)
  - Application asynchrone de prompts texte/boîte (Sam3SegmentWorker)
  - Reset des prompts (Sam3ResetWorker)
+ - Recherche globale sur tout le dossier (ObjectSearchAllWorker)
  - Exposition des résultats via signaux Qt (liste de MaskOverlay, type View-friendly)
 
 Responsabilités :
@@ -25,30 +26,29 @@ Responsabilités :
     sans importer services/)
  6. Notifier la vue de chaque résultat intermédiaire via signaux
  7. Permettre le reset propre de tous les prompts
+ 8. Lancer une recherche globale (search_objects) sur tout le dossier via un worker dédié
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import os
 
 import numpy as np
 from PIL import Image as PILImage
-
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 
+from models import workspace_repository as ws_repo
 from services.ollama_wrapper import OllamaWrapper
 from services.sam3_service import Sam3Service, SegmentationResult
 from services.workers import (
+    ObjectSearchAllWorker,
     Sam3EncodeWorker,
     Sam3LoadWorker,
     Sam3ResetWorker,
     Sam3SegmentWorker,
 )
 from viewmodels.gallery_vm import GalleryViewModel
-from models import workspace_repository as ws_repo
-
 
 # ── Type View-friendly (pas de dépendance vers services/) ────────────────────
 
@@ -82,12 +82,18 @@ class Sam3ViewModel(QObject):
         3. encode_image(pixmap, img_path) quand l'utilisateur ouvre une image.
         4. apply_text_prompt() ou apply_box_prompt() pour segmenter.
         5. signal_overlay_ready → la View affiche les masques.
+
+    Pour la recherche globale :
+        6. search_objects(text, threshold) lance ObjectSearchAllWorker.
+        7. signal_search_match → la View reçoit chaque correspondance au fil de l'eau.
+        8. signal_search_progress → mise à jour de la progression.
+        9. signal_search_finished → liste finale des images correspondantes.
     """
 
-    # ── Signaux ───────────────────────────────────────────────────────────────
-    signal_model_loading = pyqtSignal()  # chargement démarré
-    signal_model_ready = pyqtSignal()  # modèle disponible
-    signal_model_error = pyqtSignal(str)  # erreur de chargement
+    # ── Signaux segmentation courante ─────────────────────────────────────────
+    signal_model_loading = pyqtSignal()
+    signal_model_ready = pyqtSignal()
+    signal_model_error = pyqtSignal(str)
 
     signal_encoding = pyqtSignal()  # encodage image démarré
     signal_encoded = pyqtSignal()  # image prête pour les prompts
@@ -100,22 +106,31 @@ class Sam3ViewModel(QObject):
     signal_resetting = pyqtSignal()
     signal_reset_done = pyqtSignal()
 
-    def __init__(self,
+    # ── Signaux recherche globale ─────────────────────────────────────────────
+    signal_search_started = pyqtSignal(int)  # total d'images
+    signal_search_progress = pyqtSignal(int, int, str)  # (done, total, img_name)
+    signal_search_match = pyqtSignal(str, float)  # (img_name, score)
+    signal_search_finished = pyqtSignal(list)  # list[str] des matches
+    signal_search_error = pyqtSignal(str)
+    signal_search_cancelled = pyqtSignal()
+
+    def __init__(
+        self,
         client: OllamaWrapper,
         config: dict,
         gallery_vm: GalleryViewModel,
         ws_id: str,
         ws_data: dict,
-        parent=None):
-        
+        parent=None,
+    ):
         super().__init__(parent)
-        
+
         self._client = client
         self._config = config
         self._gallery_vm = gallery_vm
         self._ws_id = ws_id
         self._params = ws_repo.get_map_params(ws_data)
-        
+
         self._service = Sam3Service()
         self._state: dict | None = None
         self._confidence: float = 0.5
@@ -124,6 +139,7 @@ class Sam3ViewModel(QObject):
         self._encode_worker: Sam3EncodeWorker | None = None
         self._segment_worker: Sam3SegmentWorker | None = None
         self._reset_worker: Sam3ResetWorker | None = None
+        self._search_worker: ObjectSearchAllWorker | None = None
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
@@ -139,8 +155,13 @@ class Sam3ViewModel(QObject):
 
     @property
     def is_busy(self) -> bool:
-        """True si un worker est en cours d'exécution."""
+        """True si un worker de segmentation est en cours d'exécution."""
         return any(w is not None and w.isRunning() for w in (self._load_worker, self._encode_worker, self._segment_worker, self._reset_worker))
+
+    @property
+    def is_searching(self) -> bool:
+        """True si une recherche globale est en cours."""
+        return self._search_worker is not None and self._search_worker.isRunning()
 
     # ── Chargement modèle ─────────────────────────────────────────────────────
 
@@ -154,7 +175,7 @@ class Sam3ViewModel(QObject):
         self._load_worker.signal_error.connect(self.signal_model_error)
         self._load_worker.start()
 
-    def _on_model_loaded(self):
+    def _on_model_loaded(self) -> None:
         self.signal_model_ready.emit()
 
     # ── Encodage image ────────────────────────────────────────────────────────
@@ -163,13 +184,9 @@ class Sam3ViewModel(QObject):
         """
         Encode l'image dans l'état SAM3 (arrière-plan).
 
-        La conversion QPixmap → PIL.Image est faite ici (logique de données,
-        pas dans la View).
-
         Args:
             pixmap: QPixmap de l'image à segmenter.
-            img_path: chemin disque optionnel - préféré à la conversion en mémoire
-                      car plus fidèle (pas de recompression JPEG intermédiaire).
+            img_path: chemin disque optionnel - préféré à la conversion en mémoire.
         """
         if not self._service.is_loaded or self.is_busy:
             return
@@ -186,7 +203,7 @@ class Sam3ViewModel(QObject):
         self._encode_worker.signal_error.connect(self.signal_encoding_error)
         self._encode_worker.start()
 
-    def _on_encoded(self, state: dict):
+    def _on_encoded(self, state: dict) -> None:
         self._state = state
         self.signal_encoded.emit()
 
@@ -213,14 +230,7 @@ class Sam3ViewModel(QObject):
         img_h: int,
         positive: bool = True,
     ) -> None:
-        """
-        Applique un prompt boîte en coordonnées pixel xyxy.
-
-        Args:
-            x0, y0, x1, y1: coordonnées pixel dans l'image originale.
-            img_w, img_h: dimensions de l'image originale.
-            positive: True = inclure, False = exclure.
-        """
+        """Applique un prompt boîte en coordonnées pixel xyxy."""
         if not self._can_segment():
             return
         svc = self._service
@@ -240,7 +250,7 @@ class Sam3ViewModel(QObject):
         self._reset_worker.signal_error.connect(self.signal_segment_error)
         self._reset_worker.start()
 
-    def _on_reset_done(self, new_state: dict):
+    def _on_reset_done(self, new_state: dict) -> None:
         self._state = new_state
         self.signal_reset_done.emit()
 
@@ -255,32 +265,62 @@ class Sam3ViewModel(QObject):
 
             self._run_segment(fn)
 
-    def search_objects(self, text: str) -> None:
-        """Recherche des objets correspondant au texte sur toutes les images.
-        
-        Args : 
-            text(str) : le texte à rechercher
+    # ── Recherche globale ─────────────────────────────────────────────────────
+
+    def search_objects(self, text: str, threshold: float = 0.75) -> None:
         """
-        
-        # Récupérer toutes les images de la galerie
-        # for image in self._gallery_vm.all_images():
-        
-        image = self._gallery_vm.all_images()[0]
-            
-        img_path = os.path.join(self._gallery_vm.current_folder, image)
-        pixmap = QPixmap(img_path)
-        if pixmap.isNull():
+        Lance la recherche de l'objet `text` sur toutes les images du dossier.
+
+        Bloque si le modèle n'est pas chargé ou si une recherche est déjà en cours.
+        Chaque correspondance est émise via signal_search_match au fil de l'eau.
+
+        Args:
+            text: texte décrivant l'objet (ex: "shoe", "dog").
+            threshold: score minimum SAM3 pour qu'une image soit retenue (0–1).
+        """
+        if not self._service.is_loaded:
+            self.signal_search_error.emit("Le modèle SAM3 n'est pas encore chargé.")
             return
-        
-        print(f"Encodage de l'image : {image}")
-        
-        # Encodage de l'image (cela mettra à jour self._state)
-        self.encode_image(pixmap, img_path)
-        dico = self._service.apply_text_prompt(text, self._state)
-        
-        print(dico)
-        
-    # ── Interne ───────────────────────────────────────────────────────────────
+
+        if self.is_searching:
+            return
+
+        folder = self._gallery_vm.current_folder
+        if not folder:
+            self.signal_search_error.emit("Aucun dossier ouvert.")
+            return
+
+        images = self._gallery_vm.all_images()
+        if not images:
+            self.signal_search_error.emit("Aucune image dans le dossier.")
+            return
+
+        self.signal_search_started.emit(len(images))
+
+        self._search_worker = ObjectSearchAllWorker(
+            folder=folder,
+            images=images,
+            service=self._service,
+            text=text,
+            threshold=threshold,
+            parent=self,
+        )
+        self._search_worker.signal_progress.connect(self.signal_search_progress)
+        self._search_worker.signal_match.connect(self.signal_search_match)
+        self._search_worker.signal_finished.connect(self._on_search_finished)
+        self._search_worker.signal_error.connect(self.signal_search_error)
+        self._search_worker.start()
+
+    def cancel_search(self) -> None:
+        """Annule la recherche globale en cours."""
+        if self._search_worker and self._search_worker.isRunning():
+            self._search_worker.cancel()
+            self.signal_search_cancelled.emit()
+
+    def _on_search_finished(self, matched: list) -> None:
+        self.signal_search_finished.emit(matched)
+
+    # ── Interne segmentation ──────────────────────────────────────────────────
 
     def _can_segment(self) -> bool:
         return self._service.is_loaded and self._state is not None and not self.is_busy
@@ -292,12 +332,12 @@ class Sam3ViewModel(QObject):
         self._segment_worker.signal_error.connect(self._on_segment_error)
         self._segment_worker.start()
 
-    def _on_segment_done(self, new_state: dict, result: SegmentationResult):
+    def _on_segment_done(self, new_state: dict, result: SegmentationResult) -> None:
         self._state = new_state
         overlay = self._to_overlay(result)
         self.signal_overlay_ready.emit(overlay)
 
-    def _on_segment_error(self, msg: str):
+    def _on_segment_error(self, msg: str) -> None:
         self.signal_segment_error.emit(msg)
 
     def _to_overlay(self, result: SegmentationResult) -> MaskOverlay:
@@ -322,7 +362,7 @@ class Sam3ViewModel(QObject):
             try:
                 return PILImage.open(img_path).convert("RGB")
             except Exception:
-                pass  # fallback sur la conversion mémoire
+                pass
 
         try:
             qimg = pixmap.toImage().convertToFormat(QImage.Format.Format_RGB888)

@@ -553,3 +553,93 @@ class Sam3ResetWorker(QThread):
             self.signal_finished.emit(new_state)
         except Exception as exc:
             self.signal_error.emit(str(exc))
+
+
+# ═══════════════════════════════════════════════════════════
+#  OBJECT SEARCH ALL WORKER  (SAM3 sur tout le dossier)
+# ═══════════════════════════════════════════════════════════
+
+
+class ObjectSearchAllWorker(QThread):
+    """
+    Parcourt toutes les images du dossier et détecte celles où
+    l'objet texte est trouvé avec un score >= threshold.
+
+    Travaille directement avec le Sam3Service (déjà chargé) de manière
+    synchrone dans le thread secondaire — jamais dans le thread Qt principal.
+
+    Signaux :
+        signal_progress(done: int, total: int, img_name: str)
+        signal_match(img_name: str, score: float)   -- émis pour chaque match
+        signal_finished(matched: list[str])
+        signal_error(msg: str)
+    """
+
+    signal_progress = pyqtSignal(int, int, str)
+    signal_match = pyqtSignal(str, float)
+    signal_finished = pyqtSignal(list)
+    signal_error = pyqtSignal(str)
+
+    def __init__(
+        self,
+        folder: str,
+        images: list,  # list[str] — noms de fichiers
+        service,  # Sam3Service déjà chargé
+        text: str,
+        threshold: float = 0.75,
+        parent=None,
+    ):
+        super().__init__(parent)
+        self._folder = folder
+        self._images = images
+        self._service = service
+        self._text = text
+        self._threshold = threshold
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        """Demande l'arrêt propre du worker."""
+        self._cancelled = True
+
+    def run(self) -> None:
+        try:
+            from PIL import Image as PILImage
+
+            matched: list[str] = []
+            total = len(self._images)
+
+            for i, img_name in enumerate(self._images):
+                if self._cancelled:
+                    break
+
+                self.signal_progress.emit(i, total, img_name)
+
+                img_path = os.path.join(self._folder, img_name)
+                try:
+                    pil = PILImage.open(img_path).convert("RGB")
+                except Exception:
+                    continue
+
+                try:
+                    # Encode l'image dans l'état SAM3
+                    state = self._service.set_image(pil)
+                    # Applique le prompt texte
+                    state = self._service.apply_text_prompt(self._text, state)
+                    # Extrait le résultat
+                    result = self._service.extract_result(state)
+                except Exception:
+                    continue
+
+                if not result.scores:
+                    continue
+
+                best_score = max(result.scores)
+                if best_score >= self._threshold:
+                    matched.append(img_name)
+                    self.signal_match.emit(img_name, float(best_score))
+
+            self.signal_progress.emit(total, total, "")
+            self.signal_finished.emit(matched)
+
+        except Exception as exc:
+            self.signal_error.emit(str(exc))

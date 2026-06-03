@@ -30,7 +30,6 @@ from typing import Any
 
 import numpy as np
 
-
 # ── Résultat de segmentation ──────────────────────────────────────────────────
 
 
@@ -85,8 +84,8 @@ class Sam3Service:
             FileNotFoundError: si le fichier BPE est introuvable.
             RuntimeError: si le chargement échoue.
         """
-        from sam3.sam3.model.sam3_image_processor import Sam3Processor
         from sam3.sam3 import build_sam3_image_model
+        from sam3.sam3.model.sam3_image_processor import Sam3Processor
 
         bpe_path = self._find_bpe_path()
 
@@ -198,7 +197,6 @@ class Sam3Service:
         new_state.pop("scores", None)
         return new_state
 
-
     def set_confidence_threshold(self, threshold: float, state: dict[str, Any]) -> dict[str, Any]:
         """
         Modifie le seuil de confiance.
@@ -237,7 +235,7 @@ class Sam3Service:
         boxes_raw = state.get("boxes", [])
         scores_raw = state.get("scores", [])
 
-        for mask_t, box_t, score_t in zip(masks_raw, boxes_raw, scores_raw):
+        for mask_t, box_t, score_t in zip(masks_raw, boxes_raw, scores_raw, strict=True):
             # mask : tensor (1, H, W) → numpy (H, W) bool
             mask_np = mask_t[0].cpu().numpy() > 0.5
             result.masks.append(mask_np)
