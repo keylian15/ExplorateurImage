@@ -1,7 +1,6 @@
 """
 Dialog plein écran avec segmentation SAM3 interactive.
 
-Ce composant remplace FullscreenDialog et ajoute une barre latérale de contrôle
 SAM3 permettant :
   - Segmentation par prompt texte (ex : "shoe", "dog")
   - Segmentation par boîte dessinée à la souris (positive ou négative)
