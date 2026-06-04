@@ -349,7 +349,7 @@ class DetailWidget(QWidget):
             img_path=img_path,
             parent=self,
         )
-        dlg.exec()
+        dlg.show()
 
     # ── Sauvegarde ────────────────────────────────────────────────────────────
 

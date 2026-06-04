@@ -39,13 +39,14 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtWidgets import (
     QApplication,
-    QDialog,
+    QDockWidget,
     QDoubleSpinBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMainWindow,
     QProgressBar,
     QPushButton,
     QScrollArea,
@@ -54,8 +55,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from styles import COLORS
+from styles import COLORS, neighbor_thumb_style, score_label_style, section_title_style
 from viewmodels.sam3_vm import MaskOverlay, Sam3ViewModel
+from views.components.clickable_label import ClickableLabel
 
 # ── Palette masques ───────────────────────────────────────────────────────────
 _MASK_COLORS = [
@@ -78,12 +80,7 @@ _MASK_COLORS = [
 
 
 class ImageCanvas(QLabel):
-    """
-    QLabel étendu pour :
-      - Afficher l'image de base zoomée
-      - Superposer les masques SAM3 (MaskOverlay reçu du ViewModel)
-      - Permettre le dessin interactif de boîtes à la souris
-    """
+    """QLabel étendu : affiche l'image zoomée + overlay SAM3 + dessin de boîtes."""
 
     signal_box_drawn = pyqtSignal(float, float, float, float)
     # x0, y0, x1, y1 en coordonnées pixel de l'image originale (non zoomée)
@@ -282,84 +279,72 @@ class ImageCanvas(QLabel):
 
 class SearchResultsPanel(QWidget):
     """
-    Panneau affichant les miniatures des images qui correspondent
-    à la recherche globale SAM3 (style identique aux k-voisins).
-
-    Émis via signal lorsque l'utilisateur clique sur une miniature :
-    signal_image_clicked(img_name)
+    Grille de miniatures des images retenues par la recherche globale.
+    Visuel identique aux k-voisins de DetailWidget :
+      - QScrollArea fixe 220 px de hauteur
+      - QGridLayout 3 colonnes, spacing 4
+      - ClickableLabel pour chaque miniature
+      - Score centré sous chaque miniature
+      - En-tête avec compteur + barre de progression fine
     """
 
     signal_image_clicked = pyqtSignal(str)
 
-    THUMB_SIZE = 80
+    THUMB = 80
     COLS = 3
 
     def __init__(self, folder: str | None, parent=None):
         super().__init__(parent)
         self._folder = folder
+        self._count = 0
         self._build_ui()
 
     def _build_ui(self) -> None:
         root = QVBoxLayout(self)
-        root.setContentsMargins(0, 0, 0, 0)
-        root.setSpacing(6)
+        root.setContentsMargins(8, 8, 8, 8)
+        root.setSpacing(4)
 
         # ── En-tête ───────────────────────────────────────────────────────────
         hdr = QHBoxLayout()
-        self._lbl_title = QLabel("Résultats (0)")
-        self._lbl_title.setStyleSheet(f"font-weight: 600; font-size: 12px; color: {COLORS['text_primary']};")
+        self._lbl_title = QLabel("Images trouvées")
+        self._lbl_title.setStyleSheet(section_title_style())
         hdr.addWidget(self._lbl_title)
         hdr.addStretch()
 
         self._btn_clear = QPushButton("✕")
         self._btn_clear.setFixedSize(22, 22)
         self._btn_clear.setToolTip("Effacer les résultats")
-        self._btn_clear.setStyleSheet(f"background: transparent; color: {COLORS['text_muted']}; border: none; font-size: 12px;")
+        self._btn_clear.setStyleSheet(f"background: transparent; color: {COLORS['text_muted']}; border: none; font-size: 12px; min-width: 0;")
         self._btn_clear.clicked.connect(self.clear)
         hdr.addWidget(self._btn_clear)
         root.addLayout(hdr)
 
-        # ── Barre de progression ──────────────────────────────────────────────
+        # ── Barre de progression fine ─────────────────────────────────────────
         self._progress_bar = QProgressBar()
-        self._progress_bar.setFixedHeight(4)
+        self._progress_bar.setFixedHeight(3)
         self._progress_bar.setTextVisible(False)
         self._progress_bar.setVisible(False)
         self._progress_bar.setStyleSheet(
-            f"""
-            QProgressBar {{
-                background: {COLORS["bg_card"]};
-                border: none;
-                border-radius: 2px;
-            }}
-            QProgressBar::chunk {{
-                background: {COLORS["accent"]};
-                border-radius: 2px;
-            }}
-            """
+            f"QProgressBar {{ background: {COLORS['bg_card']}; border: none; border-radius: 1px; }}QProgressBar::chunk {{ background: {COLORS['accent']}; border-radius: 1px; }}"
         )
         root.addWidget(self._progress_bar)
 
         self._lbl_progress = QLabel("")
-        self._lbl_progress.setStyleSheet(f"font-size: 10px; color: {COLORS['text_muted']};")
+        self._lbl_progress.setStyleSheet(score_label_style())
         self._lbl_progress.setVisible(False)
         root.addWidget(self._lbl_progress)
 
         # ── Grille scrollable ─────────────────────────────────────────────────
         scroll = QScrollArea()
+        scroll.setFixedHeight(220)
         scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll.setStyleSheet("border: none; background: transparent;")
 
-        self._grid_widget = QWidget()
-        self._grid_widget.setStyleSheet("background: transparent;")
-        self._grid = QGridLayout(self._grid_widget)
-        self._grid.setSpacing(4)
-        self._grid.setContentsMargins(0, 0, 0, 0)
-
-        scroll.setWidget(self._grid_widget)
+        self._neighbors_widget = QWidget()
+        self._neighbors_grid = QGridLayout()
+        self._neighbors_grid.setSpacing(4)
+        self._neighbors_widget.setLayout(self._neighbors_grid)
+        scroll.setWidget(self._neighbors_widget)
         root.addWidget(scroll)
-
-        self._count = 0
 
     # ── API ───────────────────────────────────────────────────────────────────
 
@@ -372,12 +357,15 @@ class SearchResultsPanel(QWidget):
         self._progress_bar.setMaximum(total)
         self._progress_bar.setValue(0)
         self._progress_bar.setVisible(True)
+        self._lbl_progress.setText(f"0 / {total}")
         self._lbl_progress.setVisible(True)
         self._lbl_title.setText("Recherche en cours…")
 
     def update_progress(self, done: int, total: int, img_name: str) -> None:
         self._progress_bar.setValue(done)
-        label = f"{done}/{total}" + (f" — {img_name}" if img_name else "")
+        label = f"{done} / {total}"
+        if img_name:
+            label += f"  —  {img_name}"
         self._lbl_progress.setText(label)
 
     def add_result(self, img_name: str, score: float) -> None:
@@ -386,66 +374,63 @@ class SearchResultsPanel(QWidget):
             return
 
         img_path = os.path.join(self._folder, img_name)
-        pixmap = QPixmap(img_path)
-        if pixmap.isNull():
+        pixmap_full = QPixmap(img_path)
+        if pixmap_full.isNull():
             return
 
-        pixmap_scaled = pixmap.scaled(
-            self.THUMB_SIZE,
-            self.THUMB_SIZE,
+        pixmap_scaled = pixmap_full.scaled(
+            self.THUMB,
+            self.THUMB,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
 
         cell = QWidget()
-        cell.setStyleSheet("background: transparent;")
-        cell_layout = QVBoxLayout(cell)
+        cell_layout = QVBoxLayout()
         cell_layout.setContentsMargins(2, 2, 2, 2)
         cell_layout.setSpacing(2)
 
-        thumb = QLabel()
+        thumb = ClickableLabel()
         thumb.setPixmap(pixmap_scaled)
         thumb.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        thumb.setFixedSize(self.THUMB_SIZE + 4, self.THUMB_SIZE + 4)
-        thumb.setStyleSheet(f"border: 1px solid {COLORS['border']}; border-radius: 4px; background: {COLORS['bg_card']};")
+        thumb.setStyleSheet(neighbor_thumb_style())
         thumb.setCursor(Qt.CursorShape.PointingHandCursor)
         thumb.setToolTip(f"{img_name}\nScore : {score:.2f}")
-        # Capture de la variable dans la lambda
-        thumb.mousePressEvent = lambda _e, n=img_name: self.signal_image_clicked.emit(n)
-        cell_layout.addWidget(thumb)
+        thumb.leftClicked = lambda n=img_name: self.signal_image_clicked.emit(n)
 
         score_lbl = QLabel(f"{score:.2f}")
         score_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        score_lbl.setStyleSheet(f"font-size: 10px; color: {COLORS['text_secondary']};")
+        score_lbl.setStyleSheet(score_label_style())
+
+        cell_layout.addWidget(thumb)
         cell_layout.addWidget(score_lbl)
+        cell.setLayout(cell_layout)
 
         row, col = divmod(self._count, self.COLS)
-        self._grid.addWidget(cell, row, col)
+        self._neighbors_grid.addWidget(cell, row, col)
         self._count += 1
-
-        self._lbl_title.setText(f"Résultats ({self._count})")
+        self._lbl_title.setText(f"Images trouvées ({self._count})")
 
     def finish_search(self, matched: list) -> None:
         """Finalise l'affichage après la fin de la recherche."""
         self._progress_bar.setVisible(False)
         self._lbl_progress.setVisible(False)
         n = len(matched)
-        self._lbl_title.setText(f"Résultats ({n} image{'s' if n > 1 else ''} trouvée{'s' if n > 1 else ''})")
+        self._lbl_title.setText(f"Images trouvées ({n} image{'s' if n > 1 else ''} — {'aucune correspondance' if n == 0 else 'cliquez pour ouvrir'})")
 
     def show_cancelled(self) -> None:
         self._progress_bar.setVisible(False)
         self._lbl_progress.setVisible(False)
-        self._lbl_title.setText(f"Résultats ({self._count}) — annulé")
+        self._lbl_title.setText(f"Images trouvées ({self._count}) — annulé")
 
     def clear(self, keep_header: bool = False) -> None:
-        """Vide la grille de résultats."""
-        while self._grid.count():
-            item = self._grid.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+        for i in reversed(range(self._neighbors_grid.count())):
+            w = self._neighbors_grid.itemAt(i).widget()
+            if w:
+                w.deleteLater()
         self._count = 0
         if not keep_header:
-            self._lbl_title.setText("Résultats (0)")
+            self._lbl_title.setText("Images trouvées")
             self._progress_bar.setVisible(False)
             self._lbl_progress.setVisible(False)
 
@@ -455,11 +440,8 @@ class SearchResultsPanel(QWidget):
 # ═════════════════════════════════════════════════════════════════════════════
 
 
-class Sam3Sidebar(QWidget):
-    """
-    Panneau de contrôles SAM3 : prompt texte, mode boîte, confiance, reset,
-    et section recherche globale avec seuil configurable.
-    """
+class Sam3SidebarContent(QWidget):
+    """Contrôles SAM3 : prompt texte, mode boîte, confiance, reset, recherche globale."""
 
     signal_text_prompt = pyqtSignal(str)
     signal_search_requested = pyqtSignal(str, float)  # (text, threshold)
@@ -470,21 +452,13 @@ class Sam3Sidebar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedWidth(280)
         self._build_ui()
 
     def _build_ui(self) -> None:
         c = COLORS
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(12, 16, 12, 8)
+        layout.setContentsMargins(12, 16, 12, 12)
         layout.setSpacing(10)
-
-        # ── Titre ─────────────────────────────────────────────────────────────
-        title = QLabel("SAM3 - Segmentation")
-        title.setStyleSheet(f"font-size: 13px; font-weight: 600; color: {c['text_primary']};")
-        layout.addWidget(title)
-
-        self._sep(layout)
 
         # ── Status ────────────────────────────────────────────────────────────
         self.lbl_status = QLabel("⏳ Chargement du modèle…")
@@ -492,10 +466,10 @@ class Sam3Sidebar(QWidget):
         self.lbl_status.setStyleSheet(f"font-size: 11px; color: {c['text_secondary']};")
         layout.addWidget(self.lbl_status)
 
-        # ── Prompt texte (image courante) ─────────────────────────────────────
-        lbl_text = QLabel("Prompt texte — image courante")
-        lbl_text.setStyleSheet(self._section_style())
-        layout.addWidget(lbl_text)
+        self._sep(layout)
+
+        # ── Prompt texte ──────────────────────────────────────────────────────
+        layout.addWidget(self._section_label("Prompt texte — image courante"))
 
         self.text_input = QLineEdit()
         self.text_input.setPlaceholderText("ex: shoe, dog, person…")
@@ -503,19 +477,15 @@ class Sam3Sidebar(QWidget):
         self.text_input.returnPressed.connect(self._on_text_submit)
         layout.addWidget(self.text_input)
 
-        btn_row = QHBoxLayout()
         self.btn_segment = QPushButton("▶ Segmenter")
         self.btn_segment.setEnabled(False)
         self.btn_segment.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_segment.clicked.connect(self._on_text_submit)
-        btn_row.addWidget(self.btn_segment)
-        layout.addLayout(btn_row)
+        layout.addWidget(self.btn_segment)
 
         # ── Mode boîte ────────────────────────────────────────────────────────
         self._sep(layout)
-        lbl_box = QLabel("Mode boîte")
-        lbl_box.setStyleSheet(self._section_style())
-        layout.addWidget(lbl_box)
+        layout.addWidget(self._section_label("Mode boîte"))
 
         box_row = QHBoxLayout()
         self.btn_positive = QPushButton("✚ Positive")
@@ -567,9 +537,7 @@ class Sam3Sidebar(QWidget):
 
         # ── Recherche globale ─────────────────────────────────────────────────
         self._sep(layout)
-        lbl_search = QLabel("Recherche globale — tout le dossier")
-        lbl_search.setStyleSheet(self._section_style())
-        layout.addWidget(lbl_search)
+        layout.addWidget(self._section_label("Recherche globale — tout le dossier"))
 
         # Seuil de score pour la recherche globale
         threshold_row = QHBoxLayout()
@@ -580,26 +548,25 @@ class Sam3Sidebar(QWidget):
         self.spin_threshold.setDecimals(2)
         self.spin_threshold.setValue(0.75)
         self.spin_threshold.setFixedWidth(70)
-        self.spin_threshold.setToolTip("Score SAM3 minimum pour qu'une image soit retenue (0–1).\n0.75 = score ≥ 75 %")
+        self.spin_threshold.setToolTip("Score SAM3 minimum pour retenir une image (0–1).\n0.75 = score ≥ 75 %")
         threshold_row.addStretch()
         threshold_row.addWidget(self.spin_threshold)
         layout.addLayout(threshold_row)
 
-        search_btn_row = QHBoxLayout()
+        btn_search_row = QHBoxLayout()
         self.btn_search_all = QPushButton("🔍 Tout analyser")
         self.btn_search_all.setEnabled(False)
         self.btn_search_all.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.btn_search_all.setToolTip("Lance la recherche de l'objet du prompt texte\nsur toutes les images du dossier.")
+        self.btn_search_all.setToolTip("Recherche l'objet du prompt sur toutes les images du dossier.")
         self.btn_search_all.clicked.connect(self._on_search_all)
-        search_btn_row.addWidget(self.btn_search_all)
+        btn_search_row.addWidget(self.btn_search_all)
 
         self.btn_cancel_search = QPushButton("⛔ Annuler")
         self.btn_cancel_search.setVisible(False)
         self.btn_cancel_search.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_cancel_search.clicked.connect(self.signal_search_cancel)
-        search_btn_row.addWidget(self.btn_cancel_search)
-
-        layout.addLayout(search_btn_row)
+        btn_search_row.addWidget(self.btn_cancel_search)
+        layout.addLayout(btn_search_row)
 
         layout.addStretch()
         self._apply_stylesheet()
@@ -610,9 +577,10 @@ class Sam3Sidebar(QWidget):
         sep.setStyleSheet(f"color: {COLORS['border']};")
         layout.addWidget(sep)
 
-    def _section_style(self) -> str:
-        c = COLORS
-        return f"font-size: 11px; color: {c['text_secondary']}; font-weight: 600;"
+    def _section_label(self, text: str) -> QLabel:
+        lbl = QLabel(text)
+        lbl.setStyleSheet(f"font-size: 11px; color: {COLORS['text_secondary']}; font-weight: 600;")
+        return lbl
 
     def _apply_stylesheet(self) -> None:
         c = COLORS
@@ -643,12 +611,16 @@ class Sam3Sidebar(QWidget):
                 border: 1px solid {c["border"]}; border-radius: 4px;
                 padding: 2px 6px; font-size: 12px;
             }}
-            QSlider::groove:horizontal {{ height: 4px; background: {c["border"]}; border-radius: 2px; }}
+            QSlider::groove:horizontal {{
+                height: 4px; background: {c["border"]}; border-radius: 2px;
+            }}
             QSlider::handle:horizontal {{
                 background: {c["accent"]}; border: none;
                 width: 14px; height: 14px; margin: -5px 0; border-radius: 7px;
             }}
-            QSlider::sub-page:horizontal {{ background: {c["accent"]}; border-radius: 2px; }}
+            QSlider::sub-page:horizontal {{
+                background: {c["accent"]}; border-radius: 2px;
+            }}
         """)
 
     # ── API externe ───────────────────────────────────────────────────────────
@@ -681,8 +653,6 @@ class Sam3Sidebar(QWidget):
         """Bascule l'état visuel pendant la recherche globale."""
         self.btn_search_all.setVisible(not searching)
         self.btn_cancel_search.setVisible(searching)
-        # Les autres contrôles restent actifs pendant la recherche globale
-        # (le worker tourne dans son propre thread, l'UI reste réactive)
 
     def is_positive_mode(self) -> bool:
         return self.btn_positive.isChecked()
@@ -713,8 +683,7 @@ class Sam3Sidebar(QWidget):
         if not text:
             self.lbl_status.setText("⚠️ Saisissez d'abord un prompt texte.")
             return
-        threshold = self.spin_threshold.value()
-        self.signal_search_requested.emit(text, threshold)
+        self.signal_search_requested.emit(text, self.spin_threshold.value())
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -722,13 +691,17 @@ class Sam3Sidebar(QWidget):
 # ═════════════════════════════════════════════════════════════════════════════
 
 
-class Sam3Dialog(QDialog):
+class Sam3Dialog(QMainWindow):
     """
-    Dialog plein écran combinant zoom et segmentation SAM3 interactive.
+    Fenêtre SAM3 interactive.
 
-    La droite de l'écran est partagée entre :
-      - Sam3Sidebar (contrôles)
-      - SearchResultsPanel (résultats de la recherche globale)
+    QMainWindow (et non QDialog) pour avoir :
+      - Les 3 boutons natifs : réduire / plein écran / fermer
+      - Fenêtre non bloquante : on peut continuer à utiliser l'app
+        pendant qu'une analyse globale tourne en arrière-plan
+      - Deux QDockWidget : contrôles SAM3 (droite) et résultats (bas)
+
+    Appel : Sam3Dialog(...).show()  — plus exec()
     """
 
     def __init__(
@@ -747,7 +720,10 @@ class Sam3Dialog(QDialog):
         self._img_h = pixmap.height()
         self._zoom = 0.75
 
-        self.setWindowTitle(title or "Visualisation SAM3")
+        self.setWindowTitle(title or "SAM3 — Segmentation interactive")
+        # Flags pour avoir les 3 boutons fenêtre natifs
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
+
         screen = QApplication.primaryScreen().availableGeometry()
         self.resize(screen.width(), screen.height())
 
@@ -758,17 +734,14 @@ class Sam3Dialog(QDialog):
     # ── Construction ─────────────────────────────────────────────────────────
 
     def _build_ui(self) -> None:
-        root = QVBoxLayout(self)
-        root.setContentsMargins(0, 0, 0, 0)
-        root.setSpacing(0)
+        # ── Zone centrale : barre de zoom + canvas ────────────────────────────
+        central = QWidget()
+        central_layout = QVBoxLayout(central)
+        central_layout.setContentsMargins(0, 0, 0, 0)
+        central_layout.setSpacing(0)
 
-        root.addWidget(self._build_topbar())
+        central_layout.addWidget(self._build_topbar())
 
-        center = QHBoxLayout()
-        center.setContentsMargins(0, 0, 0, 0)
-        center.setSpacing(0)
-
-        # ── Canvas (image principale) ─────────────────────────────────────────
         self._canvas = ImageCanvas()
         self._canvas.set_base_pixmap(self._pixmap)
         self._canvas.set_zoom(self._zoom)
@@ -780,41 +753,51 @@ class Sam3Dialog(QDialog):
         self._scroll.setStyleSheet(f"background: {COLORS['bg_card']}; border: none;")
         self._scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._scroll.wheelEvent = self._on_scroll_wheel
-        center.addWidget(self._scroll, stretch=1)
+        central_layout.addWidget(self._scroll)
 
-        # ── Panneau droit : sidebar + résultats ───────────────────────────────
-        right_panel = QWidget()
-        right_panel.setFixedWidth(280)
-        right_layout = QVBoxLayout(right_panel)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(0)
+        self.setCentralWidget(central)
 
-        self._sidebar = Sam3Sidebar()
-        right_layout.addWidget(self._sidebar, stretch=1)
+        # ── Contenu du dock : sidebar + séparateur + résultats ────────────────
+        self._sidebar_content = Sam3SidebarContent()
+        self._sidebar_content.signal_text_prompt.connect(self._vm.apply_text_prompt)
+        self._sidebar_content.signal_box_positive.connect(self._canvas.set_box_positive)
+        self._sidebar_content.signal_confidence_changed.connect(self._vm.set_confidence)
+        self._sidebar_content.signal_reset.connect(self._vm.reset_prompts)
+        self._sidebar_content.signal_search_requested.connect(self._on_search_requested)
+        self._sidebar_content.signal_search_cancel.connect(self._vm.cancel_search)
 
-        # Séparateur
+        self._results_panel = SearchResultsPanel(folder=self._vm._gallery_vm.current_folder)
+        self._results_panel.signal_image_clicked.connect(self._on_result_clicked)
+
+        # Séparateur entre les deux sections
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
         sep.setStyleSheet(f"color: {COLORS['border']};")
-        right_layout.addWidget(sep)
 
-        # Panneau résultats (hauteur fixe + scroll interne)
-        self._results_panel = SearchResultsPanel(folder=self._vm._gallery_vm.current_folder)
-        self._results_panel.setFixedHeight(280)
-        self._results_panel.setStyleSheet(f"background: {COLORS['bg_secondary']}; padding: 8px;")
-        self._results_panel.signal_image_clicked.connect(self._on_result_clicked)
-        right_layout.addWidget(self._results_panel)
+        # Conteneur vertical : sidebar / séparateur / résultats
+        dock_content = QWidget()
+        dock_layout = QVBoxLayout(dock_content)
+        dock_layout.setContentsMargins(0, 0, 0, 0)
+        dock_layout.setSpacing(0)
+        dock_layout.addWidget(self._sidebar_content, stretch=1)
+        dock_layout.addWidget(sep)
+        dock_layout.addWidget(self._results_panel)  # hauteur fixe (220 px dans SearchResultsPanel)
 
-        center.addWidget(right_panel)
-        root.addLayout(center)
+        # Wrap dans un QScrollArea vertical pour les petits écrans
+        scroll_dock = QScrollArea()
+        scroll_dock.setWidget(dock_content)
+        scroll_dock.setWidgetResizable(True)
+        scroll_dock.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll_dock.setStyleSheet("border: none;")
 
-        # Connexions sidebar → vm / canvas
-        self._sidebar.signal_text_prompt.connect(self._vm.apply_text_prompt)
-        self._sidebar.signal_box_positive.connect(self._canvas.set_box_positive)
-        self._sidebar.signal_confidence_changed.connect(self._vm.set_confidence)
-        self._sidebar.signal_reset.connect(self._vm.reset_prompts)
-        self._sidebar.signal_search_requested.connect(self._on_search_requested)
-        self._sidebar.signal_search_cancel.connect(self._vm.cancel_search)
+        # ── Unique dock (droite, ancrable gauche/droite) ──────────────────────
+        dock = QDockWidget("Contrôles SAM3", self)
+        dock.setObjectName("dock_sam3_controls")
+        dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable)
+        dock.setWidget(scroll_dock)
+        dock.setMinimumWidth(300)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 
     def _build_topbar(self) -> QWidget:
         bar = QHBoxLayout()
@@ -841,25 +824,25 @@ class Sam3Dialog(QDialog):
         bar_w = QWidget()
         bar_w.setLayout(bar)
         bar_w.setFixedHeight(40)
-        bar_w.setStyleSheet(f"background: {COLORS['bg_primary']}; border-bottom: 1px solid {COLORS['border']};")
+        bar_w.setStyleSheet(f"background: {COLORS['bg_primary']};border-bottom: 1px solid {COLORS['border']};")
         return bar_w
 
     # ── Connexion ViewModel → View ────────────────────────────────────────────
 
     def _connect_vm(self) -> None:
         vm = self._vm
+        sb = self._sidebar_content
 
-        # Segmentation courante
-        vm.signal_model_loading.connect(lambda: self._sidebar.set_status("⏳ Chargement du modèle…"))
+        vm.signal_model_loading.connect(lambda: sb.set_status("⏳ Chargement du modèle…"))
         vm.signal_model_ready.connect(self._on_model_ready)
-        vm.signal_model_error.connect(lambda e: self._sidebar.set_status(f"❌ Erreur modèle : {e}"))
-        vm.signal_encoding.connect(lambda: self._sidebar.set_busy(True, "Encodage de l'image…"))
+        vm.signal_model_error.connect(lambda e: sb.set_status(f"❌ Erreur modèle : {e}"))
+        vm.signal_encoding.connect(lambda: sb.set_busy(True, "Encodage de l'image…"))
         vm.signal_encoded.connect(self._on_encoded)
-        vm.signal_encoding_error.connect(lambda e: self._sidebar.set_status(f"❌ Encodage : {e}"))
-        vm.signal_segmenting.connect(lambda: self._sidebar.set_busy(True, "Segmentation en cours…"))
+        vm.signal_encoding_error.connect(lambda e: sb.set_status(f"❌ Encodage : {e}"))
+        vm.signal_segmenting.connect(lambda: sb.set_busy(True, "Segmentation en cours…"))
         vm.signal_overlay_ready.connect(self._on_overlay_ready)
-        vm.signal_segment_error.connect(lambda e: self._sidebar.set_status(f"❌ Segmentation : {e}"))
-        vm.signal_resetting.connect(lambda: self._sidebar.set_busy(True, "Réinitialisation…"))
+        vm.signal_segment_error.connect(lambda e: sb.set_status(f"❌ Segmentation : {e}"))
+        vm.signal_resetting.connect(lambda: sb.set_busy(True, "Réinitialisation…"))
         vm.signal_reset_done.connect(self._on_reset_done)
 
         # Recherche globale
@@ -868,7 +851,7 @@ class Sam3Dialog(QDialog):
         vm.signal_search_match.connect(self._results_panel.add_result)
         vm.signal_search_finished.connect(self._on_search_finished)
         vm.signal_search_cancelled.connect(self._on_search_cancelled)
-        vm.signal_search_error.connect(lambda e: self._sidebar.set_status(f"❌ Recherche : {e}"))
+        vm.signal_search_error.connect(lambda e: sb.set_status(f"❌ Recherche : {e}"))
 
     # ── Initialisation image ──────────────────────────────────────────────────
 
@@ -876,31 +859,31 @@ class Sam3Dialog(QDialog):
         if self._vm.is_model_loaded:
             self._vm.encode_image(self._pixmap, self._img_path)
         else:
-            self._sidebar.set_status("⏳ Chargement du modèle en cours…")
+            self._sidebar_content.set_status("⏳ Chargement du modèle en cours…")
             if not self._vm.is_busy:
                 self._vm.load_model()
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
     def _on_model_ready(self) -> None:
-        self._sidebar.set_status("✅ Modèle prêt")
+        self._sidebar_content.set_status("✅ Modèle prêt")
         if not self._vm.is_image_encoded:
             self._vm.encode_image(self._pixmap, self._img_path)
 
     def _on_encoded(self) -> None:
-        self._sidebar.set_ready(True)
-        self._sidebar.set_status("✅ Prêt — saisissez un prompt ou dessinez une boîte")
+        self._sidebar_content.set_ready(True)
+        self._sidebar_content.set_status("✅ Prêt — saisissez un prompt ou dessinez une boîte")
 
     def _on_overlay_ready(self, overlay: MaskOverlay) -> None:
-        self._sidebar.set_ready(True)
+        self._sidebar_content.set_ready(True)
         n = len(overlay.masks)
-        self._sidebar.set_status(f"✅ {n} objet(s) trouvé(s)")
+        self._sidebar_content.set_status(f"✅ {n} objet(s) trouvé(s)")
         self._canvas.set_overlay(overlay)
 
     def _on_reset_done(self) -> None:
         self._canvas.clear_overlay()
-        self._sidebar.set_ready(True)
-        self._sidebar.set_status("✅ Prompts réinitialisés")
+        self._sidebar_content.set_ready(True)
+        self._sidebar_content.set_status("✅ Prompts réinitialisés")
 
     # ── Slots recherche globale ───────────────────────────────────────────────
 
@@ -911,36 +894,31 @@ class Sam3Dialog(QDialog):
         self._vm.search_objects(text, threshold)
 
     def _on_search_started(self, total: int) -> None:
-        self._sidebar.set_searching(True)
-        self._sidebar.set_status(f"🔍 Analyse de {total} image(s)…")
+        self._sidebar_content.set_searching(True)
+        self._sidebar_content.set_status(f"🔍 Analyse de {total} image(s)…")
         self._results_panel.start_search(total)
 
     def _on_search_finished(self, matched: list) -> None:
-        self._sidebar.set_searching(False)
+        self._sidebar_content.set_searching(False)
         n = len(matched)
-        self._sidebar.set_status(f"✅ Recherche terminée — {n} correspondance(s)")
+        self._sidebar_content.set_status(f"✅ Recherche terminée — {n} correspondance(s)")
         self._results_panel.finish_search(matched)
 
     def _on_search_cancelled(self) -> None:
-        self._sidebar.set_searching(False)
-        self._sidebar.set_status("⛔ Recherche annulée")
+        self._sidebar_content.set_searching(False)
+        self._sidebar_content.set_status("⛔ Recherche annulée")
         self._results_panel.show_cancelled()
 
     def _on_result_clicked(self, img_name: str) -> None:
-        """
-        Quand l'utilisateur clique sur une miniature de résultat :
-        charge l'image dans le canvas principal et la sélectionne dans la galerie.
-        """
+        """Charge l'image cliquée dans le canvas et la sélectionne dans la galerie."""
         folder = self._vm._gallery_vm.current_folder
         if not folder:
             return
-
         img_path = os.path.join(folder, img_name)
         pixmap = QPixmap(img_path)
         if pixmap.isNull():
             return
 
-        # Mise à jour du canvas
         self._pixmap = pixmap
         self._img_path = img_path
         self._img_w = pixmap.width()
@@ -949,18 +927,16 @@ class Sam3Dialog(QDialog):
         self._canvas.set_zoom(self._zoom)
         self.setWindowTitle(img_name)
 
-        # Sélection dans la galerie (optionnel, mais cohérent)
-        self._vm._gallery_vm.select_image(img_name)
+        # self._vm._gallery_vm.select_image(img_name)
 
-        # Ré-encode la nouvelle image si le modèle est prêt
         if self._vm.is_model_loaded and not self._vm.is_busy:
             self._vm.encode_image(pixmap, img_path)
-            self._sidebar.set_status(f"⏳ Encodage de {img_name}…")
+            self._sidebar_content.set_status(f"⏳ Encodage de {img_name}…")
 
     # ── Slots UI → ViewModel ──────────────────────────────────────────────────
 
     def _on_box_drawn(self, x0: float, y0: float, x1: float, y1: float) -> None:
-        positive = self._sidebar.is_positive_mode()
+        positive = self._sidebar_content.is_positive_mode()
         self._vm.apply_box_prompt(x0, y0, x1, y1, self._img_w, self._img_h, positive)
 
     # ── Zoom ──────────────────────────────────────────────────────────────────

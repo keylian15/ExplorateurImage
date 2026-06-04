@@ -268,7 +268,7 @@ class GalleryWidget(QWidget):
             img_path=img_path,
             parent=self,
         )
-        dlg.exec()
+        dlg.show()
 
     def on_cancel(self):
         self._avm.cancel()
