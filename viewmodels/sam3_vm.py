@@ -15,6 +15,7 @@ Contenu :
  - Application asynchrone de prompts texte/boîte (Sam3SegmentWorker)
  - Reset des prompts (Sam3ResetWorker)
  - Recherche globale sur tout le dossier (ObjectSearchAllWorker)
+ - Recherche par box avec trois stratégies : Embedding, SAM3, Hybride
  - Exposition des résultats via signaux Qt (liste de MaskOverlay, type View-friendly)
 
 Responsabilités :
@@ -27,6 +28,7 @@ Responsabilités :
  6. Notifier la vue de chaque résultat intermédiaire via signaux
  7. Permettre le reset propre de tous les prompts
  8. Lancer une recherche globale (search_objects) sur tout le dossier via un worker dédié
+ 9. Lancer une recherche par box (search_from_box) avec la stratégie choisie par l'utilisateur
 """
 
 from __future__ import annotations
@@ -42,7 +44,10 @@ from models import workspace_repository as ws_repo
 from services.ollama_wrapper import OllamaWrapper
 from services.sam3_service import Sam3Service, SegmentationResult
 from services.workers import (
+    EmbeddingBoxSearchWorker,
+    HybridBoxSearchWorker,
     ObjectSearchAllWorker,
+    Sam3BoxSearchWorker,
     Sam3EncodeWorker,
     Sam3LoadWorker,
     Sam3ResetWorker,
@@ -83,11 +88,13 @@ class Sam3ViewModel(QObject):
         4. apply_text_prompt() ou apply_box_prompt() pour segmenter.
         5. signal_overlay_ready → la View affiche les masques.
 
-    Pour la recherche globale :
+    Pour la recherche globale (texte) :
         6. search_objects(text, threshold) lance ObjectSearchAllWorker.
-        7. signal_search_match → la View reçoit chaque correspondance au fil de l'eau.
-        8. signal_search_progress → mise à jour de la progression.
-        9. signal_search_finished → liste finale des images correspondantes.
+
+    Pour la recherche par box :
+        7. search_from_box(x0, y0, x1, y1, img_w, img_h, pixmap, strategy_name, ...)
+           lance le worker correspondant à la stratégie choisie.
+        8. Les mêmes signaux search_* sont utilisés pour les deux types de recherche.
     """
 
     # ── Signaux segmentation courante ─────────────────────────────────────────
@@ -106,13 +113,16 @@ class Sam3ViewModel(QObject):
     signal_resetting = pyqtSignal()
     signal_reset_done = pyqtSignal()
 
-    # ── Signaux recherche globale ─────────────────────────────────────────────
+    # ── Signaux recherche (partagés entre search_objects et search_from_box) ──
     signal_search_started = pyqtSignal(int)  # total d'images
     signal_search_progress = pyqtSignal(int, int, str)  # (done, total, img_name)
     signal_search_match = pyqtSignal(str, float)  # (img_name, score)
     signal_search_finished = pyqtSignal(list)  # list[str] des matches
     signal_search_error = pyqtSignal(str)
     signal_search_cancelled = pyqtSignal()
+
+    # ── Signal spécifique box search (informe la View de la stratégie active) ─
+    signal_box_search_strategy = pyqtSignal(str)  # nom de la stratégie en cours
 
     def __init__(
         self,
@@ -139,7 +149,7 @@ class Sam3ViewModel(QObject):
         self._encode_worker: Sam3EncodeWorker | None = None
         self._segment_worker: Sam3SegmentWorker | None = None
         self._reset_worker: Sam3ResetWorker | None = None
-        self._search_worker: ObjectSearchAllWorker | None = None
+        self._search_worker: ObjectSearchAllWorker | EmbeddingBoxSearchWorker | Sam3BoxSearchWorker | HybridBoxSearchWorker | None = None
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
@@ -265,7 +275,7 @@ class Sam3ViewModel(QObject):
 
             self._run_segment(fn)
 
-    # ── Recherche globale ─────────────────────────────────────────────────────
+    # ── Recherche globale (texte direct) ──────────────────────────────────────
 
     def search_objects(self, text: str, threshold: float = 0.75) -> None:
         """
@@ -311,8 +321,128 @@ class Sam3ViewModel(QObject):
         self._search_worker.signal_error.connect(self.signal_search_error)
         self._search_worker.start()
 
+    # ── Recherche par box ─────────────────────────────────────────────────────
+
+    def search_from_box(
+        self,
+        x0: float,
+        y0: float,
+        x1: float,
+        y1: float,
+        img_w: int,
+        img_h: int,
+        pixmap: QPixmap,
+        strategy_name: str = "embedding",
+        threshold: float = 0.3,
+        sam3_threshold: float = 0.75,
+        max_results: int = 0,
+    ) -> None:
+        """
+        Lance une recherche d'objet à partir d'une région dessinée sur l'image.
+
+        Recadre la région de la box, choisit la stratégie demandée et lance
+        le worker correspondant. Utilise les mêmes signaux que search_objects.
+
+        Args:
+            x0, y0, x1, y1: Coordonnées pixel de la box sur l'image originale.
+            img_w, img_h: Dimensions de l'image originale (pour validation).
+            pixmap: QPixmap de l'image courante (source du crop).
+            strategy_name: "embedding", "sam3" ou "hybrid".
+            threshold: Seuil principal (cosinus pour embedding, SAM3 score pour sam3).
+            sam3_threshold: Seuil SAM3 utilisé uniquement par les stratégies sam3/hybrid.
+            max_results: Nombre maximum de résultats (0 = illimité).
+        """
+        if self.is_searching:
+            self.signal_search_error.emit("Une recherche est déjà en cours.")
+            return
+
+        folder = self._gallery_vm.current_folder
+        if not folder:
+            self.signal_search_error.emit("Aucun dossier ouvert.")
+            return
+
+        images = self._gallery_vm.all_images()
+        if not images:
+            self.signal_search_error.emit("Aucune image dans le dossier.")
+            return
+
+        index = self._gallery_vm.index
+        if not index:
+            self.signal_search_error.emit("Aucune image indexée dans ce dossier.")
+            return
+
+        # Crop PIL de la région de la box
+        pil_source = self._to_pil(pixmap, None)
+        if pil_source is None:
+            self.signal_search_error.emit("Impossible de convertir l'image courante.")
+            return
+
+        from services.box_search_strategies import crop_pil
+
+        crop = crop_pil(pil_source, x0, y0, x1, y1)
+        if crop.width < 4 or crop.height < 4:
+            self.signal_search_error.emit("La région sélectionnée est trop petite.")
+            return
+
+        strategy_name = strategy_name.lower()
+
+        # Validation : SAM3 doit être chargé pour les stratégies qui l'utilisent
+        if strategy_name in ("sam3", "hybrid") and not self._service.is_loaded:
+            self.signal_search_error.emit("Le modèle SAM3 n'est pas encore chargé.")
+            return
+
+        self.signal_box_search_strategy.emit(strategy_name)
+        self.signal_search_started.emit(len(images) if strategy_name != "embedding" else len(index))
+
+        if strategy_name == "embedding":
+            worker = EmbeddingBoxSearchWorker(
+                crop=crop,
+                folder=folder,
+                images=images,
+                index=index,
+                client=self._client,
+                threshold=threshold,
+                max_results=max_results,
+                parent=self,
+            )
+        elif strategy_name == "sam3":
+            worker = Sam3BoxSearchWorker(
+                crop=crop,
+                folder=folder,
+                images=images,
+                index=index,
+                client=self._client,
+                service=self._service,
+                threshold=sam3_threshold,
+                max_results=max_results,
+                parent=self,
+            )
+        elif strategy_name == "hybrid":
+            worker = HybridBoxSearchWorker(
+                crop=crop,
+                folder=folder,
+                images=images,
+                index=index,
+                client=self._client,
+                service=self._service,
+                embed_threshold=threshold,
+                sam3_threshold=sam3_threshold,
+                max_results=max_results,
+                parent=self,
+            )
+        else:
+            self.signal_search_error.emit(f"Stratégie inconnue : {strategy_name!r}.")
+            return
+
+        self._search_worker = worker
+        worker.signal_progress.connect(self.signal_search_progress)
+        worker.signal_match.connect(self.signal_search_match)
+        worker.signal_finished.connect(self._on_search_finished)
+        worker.signal_error.connect(self.signal_search_error)
+        worker.start()
+
     def cancel_search(self) -> None:
-        """Annule la recherche globale en cours."""
+        """Annule la recherche globale ou par box en cours."""
         if self._search_worker and self._search_worker.isRunning():
             self._search_worker.cancel()
             self.signal_search_cancelled.emit()

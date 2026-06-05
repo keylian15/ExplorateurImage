@@ -7,6 +7,7 @@ SAM3 permettant :
   - Zoom via molette ou boutons
   - Reset des prompts
   - Recherche globale sur tout le dossier avec panneau de résultats
+  - Recherche par box avec trois stratégies : Embedding, SAM3, Hybride
 
 Ce widget ne contient AUCUNE logique métier :
   - Pas d'import numpy, PIL, services/
@@ -21,6 +22,7 @@ Responsabilités (View uniquement) :
  4. Gérer les états visuels (chargement, prêt, erreur)
  5. Relayer les actions utilisateur vers le ViewModel
  6. Afficher les résultats de la recherche globale (miniatures + scores)
+ 7. Permettre la sélection de la stratégie de recherche par box
 """
 
 from __future__ import annotations
@@ -39,6 +41,7 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtWidgets import (
     QApplication,
+    QButtonGroup,
     QDockWidget,
     QDoubleSpinBox,
     QFrame,
@@ -49,6 +52,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QProgressBar,
     QPushButton,
+    QRadioButton,
     QScrollArea,
     QSlider,
     QVBoxLayout,
@@ -72,6 +76,13 @@ _MASK_COLORS = [
     (109, 168, 124),
     (136, 136, 204),
 ]
+
+# ── Labels lisibles pour les stratégies ──────────────────────────────────────
+_STRATEGY_LABELS = {
+    "embedding": "⚡ Embedding (rapide)",
+    "sam3": "🎯 SAM3 (précis)",
+    "hybrid": "🔬 Hybride (très précis, lent)",
+}
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -280,7 +291,12 @@ class ImageCanvas(QLabel):
 class SearchResultsPanel(QWidget):
     """
     Grille de miniatures des images retenues par la recherche globale.
-    Visuel identique aux k-voisins de DetailWidget :
+
+    Les résultats s'affichent au fur et à mesure grâce à un QTimer qui
+    dépile une file d'attente (_pending_results) par petits lots, laissant
+    Qt traiter ses événements entre chaque lot pour éviter tout freeze.
+
+    Structure :
       - QScrollArea fixe 220 px de hauteur
       - QGridLayout 3 colonnes, spacing 4
       - ClickableLabel pour chaque miniature
@@ -292,14 +308,24 @@ class SearchResultsPanel(QWidget):
 
     THUMB = 80
     COLS = 3
+    # Nombre de cellules insérées par tick du timer de flush
+    _BATCH_SIZE = 3
+    # Intervalle entre deux ticks (ms) — assez court pour paraître fluide
+    _FLUSH_INTERVAL_MS = 40
 
     def __init__(self, folder: str | None, parent=None):
         super().__init__(parent)
         self._folder = folder
         self._count = 0
+        # File d'attente des résultats reçus mais pas encore affichés
+        self._pending_results: list[tuple[str, float]] = []
+
+        self._flush_timer = None  # initialisé dans _build_ui (besoin de QTimer)
         self._build_ui()
 
     def _build_ui(self) -> None:
+        from PyQt6.QtCore import QTimer
+
         root = QVBoxLayout(self)
         root.setContentsMargins(8, 8, 8, 8)
         root.setSpacing(4)
@@ -338,6 +364,7 @@ class SearchResultsPanel(QWidget):
         scroll = QScrollArea()
         scroll.setFixedHeight(220)
         scroll.setWidgetResizable(True)
+        self._scroll = scroll
 
         self._neighbors_widget = QWidget()
         self._neighbors_grid = QGridLayout()
@@ -345,6 +372,11 @@ class SearchResultsPanel(QWidget):
         self._neighbors_widget.setLayout(self._neighbors_grid)
         scroll.setWidget(self._neighbors_widget)
         root.addWidget(scroll)
+
+        # ── Timer de flush progressif ─────────────────────────────────────────
+        self._flush_timer = QTimer(self)
+        self._flush_timer.setInterval(self._FLUSH_INTERVAL_MS)
+        self._flush_timer.timeout.connect(self._flush_batch)
 
     # ── API ───────────────────────────────────────────────────────────────────
 
@@ -369,7 +401,86 @@ class SearchResultsPanel(QWidget):
         self._lbl_progress.setText(label)
 
     def add_result(self, img_name: str, score: float) -> None:
-        """Ajoute une miniature de résultat au fil de l'eau."""
+        """Enfile un résultat et démarre le timer de flush si nécessaire.
+
+        L'appel est très rapide (pas de création de widget ici) — le rendu
+        réel est délégué à _flush_batch() via le QTimer.
+
+        Args:
+            img_name: Nom du fichier image résultat.
+            score: Score de similarité (0–1).
+        """
+        self._pending_results.append((img_name, score))
+        if self._flush_timer and not self._flush_timer.isActive():
+            self._flush_timer.start()
+
+    def finish_search(self, matched: list) -> None:
+        """Finalise l'affichage après la fin de la recherche.
+
+        On laisse le timer vider la file avant de mettre à jour le titre.
+        """
+        # On ne stoppe pas le timer : il doit finir de vider _pending_results.
+        # Le titre final sera mis à jour par _flush_batch au dernier tick.
+        self._progress_bar.setVisible(False)
+        self._lbl_progress.setVisible(False)
+        # Mémorise le total final pour l'afficher quand la file est vide
+        self._final_count = len(matched)
+        self._search_done = True
+
+    def show_cancelled(self) -> None:
+        self._progress_bar.setVisible(False)
+        self._lbl_progress.setVisible(False)
+        self._search_done = True
+        self._final_count = None  # None = annulé
+
+    def clear(self, keep_header: bool = False) -> None:
+        if self._flush_timer:
+            self._flush_timer.stop()
+        self._pending_results.clear()
+        self._search_done = False
+        self._final_count = None
+
+        for i in reversed(range(self._neighbors_grid.count())):
+            w = self._neighbors_grid.itemAt(i).widget()
+            if w:
+                w.deleteLater()
+        self._count = 0
+        if not keep_header:
+            self._lbl_title.setText("Images trouvées")
+            self._progress_bar.setVisible(False)
+            self._lbl_progress.setVisible(False)
+
+    # ── Flush progressif ──────────────────────────────────────────────────────
+
+    def _flush_batch(self) -> None:
+        """Insère jusqu'à _BATCH_SIZE cellules dans la grille, puis rend la main à Qt.
+
+        Appelé périodiquement par _flush_timer. S'arrête quand la file est vide.
+        """
+        batch = self._pending_results[: self._BATCH_SIZE]
+        self._pending_results = self._pending_results[self._BATCH_SIZE :]
+
+        for img_name, score in batch:
+            self._insert_cell(img_name, score)
+
+        if not self._pending_results:
+            self._flush_timer.stop()
+            # Mise à jour du titre final si la recherche est terminée
+            if getattr(self, "_search_done", False):
+                n = getattr(self, "_final_count", None)
+                if n is None:
+                    # Annulé
+                    self._lbl_title.setText(f"Images trouvées ({self._count}) — annulé")
+                else:
+                    self._lbl_title.setText(f"Images trouvées ({n} image{'s' if n > 1 else ''} — {'aucune correspondance' if n == 0 else 'cliquez pour ouvrir'})")
+
+    def _insert_cell(self, img_name: str, score: float) -> None:
+        """Crée et insère une cellule (thumbnail + score) dans la grille.
+
+        Args:
+            img_name: Nom du fichier image.
+            score: Score de similarité.
+        """
         if not self._folder:
             return
 
@@ -411,29 +522,6 @@ class SearchResultsPanel(QWidget):
         self._count += 1
         self._lbl_title.setText(f"Images trouvées ({self._count})")
 
-    def finish_search(self, matched: list) -> None:
-        """Finalise l'affichage après la fin de la recherche."""
-        self._progress_bar.setVisible(False)
-        self._lbl_progress.setVisible(False)
-        n = len(matched)
-        self._lbl_title.setText(f"Images trouvées ({n} image{'s' if n > 1 else ''} — {'aucune correspondance' if n == 0 else 'cliquez pour ouvrir'})")
-
-    def show_cancelled(self) -> None:
-        self._progress_bar.setVisible(False)
-        self._lbl_progress.setVisible(False)
-        self._lbl_title.setText(f"Images trouvées ({self._count}) — annulé")
-
-    def clear(self, keep_header: bool = False) -> None:
-        for i in reversed(range(self._neighbors_grid.count())):
-            w = self._neighbors_grid.itemAt(i).widget()
-            if w:
-                w.deleteLater()
-        self._count = 0
-        if not keep_header:
-            self._lbl_title.setText("Images trouvées")
-            self._progress_bar.setVisible(False)
-            self._lbl_progress.setVisible(False)
-
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  Barre latérale SAM3
@@ -441,10 +529,11 @@ class SearchResultsPanel(QWidget):
 
 
 class Sam3SidebarContent(QWidget):
-    """Contrôles SAM3 : prompt texte, mode boîte, confiance, reset, recherche globale."""
+    """Contrôles SAM3 : prompt texte, mode boîte, confiance, reset, recherche globale et recherche par box."""
 
     signal_text_prompt = pyqtSignal(str)
-    signal_search_requested = pyqtSignal(str, float)  # (text, threshold)
+    signal_search_requested = pyqtSignal(str, float)  # (text, threshold) — recherche texte globale
+    signal_box_search_requested = pyqtSignal(float, float)  # (threshold, sam3_threshold) — recherche par box
     signal_search_cancel = pyqtSignal()
     signal_box_positive = pyqtSignal(bool)
     signal_confidence_changed = pyqtSignal(float)
@@ -452,7 +541,40 @@ class Sam3SidebarContent(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        # Mémorise les dernières coordonnées de box dessinée (coords image originale)
+        self._last_box: tuple[float, float, float, float] | None = None
         self._build_ui()
+
+    def set_last_box(self, x0: float, y0: float, x1: float, y1: float) -> None:
+        """Mémorise les coordonnées de la dernière box dessinée.
+
+        Args:
+            x0, y0, x1, y1: Coordonnées pixel sur l'image originale.
+        """
+        self._last_box = (x0, y0, x1, y1)
+        # Active le bouton "Rechercher dans la box" si une box est disponible
+        if hasattr(self, "btn_search_box"):
+            self.btn_search_box.setEnabled(self.btn_segment.isEnabled())
+
+    def has_box(self) -> bool:
+        """Indique si une box a été mémorisée."""
+        return self._last_box is not None
+
+    def get_last_box(self) -> tuple[float, float, float, float] | None:
+        """Retourne les coordonnées de la dernière box, ou None."""
+        return self._last_box
+
+    def current_strategy(self) -> str:
+        """Retourne le nom de la stratégie de recherche sélectionnée.
+
+        Returns:
+            "embedding", "sam3" ou "hybrid".
+        """
+        if self._radio_sam3.isChecked():
+            return "sam3"
+        if self._radio_hybrid.isChecked():
+            return "hybrid"
+        return "embedding"
 
     def _build_ui(self) -> None:
         c = COLORS
@@ -535,38 +657,86 @@ class Sam3SidebarContent(QWidget):
         self.btn_reset.clicked.connect(self.signal_reset)
         layout.addWidget(self.btn_reset)
 
-        # ── Recherche globale ─────────────────────────────────────────────────
+        # ── Stratégie de recherche ────────────────────────────────────────────
         self._sep(layout)
-        layout.addWidget(self._section_label("Recherche globale — tout le dossier"))
+        layout.addWidget(self._section_label("Stratégie de recherche"))
 
-        # Seuil de score pour la recherche globale
-        threshold_row = QHBoxLayout()
-        threshold_row.addWidget(QLabel("Seuil de score"))
-        self.spin_threshold = QDoubleSpinBox()
-        self.spin_threshold.setRange(0.01, 1.0)
-        self.spin_threshold.setSingleStep(0.05)
-        self.spin_threshold.setDecimals(2)
-        self.spin_threshold.setValue(0.75)
-        self.spin_threshold.setFixedWidth(70)
-        self.spin_threshold.setToolTip("Score SAM3 minimum pour retenir une image (0–1).\n0.75 = score ≥ 75 %")
-        threshold_row.addStretch()
-        threshold_row.addWidget(self.spin_threshold)
-        layout.addLayout(threshold_row)
+        self._radio_embedding = QRadioButton(_STRATEGY_LABELS["embedding"])
+        self._radio_embedding.setChecked(True)
+        self._radio_embedding.setToolTip("Description VLM → embedding → similarité cosinus sur l'index.\nRapide, ne nécessite pas SAM3.")
+        layout.addWidget(self._radio_embedding)
 
-        btn_search_row = QHBoxLayout()
-        self.btn_search_all = QPushButton("🔍 Tout analyser")
+        self._radio_sam3 = QRadioButton(_STRATEGY_LABELS["sam3"])
+        self._radio_sam3.setToolTip("Description VLM → recherche SAM3 sur tout le dossier.\nPrécis visuellement, nécessite SAM3.")
+        layout.addWidget(self._radio_sam3)
+
+        self._radio_hybrid = QRadioButton(_STRATEGY_LABELS["hybrid"])
+        self._radio_hybrid.setToolTip("Embedding pour présélectionner, puis SAM3 pour raffiner.\nTrès précis mais lent.")
+        layout.addWidget(self._radio_hybrid)
+
+        # Groupe exclusif
+        self._strategy_group = QButtonGroup(self)
+        self._strategy_group.addButton(self._radio_embedding)
+        self._strategy_group.addButton(self._radio_sam3)
+        self._strategy_group.addButton(self._radio_hybrid)
+
+        # ── Seuils de recherche ───────────────────────────────────────────────
+        self._sep(layout)
+        layout.addWidget(self._section_label("Seuils de recherche"))
+
+        embed_thresh_row = QHBoxLayout()
+        embed_thresh_row.addWidget(QLabel("Seuil embedding"))
+        self.spin_embed_threshold = QDoubleSpinBox()
+        self.spin_embed_threshold.setRange(0.01, 1.0)
+        self.spin_embed_threshold.setSingleStep(0.05)
+        self.spin_embed_threshold.setDecimals(2)
+        self.spin_embed_threshold.setValue(0.75)
+        self.spin_embed_threshold.setFixedWidth(70)
+        self.spin_embed_threshold.setToolTip("Score cosinus minimum (stratégies Embedding et Hybride).")
+        embed_thresh_row.addStretch()
+        embed_thresh_row.addWidget(self.spin_embed_threshold)
+        layout.addLayout(embed_thresh_row)
+
+        sam3_thresh_row = QHBoxLayout()
+        sam3_thresh_row.addWidget(QLabel("Seuil SAM3"))
+        self.spin_sam3_threshold = QDoubleSpinBox()
+        self.spin_sam3_threshold.setRange(0.01, 1.0)
+        self.spin_sam3_threshold.setSingleStep(0.05)
+        self.spin_sam3_threshold.setDecimals(2)
+        self.spin_sam3_threshold.setValue(0.75)
+        self.spin_sam3_threshold.setFixedWidth(70)
+        self.spin_sam3_threshold.setToolTip("Score SAM3 minimum (stratégies SAM3 et Hybride).\n0.75 = score ≥ 75 %")
+        sam3_thresh_row.addStretch()
+        sam3_thresh_row.addWidget(self.spin_sam3_threshold)
+        layout.addLayout(sam3_thresh_row)
+
+        # ── Boutons de recherche ──────────────────────────────────────────────
+        self._sep(layout)
+        layout.addWidget(self._section_label("Recherche — tout le dossier"))
+
+        # Recherche par box (nouvelle)
+        self.btn_search_box = QPushButton("🔲 Rechercher par box")
+        self.btn_search_box.setEnabled(False)
+        self.btn_search_box.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.btn_search_box.setToolTip("Lance la recherche sur la région dessinée avec la stratégie sélectionnée.\nDessinez d'abord une boîte sur l'image.")
+        self.btn_search_box.clicked.connect(self._on_search_box)
+        layout.addWidget(self.btn_search_box)
+
+        # Recherche par texte (existante, renommée pour clarté)
+        self.btn_search_all = QPushButton("🔍 Rechercher par texte")
         self.btn_search_all.setEnabled(False)
         self.btn_search_all.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.btn_search_all.setToolTip("Recherche l'objet du prompt sur toutes les images du dossier.")
+        self.btn_search_all.setToolTip("Recherche l'objet du prompt texte sur toutes les images via SAM3.")
         self.btn_search_all.clicked.connect(self._on_search_all)
-        btn_search_row.addWidget(self.btn_search_all)
+        layout.addWidget(self.btn_search_all)
 
+        btn_cancel_row = QHBoxLayout()
         self.btn_cancel_search = QPushButton("⛔ Annuler")
         self.btn_cancel_search.setVisible(False)
         self.btn_cancel_search.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.btn_cancel_search.clicked.connect(self.signal_search_cancel)
-        btn_search_row.addWidget(self.btn_cancel_search)
-        layout.addLayout(btn_search_row)
+        btn_cancel_row.addWidget(self.btn_cancel_search)
+        layout.addLayout(btn_cancel_row)
 
         layout.addStretch()
         self._apply_stylesheet()
@@ -621,6 +791,13 @@ class Sam3SidebarContent(QWidget):
             QSlider::sub-page:horizontal {{
                 background: {c["accent"]}; border-radius: 2px;
             }}
+            QRadioButton {{
+                font-size: 12px;
+                padding: 2px 0px;
+            }}
+            QRadioButton::indicator {{
+                width: 14px; height: 14px;
+            }}
         """)
 
     # ── API externe ───────────────────────────────────────────────────────────
@@ -637,7 +814,8 @@ class Sam3SidebarContent(QWidget):
             self.btn_search_all,
         ):
             w.setEnabled(ready)
-        # Redonner le focus au champ texte quand on est prêt
+        # Le bouton box search n'est actif que si prêt ET qu'une box existe
+        self.btn_search_box.setEnabled(ready and self.has_box())
         if ready:
             self.text_input.setFocus()
 
@@ -652,13 +830,17 @@ class Sam3SidebarContent(QWidget):
     def set_searching(self, searching: bool) -> None:
         """Bascule l'état visuel pendant la recherche globale."""
         self.btn_search_all.setVisible(not searching)
+        self.btn_search_box.setVisible(not searching)
         self.btn_cancel_search.setVisible(searching)
 
     def is_positive_mode(self) -> bool:
         return self.btn_positive.isChecked()
 
-    def current_threshold(self) -> float:
-        return self.spin_threshold.value()
+    def current_embed_threshold(self) -> float:
+        return self.spin_embed_threshold.value()
+
+    def current_sam3_threshold(self) -> float:
+        return self.spin_sam3_threshold.value()
 
     # ── Slots internes ────────────────────────────────────────────────────────
 
@@ -679,11 +861,19 @@ class Sam3SidebarContent(QWidget):
         self.signal_confidence_changed.emit(f)
 
     def _on_search_all(self) -> None:
+        """Recherche texte globale via SAM3 (comportement original)."""
         text = self.text_input.text().strip()
         if not text:
             self.lbl_status.setText("⚠️ Saisissez d'abord un prompt texte.")
             return
-        self.signal_search_requested.emit(text, self.spin_threshold.value())
+        self.signal_search_requested.emit(text, self.spin_sam3_threshold.value())
+
+    def _on_search_box(self) -> None:
+        """Recherche par box avec la stratégie sélectionnée."""
+        if not self.has_box():
+            self.lbl_status.setText("⚠️ Dessinez d'abord une boîte sur l'image.")
+            return
+        self.signal_box_search_requested.emit(self.current_embed_threshold(), self.current_sam3_threshold())
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -721,7 +911,6 @@ class Sam3Dialog(QMainWindow):
         self._zoom = 0.75
 
         self.setWindowTitle(title or "SAM3 — Segmentation interactive")
-        # Flags pour avoir les 3 boutons fenêtre natifs
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
 
         screen = QApplication.primaryScreen().availableGeometry()
@@ -764,33 +953,30 @@ class Sam3Dialog(QMainWindow):
         self._sidebar_content.signal_confidence_changed.connect(self._vm.set_confidence)
         self._sidebar_content.signal_reset.connect(self._vm.reset_prompts)
         self._sidebar_content.signal_search_requested.connect(self._on_search_requested)
+        self._sidebar_content.signal_box_search_requested.connect(self._on_box_search_requested)
         self._sidebar_content.signal_search_cancel.connect(self._vm.cancel_search)
 
         self._results_panel = SearchResultsPanel(folder=self._vm._gallery_vm.current_folder)
         self._results_panel.signal_image_clicked.connect(self._on_result_clicked)
 
-        # Séparateur entre les deux sections
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
         sep.setStyleSheet(f"color: {COLORS['border']};")
 
-        # Conteneur vertical : sidebar / séparateur / résultats
         dock_content = QWidget()
         dock_layout = QVBoxLayout(dock_content)
         dock_layout.setContentsMargins(0, 0, 0, 0)
         dock_layout.setSpacing(0)
         dock_layout.addWidget(self._sidebar_content, stretch=1)
         dock_layout.addWidget(sep)
-        dock_layout.addWidget(self._results_panel)  # hauteur fixe (220 px dans SearchResultsPanel)
+        dock_layout.addWidget(self._results_panel)
 
-        # Wrap dans un QScrollArea vertical pour les petits écrans
         scroll_dock = QScrollArea()
         scroll_dock.setWidget(dock_content)
         scroll_dock.setWidgetResizable(True)
         scroll_dock.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_dock.setStyleSheet("border: none;")
 
-        # ── Unique dock (droite, ancrable gauche/droite) ──────────────────────
         dock = QDockWidget("Contrôles SAM3", self)
         dock.setObjectName("dock_sam3_controls")
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
@@ -845,13 +1031,16 @@ class Sam3Dialog(QMainWindow):
         vm.signal_resetting.connect(lambda: sb.set_busy(True, "Réinitialisation…"))
         vm.signal_reset_done.connect(self._on_reset_done)
 
-        # Recherche globale
+        # Recherche (texte ou box)
         vm.signal_search_started.connect(self._on_search_started)
         vm.signal_search_progress.connect(self._results_panel.update_progress)
         vm.signal_search_match.connect(self._results_panel.add_result)
         vm.signal_search_finished.connect(self._on_search_finished)
         vm.signal_search_cancelled.connect(self._on_search_cancelled)
         vm.signal_search_error.connect(lambda e: sb.set_status(f"❌ Recherche : {e}"))
+
+        # Stratégie active
+        vm.signal_box_search_strategy.connect(self._on_box_search_strategy)
 
     # ── Initialisation image ──────────────────────────────────────────────────
 
@@ -885,13 +1074,41 @@ class Sam3Dialog(QMainWindow):
         self._sidebar_content.set_ready(True)
         self._sidebar_content.set_status("✅ Prompts réinitialisés")
 
+    def _on_box_search_strategy(self, strategy_name: str) -> None:
+        """Informe la sidebar de la stratégie active lors d'une recherche par box."""
+        label = _STRATEGY_LABELS.get(strategy_name, strategy_name)
+        self._sidebar_content.set_status(f"🔍 Recherche par box — stratégie : {label}")
+
     # ── Slots recherche globale ───────────────────────────────────────────────
 
     def _on_search_requested(self, text: str, threshold: float) -> None:
-        """Relaie la demande de recherche globale au ViewModel."""
-        # Met à jour le dossier courant au cas où il aurait changé
+        """Relaie la demande de recherche texte globale (SAM3) au ViewModel."""
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
         self._vm.search_objects(text, threshold)
+
+    def _on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
+        """Relaie la demande de recherche par box au ViewModel."""
+        box = self._sidebar_content.get_last_box()
+        if box is None:
+            self._sidebar_content.set_status("⚠️ Aucune box disponible.")
+            return
+
+        x0, y0, x1, y1 = box
+        strategy = self._sidebar_content.current_strategy()
+
+        self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
+        self._vm.search_from_box(
+            x0=x0,
+            y0=y0,
+            x1=x1,
+            y1=y1,
+            img_w=self._img_w,
+            img_h=self._img_h,
+            pixmap=self._pixmap,
+            strategy_name=strategy,
+            threshold=embed_threshold,
+            sam3_threshold=sam3_threshold,
+        )
 
     def _on_search_started(self, total: int) -> None:
         self._sidebar_content.set_searching(True)
@@ -927,7 +1144,9 @@ class Sam3Dialog(QMainWindow):
         self._canvas.set_zoom(self._zoom)
         self.setWindowTitle(img_name)
 
-        # self._vm._gallery_vm.select_image(img_name)
+        # Invalide la box mémorisée (elle concerne l'ancienne image)
+        self._sidebar_content._last_box = None
+        self._sidebar_content.btn_search_box.setEnabled(False)
 
         if self._vm.is_model_loaded and not self._vm.is_busy:
             self._vm.encode_image(pixmap, img_path)
@@ -936,8 +1155,16 @@ class Sam3Dialog(QMainWindow):
     # ── Slots UI → ViewModel ──────────────────────────────────────────────────
 
     def _on_box_drawn(self, x0: float, y0: float, x1: float, y1: float) -> None:
+        """Appelé quand l'utilisateur finit de dessiner une box.
+
+        Déclenche la segmentation SAM3 courante ET mémorise les coordonnées
+        pour une éventuelle recherche par box.
+        """
         positive = self._sidebar_content.is_positive_mode()
+        # Segmentation de l'image courante (comportement original)
         self._vm.apply_box_prompt(x0, y0, x1, y1, self._img_w, self._img_h, positive)
+        # Mémorisation pour la recherche par box
+        self._sidebar_content.set_last_box(x0, y0, x1, y1)
 
     # ── Zoom ──────────────────────────────────────────────────────────────────
 

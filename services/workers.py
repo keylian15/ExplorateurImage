@@ -643,3 +643,340 @@ class ObjectSearchAllWorker(QThread):
 
         except Exception as exc:
             self.signal_error.emit(str(exc))
+
+
+# ═══════════════════════════════════════════════════════════
+#  BOX SEARCH WORKERS  (recherche à partir d'une region box)
+# ═══════════════════════════════════════════════════════════
+
+
+class EmbeddingBoxSearchWorker(QThread):
+    """
+    Worker pour la stratégie Embedding (rapide).
+
+    Workflow :
+     1. Appel VLM sur le crop PIL pour obtenir une description en Français.
+     2. Embedding via nomic-embed-text.
+     3. Similarité cosinus sur tout l'index.
+     4. Émet signal_match pour chaque image au-dessus du seuil.
+
+    Args:
+        crop: PIL.Image recadrée sur la région d'intérêt.
+        folder: Chemin du dossier des images (pour signal_progress).
+        images: Liste des noms de fichiers (pour signal_progress total).
+        index: Index des métadonnées {img_name: {embedding: [...], ...}}.
+        client: Instance OllamaWrapper.
+        threshold: Score cosinus minimum pour retenir une image.
+        max_results: Nombre maximum de résultats (0 = illimité).
+    """
+
+    signal_progress = pyqtSignal(int, int, str)
+    signal_match = pyqtSignal(str, float)
+    signal_finished = pyqtSignal(list)
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, crop, folder: str, images: list, index: dict, client: OllamaWrapper, threshold: float = 0.3, max_results: int = 0, parent=None):
+        super().__init__(parent)
+        self._crop = crop
+        self._folder = folder
+        self._images = images
+        self._index = index
+        self._client = client
+        self._threshold = threshold
+        self._max_results = max_results
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        """Demande l'arrêt propre du worker."""
+        self._cancelled = True
+
+    def run(self) -> None:
+        """Exécute la recherche par embedding."""
+        try:
+            from services.box_search_strategies import _pil_to_bytes
+
+            MODEL_VLM = "qwen2.5vl:7b"
+            MODEL_EMBED_LOCAL = "nomic-embed-text:v1.5"
+            PROMPT_FR = (
+                "Décris précisément l'objet principal de l'image en Français. Donne des hypernymes et concepts associés, retourne une liste des termes uniquement séparés par une virgule sans phrase."
+            )
+
+            # 1. Description VLM du crop
+            result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_FR, image=_pil_to_bytes(self._crop))
+            description = result.response.strip()
+
+            if self._cancelled:
+                self.signal_finished.emit([])
+                return
+
+            # 2. Embedding de la description
+            query_emb = self._client.embed(model=MODEL_EMBED_LOCAL, text=description)
+
+            # 3. Similarité cosinus sur l'index
+            scores: list[tuple[str, float]] = []
+            total = len(self._index)
+
+            for i, (img_name, data) in enumerate(self._index.items()):
+                if self._cancelled:
+                    self.signal_finished.emit([m for m, _ in scores])
+                    return
+                self.signal_progress.emit(i, total, img_name)
+                emb = data.get("embedding")
+                if not emb:
+                    continue
+                score = self._client.similarite_cosinus(query_emb, emb)
+                if score >= self._threshold:
+                    scores.append((img_name, float(score)))
+
+            scores.sort(key=lambda x: x[1], reverse=True)
+            if self._max_results > 0:
+                scores = scores[: self._max_results]
+
+            matched = []
+            for img_name, score in scores:
+                self.signal_match.emit(img_name, score)
+                matched.append(img_name)
+
+            self.signal_progress.emit(total, total, "")
+            self.signal_finished.emit(matched)
+
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
+
+
+class Sam3BoxSearchWorker(QThread):
+    """
+    Worker pour la stratégie SAM3 (précis).
+
+    Workflow :
+     1. Appel VLM sur le crop pour nommer l'objet en anglais (1-2 mots).
+     2. Parcours de toutes les images du dossier avec SAM3.
+     3. Émet signal_match pour chaque image où le score SAM3 >= seuil.
+
+    Args:
+        crop: PIL.Image recadrée sur la région d'intérêt.
+        folder: Chemin du dossier des images.
+        images: Liste des noms de fichiers à analyser.
+        index: Index des métadonnées (utilisé pour le total dans progress).
+        client: Instance OllamaWrapper.
+        service: Instance Sam3Service déjà chargé.
+        threshold: Score SAM3 minimum pour retenir une image.
+        max_results: Nombre maximum de résultats (0 = illimité).
+    """
+
+    signal_progress = pyqtSignal(int, int, str)
+    signal_match = pyqtSignal(str, float)
+    signal_finished = pyqtSignal(list)
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, crop, folder: str, images: list, index: dict, client: OllamaWrapper, service, threshold: float = 0.75, max_results: int = 0, parent=None):
+        super().__init__(parent)
+        self._crop = crop
+        self._folder = folder
+        self._images = images
+        self._index = index
+        self._client = client
+        self._service = service
+        self._threshold = threshold
+        self._max_results = max_results
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        """Demande l'arrêt propre du worker."""
+        self._cancelled = True
+
+    def run(self) -> None:
+        """Exécute la recherche SAM3."""
+        try:
+            from PIL import Image as PILImage
+
+            from services.box_search_strategies import _pil_to_bytes
+
+            MODEL_VLM = "qwen2.5vl:7b"
+            PROMPT_EN = "In one or two English words, name the main object in this image. Return only the object name, nothing else."
+
+            # 1. Nom de l'objet en anglais
+            result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_EN, image=_pil_to_bytes(self._crop))
+            object_name = result.response.strip().splitlines()[0].strip()[:50]
+
+            if self._cancelled:
+                self.signal_finished.emit([])
+                return
+
+            # 2. SAM3 sur tout le dossier
+            matched: list[str] = []
+            total = len(self._images)
+            result_scores: list[tuple[str, float]] = []
+
+            for i, img_name in enumerate(self._images):
+                if self._cancelled:
+                    self.signal_finished.emit(matched)
+                    return
+                self.signal_progress.emit(i, total, img_name)
+
+                img_path = os.path.join(self._folder, img_name)
+                try:
+                    pil = PILImage.open(img_path).convert("RGB")
+                    state = self._service.set_image(pil)
+                    state = self._service.apply_text_prompt(object_name, state)
+                    seg_result = self._service.extract_result(state)
+                except Exception:
+                    continue
+
+                if not seg_result.scores:
+                    continue
+
+                best = max(seg_result.scores)
+                if best >= self._threshold:
+                    result_scores.append((img_name, float(best)))
+
+            result_scores.sort(key=lambda x: x[1], reverse=True)
+            if self._max_results > 0:
+                result_scores = result_scores[: self._max_results]
+
+            for img_name, score in result_scores:
+                self.signal_match.emit(img_name, score)
+                matched.append(img_name)
+
+            self.signal_progress.emit(total, total, "")
+            self.signal_finished.emit(matched)
+
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
+
+
+class HybridBoxSearchWorker(QThread):
+    """
+    Worker pour la stratégie Hybride (très précis, lent).
+
+    Workflow :
+     1. Appel VLM pour obtenir un nom anglais + concepts (format NAME:/CONCEPTS:).
+     2. Embedding des concepts → présélection des candidats au-dessus d'un seuil bas.
+     3. SAM3 sur les candidats uniquement.
+     4. Score final = score_embedding × score_sam3 (ou score_sam3 dégradé si SAM3 = 0).
+     5. Émet signal_match pour chaque résultat retenu.
+
+    Args:
+        crop: PIL.Image recadrée sur la région d'intérêt.
+        folder: Chemin du dossier des images.
+        images: Liste des noms de fichiers à analyser.
+        index: Index des métadonnées {img_name: {embedding: [...], ...}}.
+        client: Instance OllamaWrapper.
+        service: Instance Sam3Service déjà chargé.
+        embed_threshold: Seuil cosinus pour la présélection embedding (défaut 0.3).
+        sam3_threshold: Seuil SAM3 pour le score brut (défaut 0.5, appliqué au score final).
+        max_results: Nombre maximum de résultats finaux (0 = illimité).
+    """
+
+    signal_progress = pyqtSignal(int, int, str)
+    signal_match = pyqtSignal(str, float)
+    signal_finished = pyqtSignal(list)
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, crop, folder: str, images: list, index: dict, client: OllamaWrapper, service, embed_threshold: float = 0.3, sam3_threshold: float = 0.5, max_results: int = 0, parent=None):
+        super().__init__(parent)
+        self._crop = crop
+        self._folder = folder
+        self._images = images
+        self._index = index
+        self._client = client
+        self._service = service
+        self._embed_threshold = embed_threshold
+        self._sam3_threshold = sam3_threshold
+        self._max_results = max_results
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        """Demande l'arrêt propre du worker."""
+        self._cancelled = True
+
+    def run(self) -> None:
+        """Exécute la recherche hybride."""
+        try:
+            from PIL import Image as PILImage
+
+            from services.box_search_strategies import _parse_hybrid_response, _pil_to_bytes
+
+            MODEL_VLM = "qwen2.5vl:7b"
+            MODEL_EMBED_LOCAL = "nomic-embed-text:v1.5"
+            PROMPT_HYBRID = (
+                "Describe precisely the main object in this image. Provide: "
+                "1) A one or two word English name for the object. "
+                "2) A comma-separated list of English hypernyms and associated concepts. "
+                "Return exactly in this format: NAME: <name>\nCONCEPTS: <concepts>"
+            )
+
+            # 1. Description hybride via VLM
+            vlm_result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID, image=_pil_to_bytes(self._crop))
+            raw = vlm_result.response.strip()
+            object_name, concepts = _parse_hybrid_response(raw)
+
+            if self._cancelled:
+                self.signal_finished.emit([])
+                return
+
+            # 2. Embedding des concepts → présélection
+            embed_text = f"{object_name} {concepts}" if concepts else object_name
+            query_emb = self._client.embed(model=MODEL_EMBED_LOCAL, text=embed_text)
+
+            embed_candidates: list[tuple[str, float]] = []
+            for img_name, data in self._index.items():
+                emb = data.get("embedding")
+                if not emb:
+                    continue
+                score = self._client.similarite_cosinus(query_emb, emb)
+                if score >= self._embed_threshold:
+                    embed_candidates.append((img_name, float(score)))
+
+            embed_score_map = dict(embed_candidates)
+            candidate_names = list(embed_score_map.keys())
+
+            if self._cancelled:
+                self.signal_finished.emit([])
+                return
+
+            # 3. SAM3 sur les candidats
+            final_scores: list[tuple[str, float]] = []
+            total = len(candidate_names)
+
+            for i, img_name in enumerate(candidate_names):
+                if self._cancelled:
+                    self.signal_finished.emit([m for m, _ in final_scores])
+                    return
+                self.signal_progress.emit(i, total, img_name)
+
+                img_path = os.path.join(self._folder, img_name)
+                e_score = embed_score_map[img_name]
+
+                try:
+                    pil = PILImage.open(img_path).convert("RGB")
+                    state = self._service.set_image(pil)
+                    state = self._service.apply_text_prompt(object_name, state)
+                    seg_result = self._service.extract_result(state)
+                except Exception:
+                    # Échec SAM3 → score embedding dégradé
+                    final_scores.append((img_name, e_score * 0.5))
+                    continue
+
+                if seg_result.scores:
+                    sam3_score = max(seg_result.scores)
+                    combined = e_score * sam3_score if sam3_score > 0 else e_score * 0.3
+                else:
+                    combined = e_score * 0.3
+                final_scores.append((img_name, float(combined)))
+
+            # 4. Tri et filtrage
+            final_scores.sort(key=lambda x: x[1], reverse=True)
+            if self._max_results > 0:
+                final_scores = final_scores[: self._max_results]
+
+            matched = []
+            for img_name, score in final_scores:
+                self.signal_match.emit(img_name, score)
+                matched.append(img_name)
+
+            self.signal_progress.emit(total, total, "")
+            self.signal_finished.emit(matched)
+
+        except Exception as exc:
+            self.signal_error.emit(str(exc))
