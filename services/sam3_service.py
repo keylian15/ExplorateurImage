@@ -220,32 +220,41 @@ class Sam3Service:
         """
         Extrait les masques, boîtes et scores depuis l'état SAM3.
 
+        Gère proprement les tenseurs vides retournés quand SAM3
+        ne détecte pas l'objet dans l'image.
+
         Args:
             state: état SAM3 après un prompt.
 
         Returns:
-            SegmentationResult avec données numpy.
+            SegmentationResult avec données numpy (listes vides si rien détecté).
         """
         result = SegmentationResult(
             img_w=state.get("original_width", 0),
             img_h=state.get("original_height", 0),
         )
-
         masks_raw = state.get("masks", [])
         boxes_raw = state.get("boxes", [])
         scores_raw = state.get("scores", [])
 
-        for mask_t, box_t, score_t in zip(masks_raw, boxes_raw, scores_raw, strict=True):
-            # mask : tensor (1, H, W) → numpy (H, W) bool
-            mask_np = mask_t[0].cpu().numpy() > 0.5
-            result.masks.append(mask_np)
+        # Guard : tenseur vide → rien à extraire
+        try:
+            n = len(masks_raw)
+        except TypeError:
+            return result
 
-            # box : tensor (4,) en pixel xyxy
-            result.boxes_xyxy.append(box_t.cpu().numpy().tolist())
+        if n == 0:
+            return result
 
-            # score : tensor scalaire ou float
-            score = float(score_t.item() if hasattr(score_t, "item") else score_t)
-            result.scores.append(score)
+        try:
+            for mask_t, box_t, score_t in zip(masks_raw, boxes_raw, scores_raw, strict=False):
+                mask_np = mask_t[0].cpu().numpy() > 0.5
+                result.masks.append(mask_np)
+                result.boxes_xyxy.append(box_t.cpu().numpy().tolist())
+                score = float(score_t.item() if hasattr(score_t, "item") else score_t)
+                result.scores.append(score)
+        except Exception:
+            pass
 
         return result
 

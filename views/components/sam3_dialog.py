@@ -309,9 +309,9 @@ class SearchResultsPanel(QWidget):
     THUMB = 80
     COLS = 3
     # Nombre de cellules insérées par tick du timer de flush
-    _BATCH_SIZE = 3
-    # Intervalle entre deux ticks (ms) — assez court pour paraître fluide
-    _FLUSH_INTERVAL_MS = 40
+    _BATCH_SIZE = 5
+    # Intervalle entre deux ticks (ms)
+    _FLUSH_INTERVAL_MS = 16  # ~60fps
 
     def __init__(self, folder: str | None, parent=None):
         super().__init__(parent)
@@ -319,6 +319,7 @@ class SearchResultsPanel(QWidget):
         self._count = 0
         # File d'attente des résultats reçus mais pas encore affichés
         self._pending_results: list[tuple[str, float]] = []
+        self._wait_mode: bool = False  # si True, accumule sans afficher jusqu'à finish_search
 
         self._flush_timer = None  # initialisé dans _build_ui (besoin de QTimer)
         self._build_ui()
@@ -383,6 +384,17 @@ class SearchResultsPanel(QWidget):
     def set_folder(self, folder: str | None) -> None:
         self._folder = folder
 
+    def set_wait_mode(self, enabled: bool) -> None:
+        """Active ou désactive le mode attente.
+
+        En mode attente, les résultats s'accumulent silencieusement et
+        ne s'affichent qu'au moment de finish_search(), triés par score.
+
+        Args:
+            enabled: True = attendre la fin, False = afficher au fil de l'eau.
+        """
+        self._wait_mode = enabled
+
     def start_search(self, total: int) -> None:
         """Prépare le panneau pour une nouvelle recherche."""
         self.clear(keep_header=True)
@@ -401,31 +413,40 @@ class SearchResultsPanel(QWidget):
         self._lbl_progress.setText(label)
 
     def add_result(self, img_name: str, score: float) -> None:
-        """Enfile un résultat et démarre le timer de flush si nécessaire.
+        """Enfile un résultat.
 
-        L'appel est très rapide (pas de création de widget ici) — le rendu
-        réel est délégué à _flush_batch() via le QTimer.
+        En mode normal : démarre le timer de flush immédiatement pour
+        afficher au fil de l'eau.
+        En mode attente : accumule sans déclencher le timer — l'affichage
+        se fait en bloc lors de finish_search().
 
         Args:
             img_name: Nom du fichier image résultat.
             score: Score de similarité (0–1).
         """
         self._pending_results.append((img_name, score))
-        if self._flush_timer and not self._flush_timer.isActive():
-            self._flush_timer.start()
+        if not self._wait_mode and self._flush_timer and not self._flush_timer.isActive():
+            self._flush_timer.start(0)
 
     def finish_search(self, matched: list) -> None:
         """Finalise l'affichage après la fin de la recherche.
 
-        On laisse le timer vider la file avant de mettre à jour le titre.
+        En mode normal : laisse le timer vider la file, le titre se met
+        à jour au dernier tick.
+        En mode attente : trie les résultats par score décroissant et
+        déclenche le flush d'un bloc.
         """
-        # On ne stoppe pas le timer : il doit finir de vider _pending_results.
-        # Le titre final sera mis à jour par _flush_batch au dernier tick.
         self._progress_bar.setVisible(False)
         self._lbl_progress.setVisible(False)
-        # Mémorise le total final pour l'afficher quand la file est vide
         self._final_count = len(matched)
         self._search_done = True
+
+        if self._wait_mode and self._pending_results:
+            # Tri par score décroissant avant affichage
+            self._pending_results.sort(key=lambda x: x[1], reverse=True)
+            # Démarre le flush (même timer, mais la file est maintenant triée)
+            if self._flush_timer and not self._flush_timer.isActive():
+                self._flush_timer.start(0)
 
     def show_cancelled(self) -> None:
         self._progress_bar.setVisible(False)
@@ -538,6 +559,7 @@ class Sam3SidebarContent(QWidget):
     signal_box_positive = pyqtSignal(bool)
     signal_confidence_changed = pyqtSignal(float)
     signal_reset = pyqtSignal()
+    signal_wait_mode_changed = pyqtSignal(bool)  # True = attendre la fin avant d'afficher
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -690,7 +712,7 @@ class Sam3SidebarContent(QWidget):
         self.spin_embed_threshold.setRange(0.01, 1.0)
         self.spin_embed_threshold.setSingleStep(0.05)
         self.spin_embed_threshold.setDecimals(2)
-        self.spin_embed_threshold.setValue(0.75)
+        self.spin_embed_threshold.setValue(0.30)
         self.spin_embed_threshold.setFixedWidth(70)
         self.spin_embed_threshold.setToolTip("Score cosinus minimum (stratégies Embedding et Hybride).")
         embed_thresh_row.addStretch()
@@ -737,6 +759,21 @@ class Sam3SidebarContent(QWidget):
         self.btn_cancel_search.clicked.connect(self.signal_search_cancel)
         btn_cancel_row.addWidget(self.btn_cancel_search)
         layout.addLayout(btn_cancel_row)
+
+        # ── Mode attente ──────────────────────────────────────────────────────
+        self._sep(layout)
+        from PyQt6.QtWidgets import QCheckBox as _QCB
+
+        self.checkbox_wait_end = _QCB("⏳ Attendre la fin")
+        self.checkbox_wait_end.setChecked(False)
+        self.checkbox_wait_end.setToolTip(
+            "Si coché, les résultats s'affichent tous d'un coup à la fin de la recherche,\n"
+            "triés du plus proche au moins proche.\n"
+            "Par défaut (décoché), les résultats apparaissent au fur et à mesure\n"
+            "dans l'ordre de traitement — idéal pour les longues recherches."
+        )
+        self.checkbox_wait_end.toggled.connect(self.signal_wait_mode_changed)
+        layout.addWidget(self.checkbox_wait_end)
 
         layout.addStretch()
         self._apply_stylesheet()
@@ -835,6 +872,10 @@ class Sam3SidebarContent(QWidget):
 
     def is_positive_mode(self) -> bool:
         return self.btn_positive.isChecked()
+
+    def current_wait_mode(self) -> bool:
+        """Retourne True si l'utilisateur veut attendre la fin avant d'afficher."""
+        return self.checkbox_wait_end.isChecked()
 
     def current_embed_threshold(self) -> float:
         return self.spin_embed_threshold.value()
@@ -1042,6 +1083,9 @@ class Sam3Dialog(QMainWindow):
         # Stratégie active
         vm.signal_box_search_strategy.connect(self._on_box_search_strategy)
 
+        # Mode attente : synchronise checkbox → panel dès le départ
+        sb.signal_wait_mode_changed.connect(self._results_panel.set_wait_mode)
+
     # ── Initialisation image ──────────────────────────────────────────────────
 
     def _init_image(self) -> None:
@@ -1084,6 +1128,7 @@ class Sam3Dialog(QMainWindow):
     def _on_search_requested(self, text: str, threshold: float) -> None:
         """Relaie la demande de recherche texte globale (SAM3) au ViewModel."""
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
+        self._results_panel.set_wait_mode(self._sidebar_content.current_wait_mode())
         self._vm.search_objects(text, threshold)
 
     def _on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
@@ -1097,6 +1142,7 @@ class Sam3Dialog(QMainWindow):
         strategy = self._sidebar_content.current_strategy()
 
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
+        self._results_panel.set_wait_mode(self._sidebar_content.current_wait_mode())
         self._vm.search_from_box(
             x0=x0,
             y0=y0,

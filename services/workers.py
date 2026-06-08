@@ -820,7 +820,8 @@ class Sam3BoxSearchWorker(QThread):
                     state = self._service.set_image(pil)
                     state = self._service.apply_text_prompt(object_name, state)
                     seg_result = self._service.extract_result(state)
-                except Exception:
+                except Exception as e:
+                    print(f"[SAM3]   {img_name} → erreur : {e}")
                     continue
 
                 if not seg_result.scores:
@@ -829,17 +830,17 @@ class Sam3BoxSearchWorker(QThread):
                 best = max(seg_result.scores)
                 if best >= self._threshold:
                     result_scores.append((img_name, float(best)))
+                    # Émission immédiate pour affichage au fil de l'eau
+                    self.signal_match.emit(img_name, float(best))
+                    matched.append(img_name)
 
             result_scores.sort(key=lambda x: x[1], reverse=True)
             if self._max_results > 0:
                 result_scores = result_scores[: self._max_results]
 
-            for img_name, score in result_scores:
-                self.signal_match.emit(img_name, score)
-                matched.append(img_name)
-
             self.signal_progress.emit(total, total, "")
-            self.signal_finished.emit(matched)
+            # signal_finished avec liste triée (pour wait_mode)
+            self.signal_finished.emit([n for n, _ in result_scores])
 
         except Exception as exc:
             self.signal_error.emit(str(exc))
@@ -895,29 +896,37 @@ class HybridBoxSearchWorker(QThread):
         try:
             from PIL import Image as PILImage
 
-            from services.box_search_strategies import _parse_hybrid_response, _pil_to_bytes
+            from services.box_search_strategies import _pil_to_bytes
 
             MODEL_VLM = "qwen2.5vl:7b"
             MODEL_EMBED_LOCAL = "nomic-embed-text:v1.5"
-            PROMPT_HYBRID = (
-                "Describe precisely the main object in this image. Provide: "
-                "1) A one or two word English name for the object. "
-                "2) A comma-separated list of English hypernyms and associated concepts. "
-                "Return exactly in this format: NAME: <name>\nCONCEPTS: <concepts>"
+
+            # Deux prompts distincts :
+            # - FR pour l'embedding (l'index est indexé en français)
+            # - EN pour SAM3 (le modèle prend de l'anglais)
+            PROMPT_HYBRID_EN = "In one or two English words, name the main object in this image. Return only the object name, nothing else."
+            PROMPT_HYBRID_FR = (
+                "Décris précisément l'objet principal de l'image en Français. Donne des hypernymes et concepts associés, retourne une liste des termes uniquement séparés par une virgule sans phrase."
             )
 
-            # 1. Description hybride via VLM
-            vlm_result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID, image=_pil_to_bytes(self._crop))
-            raw = vlm_result.response.strip()
-            object_name, concepts = _parse_hybrid_response(raw)
+            # 1a. Nom anglais pour SAM3
+            result_en = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID_EN, image=_pil_to_bytes(self._crop))
+            object_name = result_en.response.strip().splitlines()[0].strip()[:50]
 
             if self._cancelled:
                 self.signal_finished.emit([])
                 return
 
-            # 2. Embedding des concepts → présélection
-            embed_text = f"{object_name} {concepts}" if concepts else object_name
-            query_emb = self._client.embed(model=MODEL_EMBED_LOCAL, text=embed_text)
+            # 1b. Description française pour l'embedding
+            result_fr = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID_FR, image=_pil_to_bytes(self._crop))
+            description_fr = result_fr.response.strip()
+
+            if self._cancelled:
+                self.signal_finished.emit([])
+                return
+
+            # 2. Embedding de la description française → présélection
+            query_emb = self._client.embed(model=MODEL_EMBED_LOCAL, text=description_fr)
 
             embed_candidates: list[tuple[str, float]] = []
             for img_name, data in self._index.items():
@@ -925,7 +934,8 @@ class HybridBoxSearchWorker(QThread):
                 if not emb:
                     continue
                 score = self._client.similarite_cosinus(query_emb, emb)
-                if score >= self._embed_threshold:
+                kept = score >= self._embed_threshold
+                if kept:
                     embed_candidates.append((img_name, float(score)))
 
             embed_score_map = dict(embed_candidates)
@@ -935,13 +945,13 @@ class HybridBoxSearchWorker(QThread):
                 self.signal_finished.emit([])
                 return
 
-            # 3. SAM3 sur les candidats
-            final_scores: list[tuple[str, float]] = []
+            # 3. SAM3 sur les candidats — émission immédiate au fil de l'eau
+            matched: list[str] = []
             total = len(candidate_names)
 
             for i, img_name in enumerate(candidate_names):
                 if self._cancelled:
-                    self.signal_finished.emit([m for m, _ in final_scores])
+                    self.signal_finished.emit(matched)
                     return
                 self.signal_progress.emit(i, total, img_name)
 
@@ -954,26 +964,23 @@ class HybridBoxSearchWorker(QThread):
                     state = self._service.apply_text_prompt(object_name, state)
                     seg_result = self._service.extract_result(state)
                 except Exception:
-                    # Échec SAM3 → score embedding dégradé
-                    final_scores.append((img_name, e_score * 0.5))
-                    continue
-
-                if seg_result.scores:
-                    sam3_score = max(seg_result.scores)
-                    combined = e_score * sam3_score if sam3_score > 0 else e_score * 0.3
+                    combined = e_score * 0.5
                 else:
-                    combined = e_score * 0.3
-                final_scores.append((img_name, float(combined)))
+                    if seg_result.scores:
+                        sam3_score = max(seg_result.scores)
+                        combined = e_score * sam3_score if sam3_score > 0 else e_score * 0.3
+                    else:
+                        combined = e_score * 0.3
 
-            # 4. Tri et filtrage
-            final_scores.sort(key=lambda x: x[1], reverse=True)
-            if self._max_results > 0:
-                final_scores = final_scores[: self._max_results]
+                # Filtrage par seuil — seuls les scores suffisamment bons sont émis
+                if combined >= self._sam3_threshold:
+                    # Émission immédiate — le tri est géré côté UI par _wait_mode
+                    self.signal_match.emit(img_name, float(combined))
+                    matched.append(img_name)
 
-            matched = []
-            for img_name, score in final_scores:
-                self.signal_match.emit(img_name, score)
-                matched.append(img_name)
+                # Arrêt anticipé si max_results atteint
+                if self._max_results > 0 and len(matched) >= self._max_results:
+                    break
 
             self.signal_progress.emit(total, total, "")
             self.signal_finished.emit(matched)
