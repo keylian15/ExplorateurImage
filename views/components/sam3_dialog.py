@@ -738,7 +738,7 @@ class Sam3SidebarContent(QWidget):
         self.btn_search_box = QPushButton("🔲 Rechercher par box")
         self.btn_search_box.setEnabled(False)
         self.btn_search_box.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.btn_search_box.setToolTip("Lance la recherche sur la région dessinée avec la stratégie sélectionnée.\nDessinez d'abord une boîte sur l'image.")
+        self.btn_search_box.setToolTip("Lance la recherche sur la dernière région dessinée avec la stratégie sélectionnée.\nDessinez d'abord une boîte sur l'image.")
         self.btn_search_box.clicked.connect(self._on_search_box)
         z2l.addWidget(self.btn_search_box)
 
