@@ -59,6 +59,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from services.i18n_manager import I18nManager
 from styles import dot_color_style, dot_label_style, legend_label_style, no_border_style
 from viewmodels.map_vm import MapViewModel
 from views.tree_widget import TreeViewWidget
@@ -212,16 +213,18 @@ class MapView(QGraphicsView):
 
 
 class SettingsDock(QDockWidget):
-    def __init__(self, params: dict[str, int], on_apply, parent=None):
+    def __init__(self, params: dict[str, int], on_apply, parent=None, translator: I18nManager = None):
         """
         Args:
             params (dict[str, int]): Paramètres de la carte.
             on_apply (function): Fonction à appeler lors de l'application des paramètres.
             parent (QWidget, optional): Parent. Defaults to None.
+            translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
         """
 
-        super().__init__("Paramètres de la carte", parent)
+        super().__init__(translator.tr("Paramètres de la carte"), parent)
         self.on_apply = on_apply
+        self.translator = translator
         self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
 
@@ -236,7 +239,7 @@ class SettingsDock(QDockWidget):
         self._spin_neighbors = QSpinBox()
         self._spin_neighbors.setRange(2, 200)
         self._spin_neighbors.setValue(params["umap_n_neighbors"])
-        self._spin_neighbors.setToolTip("Petit → détail local. Grand → vue globale.")
+        self._spin_neighbors.setToolTip(self.translator.tr("Petit → détail local. Grand → vue globale."))
         form.addRow("UMAP n_neighbors", self._spin_neighbors)
 
         self._spin_min_dist = QDoubleSpinBox()
@@ -244,7 +247,7 @@ class SettingsDock(QDockWidget):
         self._spin_min_dist.setSingleStep(0.05)
         self._spin_min_dist.setDecimals(2)
         self._spin_min_dist.setValue(params["umap_min_dist"])
-        self._spin_min_dist.setToolTip("0.0 → clusters serrés. 1.0 → carte diffuse.")
+        self._spin_min_dist.setToolTip(self.translator.tr("0.0 → clusters serrés. 1.0 → carte diffuse."))
         form.addRow("UMAP min_dist", self._spin_min_dist)
 
         sep = QFrame()
@@ -253,13 +256,13 @@ class SettingsDock(QDockWidget):
         self._spin_hdbscan = QSpinBox()
         self._spin_hdbscan.setRange(2, 500)
         self._spin_hdbscan.setValue(params["hdbscan_min_cluster"])
-        self._spin_hdbscan.setToolTip("Petit → beaucoup de clusters. Grand → clusters stables.")
+        self._spin_hdbscan.setToolTip(self.translator.tr("Petit → beaucoup de clusters. Grand → clusters stables."))
         form.addRow("HDBSCAN min_cluster", self._spin_hdbscan)
 
         layout.addLayout(form)
         layout.addWidget(sep)
 
-        btn = QPushButton("Appliquer et recalculer")
+        btn = QPushButton(self.translator.tr("Appliquer et recalculer"))
         btn.clicked.connect(self.apply)
         layout.addWidget(btn)
         layout.addStretch()
@@ -298,17 +301,19 @@ class SettingsDock(QDockWidget):
 
 
 class MapTab(QWidget):
-    def __init__(self, map_vm: MapViewModel, main_window, parent=None):
+    def __init__(self, map_vm: MapViewModel, main_window, translator: I18nManager, parent=None):
         """
         Args:
             map_vm (MapViewModel): Le view model de la carte.
             main_window (MainWindow): La fenetre principale.
             parent (QWidget, optional): Le parent. Defaults to None.
+            translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
         """
 
         super().__init__(parent)
         self._vm = map_vm
         self._main_window = main_window
+        self.translator = translator
         self._nodes: dict[str, MapNode] = {}
         self._current_selected: str | None = None
         self._cluster_rects: dict[int, QRectF] = {}
@@ -326,6 +331,7 @@ class MapTab(QWidget):
             self._vm.params,
             on_apply=self._vm.apply_params,
             parent=main_window,
+            translator=translator,
         )
         main_window.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._settings_dock)
         self._settings_dock.setVisible(False)
@@ -353,29 +359,29 @@ class MapTab(QWidget):
         # ── Barre de contrôle ─────────────────────────────────────────────────
         bar = QHBoxLayout()
 
-        self._btn_compute = QPushButton("Calculer la carte")
+        self._btn_compute = QPushButton(self.translator.tr("Calculer la carte"))
         self._btn_compute.clicked.connect(self._vm.compute)
         bar.addWidget(self._btn_compute)
 
-        self._btn_settings = QPushButton("⚙ Paramètres")
+        self._btn_settings = QPushButton(self.translator.tr("⚙ Paramètres"))
         self._btn_settings.setCheckable(True)
         self._btn_settings.clicked.connect(lambda checked: self._settings_dock.setVisible(checked))
         bar.addWidget(self._btn_settings)
 
-        self._btn_reset_filter = QPushButton("Réinitialiser le filtre")
+        self._btn_reset_filter = QPushButton(self.translator.tr("Réinitialiser le filtre"))
         self._btn_reset_filter.clicked.connect(self.reset_all_filters)
         self._btn_reset_filter.setEnabled(False)
         bar.addWidget(self._btn_reset_filter)
 
         # Bouton pour afficher/masquer le dock de recherche
-        self._btn_search_dock = QPushButton("🔍 Recherche")
+        self._btn_search_dock = QPushButton(self.translator.tr("🔍 Recherche"))
         self._btn_search_dock.setCheckable(True)
-        self._btn_search_dock.setToolTip("Afficher / masquer le panneau de recherche")
+        self._btn_search_dock.setToolTip(self.translator.tr("Afficher / masquer le panneau de recherche"))
         bar.addWidget(self._btn_search_dock)
 
         bar.addStretch()
 
-        self._lbl_status = QLabel("Chargement en cours…")
+        self._lbl_status = QLabel(self.translator.tr("Chargement en cours…"))
         self._lbl_status.setStyleSheet("color: gray; font-size: 12px;")
         bar.addWidget(self._lbl_status)
 
@@ -397,7 +403,7 @@ class MapTab(QWidget):
         self._legend_layout.setSpacing(4)
         self._legend_layout.setContentsMargins(4, 4, 4, 4)
 
-        lbl_leg = QLabel("Clusters")
+        lbl_leg = QLabel(self.translator.tr("Clusters"))
         lbl_leg.setStyleSheet(legend_label_style())
         self._legend_layout.addWidget(lbl_leg)
 
@@ -435,7 +441,7 @@ class MapTab(QWidget):
         # ── Barre de recherche ────────────────────────────────────────────────
         self.dock_search_bar = QLineEdit()
         self.dock_search_bar.setObjectName("search_bar")
-        self.dock_search_bar.setPlaceholderText("Rechercher…")
+        self.dock_search_bar.setPlaceholderText(self.translator.tr("Rechercher en francais…"))
         self.dock_search_bar.setClearButtonEnabled(True)
         layout.addWidget(self.dock_search_bar)
 
@@ -443,12 +449,12 @@ class MapTab(QWidget):
         actions_row = QHBoxLayout()
         actions_row.setSpacing(6)
 
-        self.btn_save_search = QPushButton("💾 Sauvegarder")
-        self.btn_save_search.setToolTip("Enregistrer la recherche dans l'historique")
+        self.btn_save_search = QPushButton(self.translator.tr("💾 Sauvegarder"))
+        self.btn_save_search.setToolTip(self.translator.tr("Enregistrer la recherche dans l'historique"))
         actions_row.addWidget(self.btn_save_search)
 
-        self.checkbox_affinage = QCheckBox("Affinage")
-        self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
+        self.checkbox_affinage = QCheckBox(self.translator.tr("Affinage"))
+        self.checkbox_affinage.setToolTip(self.translator.tr("Si activé, les recherches suivantes seront affinées à partir des résultats actuels"))
         actions_row.addWidget(self.checkbox_affinage)
 
         layout.addLayout(actions_row)
@@ -460,7 +466,7 @@ class MapTab(QWidget):
         layout.addWidget(sep)
 
         # ── Arbre de recherche ────────────────────────────────────────────────
-        self.tree_widget = TreeViewWidget(self._vm.search_tree)
+        self.tree_widget = TreeViewWidget(self._vm.search_tree, self.translator)
         self.tree_widget.signal_node_clicked.connect(self.on_signal_tree_node_clicked)
         layout.addWidget(self.tree_widget)
 
@@ -539,7 +545,7 @@ class MapTab(QWidget):
 
         Args:
             msg (str): Message d'erreur"""
-        self._lbl_status.setText(f"❌ {msg}")
+        self._lbl_status.setText(self.translator.tr("❌ {msg}").format(msg=msg))
         self._btn_compute.setEnabled(True)
 
     def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
@@ -554,7 +560,7 @@ class MapTab(QWidget):
         self.build_scene(points, labels, names, cluster_names)
         n_clusters = len({label for label in labels if label >= 0})
         n_noise = labels.count(-1)
-        self._lbl_status.setText(f"{len(names)} images - {n_clusters} clusters" + (f" - {n_noise} bruit" if n_noise else ""))
+        self._lbl_status.setText(self.translator.tr("{count} images - {clusters} clusters - {noise} bruit" if n_noise else "").format(count=len(names), clusters=n_clusters, noise=n_noise))
         self._btn_compute.setEnabled(True)
         self._btn_reset_filter.setEnabled(True)
         if self._current_selected:
@@ -715,7 +721,7 @@ class MapTab(QWidget):
             lbl.setStyleSheet(dot_label_style())
             lbl.setWordWrap(True)
             lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-            lbl.setToolTip("Clic : isoler et zoomer sur ce cluster")
+            lbl.setToolTip(self.translator.tr("Clic : isoler et zoomer sur ce cluster"))
             lbl.mousePressEvent = lambda _e, c=cid: self.filter_and_zoom_cluster(c)
             row.addWidget(lbl, stretch=1)
             self._legend_labels[cid] = lbl

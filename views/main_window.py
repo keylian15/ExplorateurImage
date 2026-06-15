@@ -41,6 +41,7 @@ from PyQt6.QtWidgets import (
 
 from models import config_repository
 from models import workspace_repository as ws_repo
+from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from views.workspace_widget import WorkspaceWidget
 
@@ -116,14 +117,15 @@ class MainWindow(QMainWindow):
             Configuration globale chargée au démarrage.
     """
 
-    def __init__(self, client: OllamaWrapper, config: dict):
+    def __init__(self, client: OllamaWrapper, config: dict, translator: I18nManager):
         super().__init__()
 
         self.client = client
         self.config = config
+        self.translator = translator
         self._tab_flip_direction = 1
 
-        self.setWindowTitle("Explorateur d'images")
+        self.setWindowTitle(self.translator.tr("Explorateur d'images"))
 
         screen = QApplication.primaryScreen().availableGeometry()
         self.setGeometry(screen)
@@ -315,6 +317,7 @@ class MainWindow(QMainWindow):
             main_window=self,
             folder=folder,
             ws_data=ws_data,
+            translator=self.translator,
         )
 
         widget.signal_folder_changed.connect(self.on_workspace_folder_changed)
@@ -478,8 +481,8 @@ class MainWindow(QMainWindow):
 
         new_name, ok = QInputDialog.getText(
             self,
-            "Renommer l'espace de travail",
-            "Nouveau nom :",
+            self.translator.tr("Renommer l'espace de travail"),
+            self.translator.tr("Nouveau nom :"),
             text=widget.ws_name,
         )
 

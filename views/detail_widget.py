@@ -48,6 +48,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from services.i18n_manager import I18nManager
 from styles import (
     image_preview_style,
     neighbor_thumb_style,
@@ -68,6 +69,7 @@ class DetailWidget(QWidget):
         self,
         detail_vm: DetailViewModel,
         sam3_vm: Sam3ViewModel,
+        translator: I18nManager,
         parent=None,
     ):
         """
@@ -80,6 +82,7 @@ class DetailWidget(QWidget):
         self._sam3_vm = sam3_vm
         self._current_pixmap: QPixmap | None = None
         self._current_img_path: str | None = None
+        self.translator = translator
 
         self.build_ui()
         self.connect_vm()
@@ -94,17 +97,17 @@ class DetailWidget(QWidget):
         # ── Titre + renommage + épingle ───────────────────────────────────────
         title_row = QHBoxLayout()
         self.title_edit = QLineEdit()
-        self.title_edit.setPlaceholderText("Nom de l'image…")
+        self.title_edit.setPlaceholderText(self.translator.tr("Nom de l'image…"))
         title_row.addWidget(self.title_edit)
 
         self.btn_rename = QPushButton("✏️")
         self.btn_rename.setFixedWidth(32)
-        self.btn_rename.setToolTip("Renommer le fichier")
+        self.btn_rename.setToolTip(self.translator.tr("Renommer le fichier"))
         title_row.addWidget(self.btn_rename)
 
         self.btn_pin = QPushButton("📌")
         self.btn_pin.setFixedWidth(32)
-        self.btn_pin.setToolTip("Épingler / désépingler cette image")
+        self.btn_pin.setToolTip(self.translator.tr("Épingler / désépingler cette image"))
         self.btn_pin.setCheckable(True)
         title_row.addWidget(self.btn_pin)
 
@@ -116,32 +119,32 @@ class DetailWidget(QWidget):
         self.preview.setFixedHeight(200)
         self.preview.setStyleSheet(image_preview_style())
         self.preview.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.preview.setToolTip("Clic : ouvrir dans SAM3 (segmentation interactive)")
+        self.preview.setToolTip(self.translator.tr("Clic : ouvrir dans SAM3 (segmentation interactive)"))
         self.preview.leftClicked = self.open_sam3_dialog
         self.preview.rightClicked = self.open_sam3_dialog
         layout.addWidget(self.preview)
 
         # ── Description ───────────────────────────────────────────────────────
         self.desc_edit = QTextEdit()
-        self.desc_edit.setPlaceholderText("Description…")
+        self.desc_edit.setPlaceholderText(self.translator.tr("Description…"))
         layout.addWidget(self.desc_edit)
 
         # ── Mots-clés ─────────────────────────────────────────────────────────
         self.keywords_edit = QLineEdit()
-        self.keywords_edit.setPlaceholderText("mot1, mot2, mot3")
+        self.keywords_edit.setPlaceholderText(self.translator.tr("Mots-clés…"))
         layout.addWidget(self.keywords_edit)
 
         # ── Bouton auto-compléter ─────────────────────────────────────────────
-        self.btn_autocomplete = QPushButton("Auto-compléter")
+        self.btn_autocomplete = QPushButton(self.translator.tr("Auto-compléter"))
         layout.addWidget(self.btn_autocomplete)
 
-        self.lbl_loading = QLabel("Analyse en cours…")
+        self.lbl_loading = QLabel(self.translator.tr("Analyse en cours…"))
         self.lbl_loading.setVisible(False)
         layout.addWidget(self.lbl_loading)
 
         # ── En-tête voisins ───────────────────────────────────────────────────
         neighbors_hdr = QHBoxLayout()
-        self.lbl_neighbors = QLabel("Images similaires")
+        self.lbl_neighbors = QLabel(self.translator.tr("Images similaires"))
         self.lbl_neighbors.setStyleSheet(section_title_style())
         self.spin_k = QSpinBox()
         self.spin_k.setMinimum(1)
@@ -170,7 +173,7 @@ class DetailWidget(QWidget):
         self.btn_pin.clicked.connect(self._vm.toggle_pin)
         self.spin_k.valueChanged.connect(self.on_k_changed)
 
-        action_pin = QAction("Search", self)
+        action_pin = QAction(self.translator.tr("Search"), self)
         action_pin.setShortcut(QKeySequence("Ctrl+E"))
         action_pin.triggered.connect(lambda: self._vm.toggle_pin())
         self.addAction(action_pin)
@@ -240,10 +243,10 @@ class DetailWidget(QWidget):
         self.btn_pin.setChecked(is_pinned)
         self.btn_pin.blockSignals(False)
         if is_pinned:
-            self.btn_pin.setToolTip("Désépingler cette image")
+            self.btn_pin.setToolTip(self.translator.tr("Désépingler cette image"))
             self.btn_pin.setStyleSheet("color: #f59e0b;")
         else:
-            self.btn_pin.setToolTip("Épingler cette image")
+            self.btn_pin.setToolTip(self.translator.tr("Épingler cette image"))
             self.btn_pin.setStyleSheet("")
 
     def display_neighbors(self, neighbors: dict[str, float]):
@@ -253,10 +256,10 @@ class DetailWidget(QWidget):
                 w.deleteLater()
 
         if not neighbors:
-            self.lbl_neighbors.setText("Images similaires (aucune)")
+            self.lbl_neighbors.setText(self.translator.tr("Images similaires (aucune)"))
             return
 
-        self.lbl_neighbors.setText(f"Images similaires (top {len(neighbors)})")
+        self.lbl_neighbors.setText(self.translator.tr("Images similaires (top {count})").format(count=len(neighbors)))
         folder = self._vm._folder
         THUMB = 80
         col, row = 0, 0
@@ -287,7 +290,7 @@ class DetailWidget(QWidget):
             thumb.setAlignment(Qt.AlignmentFlag.AlignCenter)
             thumb.setStyleSheet(neighbor_thumb_style())
             thumb.setCursor(Qt.CursorShape.PointingHandCursor)
-            thumb.setToolTip("Clic gauche : sélectionner | Clic droit : SAM3")
+            thumb.setToolTip(self.translator.tr("Clic gauche : sélectionner | Clic droit : SAM3"))
             thumb.leftClicked = lambda n=neighbor_name: self._vm._gallery_vm.select_image(n)
             thumb.rightClicked = lambda p=pixmap_full, np_=path: self._open_sam3_with(p, np_)
 
@@ -315,7 +318,7 @@ class DetailWidget(QWidget):
         self.btn_autocomplete.setEnabled(True)
 
     def on_signal_autocomplete_error(self, msg: str):
-        self.title_edit.setText(f"Erreur : {msg}")
+        self.title_edit.setText(self.translator.tr("Erreur : {msg}").format(msg=msg))
         self.lbl_loading.setVisible(False)
         self.btn_autocomplete.setEnabled(True)
 
@@ -326,7 +329,7 @@ class DetailWidget(QWidget):
 
     def on_signal_rename_error(self, msg: str):
         self.title_edit.setStyleSheet(rename_error_style())
-        self.title_edit.setToolTip(f"❌ {msg}")
+        self.title_edit.setToolTip(self.translator.tr("❌ {msg}").format(msg=msg))
 
     def on_k_changed(self, value: int):
         self._vm.k_neighbors = value
@@ -347,6 +350,7 @@ class DetailWidget(QWidget):
             sam3_vm=self._sam3_vm,
             title=title,
             img_path=img_path,
+            translator=self.translator,
             parent=self,
         )
         dlg.show()

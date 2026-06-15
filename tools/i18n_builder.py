@@ -111,16 +111,15 @@ def main(project_root: str, languages: list[str]):
                 if lang == SOURCE_LANG:
                     continue
 
-                if not entry.get(lang):
-                    entry[lang] = ollama_translate(text, lang)
-                    generated += 1
+                if lang in entry and entry[lang]:
+                    continue
+
+                entry[lang] = ollama_translate(text, lang)
+                generated += 1
 
     # option: cleanup ou debug
     print(f"[i18n] keys found: {len(found_keys)}")
     print(f"[i18n] translations generated: {generated}")
-
-    print(extract_tr_calls(Path("views/main_window.py").read_text(encoding="utf-8")))
-
     save_i18n(translations)
 
 

@@ -35,6 +35,7 @@ from PyQt6.QtWidgets import (
 )
 
 from models import workspace_repository as ws_repo
+from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.detail_vm import DetailViewModel
@@ -63,6 +64,7 @@ class WorkspaceWidget(QWidget):
         folder: str | None = None,
         ws_data: dict | None = None,
         parent=None,
+        translator: I18nManager = None,
     ):
         """
         Args:
@@ -79,21 +81,22 @@ class WorkspaceWidget(QWidget):
         self.ws_id = ws_id
         self.ws_name = name
         self._main_window = main_window
+        self.translator = translator
 
         _ws_data = ws_data or ws_repo.make_workspace(name=name, folder=folder)
 
         # ── ViewModels ────────────────────────────────────────────────────────
         self.gallery_vm = GalleryViewModel(client, config, ws_id=ws_id, ws_data=_ws_data)
-        self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
+        self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
-        self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
-        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data)
+        self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
+        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
 
         # ── Vues ──────────────────────────────────────────────────────────────
-        self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, self)
-        self._detail_widget = DetailWidget(self.detail_vm, self.sam3_vm, self)
-        self._map_tab = MapTab(self.map_vm, main_window, self)
-        self._style_tab = StyleTab(self)
+        self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, translator, parent=self)
+        self._detail_widget = DetailWidget(self.detail_vm, self.sam3_vm, translator, self)
+        self._map_tab = MapTab(self.map_vm, main_window, translator, self)
+        self._style_tab = StyleTab(translator, self)
 
         self._gallery_widget.btn_open.clicked.connect(self.open_folder_dialog)
 
@@ -109,12 +112,12 @@ class WorkspaceWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._tabs)
 
-        self._tabs.addTab(self._gallery_widget, "🖼 Galerie")
-        self._tabs.addTab(self._map_tab, "🗺 Carte 2D")
-        self._tabs.addTab(self._style_tab, "🎨 Thème")
+        self._tabs.addTab(self._gallery_widget, self.translator.tr("🖼 Galerie"))
+        self._tabs.addTab(self._map_tab, self.translator.tr("🗺 Carte 2D"))
+        self._tabs.addTab(self._style_tab, self.translator.tr("🎨 Thème"))
 
         # ── Dock détail ───────────────────────────────────────────────────────
-        self._dock = QDockWidget(f"Détails - {name}", main_window)
+        self._dock = QDockWidget(self.translator.tr("Détails - {name}").format(name=name), main_window)
         self._dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self._dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
         self._dock.setWidget(self._detail_widget)
@@ -203,4 +206,4 @@ class WorkspaceWidget(QWidget):
 
     def rename(self, new_name: str):
         self.ws_name = new_name
-        self._dock.setWindowTitle(f"Détails - {new_name}")
+        self._dock.setWindowTitle(self.translator.tr("Détails - {name}").format(name=new_name))

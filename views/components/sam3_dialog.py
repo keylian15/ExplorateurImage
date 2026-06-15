@@ -59,6 +59,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from services.i18n_manager import I18nManager
 from styles import COLORS, neighbor_thumb_style, score_label_style
 from viewmodels.sam3_vm import MaskOverlay, Sam3ViewModel
 from views.components.clickable_label import ClickableLabel
@@ -960,17 +961,19 @@ class Sam3Dialog(QMainWindow):
         sam3_vm: Sam3ViewModel,
         title: str = "",
         img_path: str | None = None,
+        translator: I18nManager = None,
         parent=None,
     ):
         super().__init__(parent)
         self._pixmap = pixmap
         self._vm = sam3_vm
         self._img_path = img_path
+        self.translator = translator
         self._img_w = pixmap.width()
         self._img_h = pixmap.height()
         self._zoom = 0.75
 
-        self.setWindowTitle(title or "SAM3 — Segmentation interactive")
+        self.setWindowTitle(title or self.translator.tr("SAM3 — Segmentation interactive"))
         self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
 
         screen = QApplication.primaryScreen().availableGeometry()
@@ -1026,7 +1029,7 @@ class Sam3Dialog(QMainWindow):
         scroll_dock.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_dock.setStyleSheet("border: none;")
 
-        dock = QDockWidget("Contrôles SAM3", self)
+        dock = QDockWidget(self.translator.tr("Contrôles SAM3"), self)
         dock.setObjectName("dock_sam3_controls")
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable)
@@ -1068,16 +1071,16 @@ class Sam3Dialog(QMainWindow):
         vm = self._vm
         sb = self._sidebar_content
 
-        vm.signal_model_loading.connect(lambda: sb.set_status("⏳ Chargement du modèle…"))
+        vm.signal_model_loading.connect(lambda: sb.set_status(self.translator.tr("⏳ Chargement du modèle…")))
         vm.signal_model_ready.connect(self._on_model_ready)
-        vm.signal_model_error.connect(lambda e: sb.set_status(f"❌ Erreur modèle : {e}"))
-        vm.signal_encoding.connect(lambda: sb.set_busy(True, "Encodage de l'image…"))
+        vm.signal_model_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Erreur modèle : {e}").format(e=e)))
+        vm.signal_encoding.connect(lambda: sb.set_busy(True, self.translator.tr("Encodage de l'image…")))
         vm.signal_encoded.connect(self._on_encoded)
-        vm.signal_encoding_error.connect(lambda e: sb.set_status(f"❌ Encodage : {e}"))
-        vm.signal_segmenting.connect(lambda: sb.set_busy(True, "Segmentation en cours…"))
+        vm.signal_encoding_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Encodage : {e}").format(e=e)))
+        vm.signal_segmenting.connect(lambda: sb.set_busy(True, self.translator.tr("Segmentation en cours…")))
         vm.signal_overlay_ready.connect(self._on_overlay_ready)
-        vm.signal_segment_error.connect(lambda e: sb.set_status(f"❌ Segmentation : {e}"))
-        vm.signal_resetting.connect(lambda: sb.set_busy(True, "Réinitialisation…"))
+        vm.signal_segment_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Segmentation : {e}").format(e=e)))
+        vm.signal_resetting.connect(lambda: sb.set_busy(True, self.translator.tr("Réinitialisation…")))
         vm.signal_reset_done.connect(self._on_reset_done)
 
         vm.signal_search_started.connect(self._on_search_started)
@@ -1085,8 +1088,7 @@ class Sam3Dialog(QMainWindow):
         vm.signal_search_match.connect(self._results_panel.add_result)
         vm.signal_search_finished.connect(self._on_search_finished)
         vm.signal_search_cancelled.connect(self._on_search_cancelled)
-        vm.signal_search_error.connect(lambda e: sb.set_status(f"❌ Recherche : {e}"))
-
+        vm.signal_search_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Recherche : {error}").format(error=e)))
         vm.signal_box_search_strategy.connect(self._on_box_search_strategy)
 
         sb.signal_wait_mode_changed.connect(self._results_panel.set_wait_mode)
@@ -1097,35 +1099,35 @@ class Sam3Dialog(QMainWindow):
         if self._vm.is_model_loaded:
             self._vm.encode_image(self._pixmap, self._img_path)
         else:
-            self._sidebar_content.set_status("⏳ Chargement du modèle en cours…")
+            self._sidebar_content.set_status(self.translator.tr("⏳ Chargement du modèle en cours…"))
             if not self._vm.is_busy:
                 self._vm.load_model()
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
     def _on_model_ready(self) -> None:
-        self._sidebar_content.set_status("✅ Modèle prêt")
+        self._sidebar_content.set_status(self.translator.tr("✅ Modèle prêt"))
         if not self._vm.is_image_encoded:
             self._vm.encode_image(self._pixmap, self._img_path)
 
     def _on_encoded(self) -> None:
         self._sidebar_content.set_ready(True)
-        self._sidebar_content.set_status("✅ Prêt — saisissez un prompt ou dessinez une boîte")
+        self._sidebar_content.set_status(self.translator.tr("✅ Prêt — saisissez un prompt ou dessinez une boîte"))
 
     def _on_overlay_ready(self, overlay: MaskOverlay) -> None:
         self._sidebar_content.set_ready(True)
         n = len(overlay.masks)
-        self._sidebar_content.set_status(f"✅ {n} objet(s) trouvé(s)")
+        self._sidebar_content.set_status(self.translator.tr("✅ {n} objet(s) trouvé(s)").format(n=n))
         self._canvas.set_overlay(overlay)
 
     def _on_reset_done(self) -> None:
         self._canvas.clear_overlay()
         self._sidebar_content.set_ready(True)
-        self._sidebar_content.set_status("✅ Prompts réinitialisés")
+        self._sidebar_content.set_status(self.translator.tr("✅ Prompts réinitialisés"))
 
     def _on_box_search_strategy(self, strategy_name: str) -> None:
         label = _STRATEGY_LABELS.get(strategy_name, strategy_name)
-        self._sidebar_content.set_status(f"🔍 Recherche par box — stratégie : {label}")
+        self._sidebar_content.set_status(self.translator.tr("🔍 Recherche par box — stratégie : {label}").format(label=label))
 
     # ── Slots recherche ───────────────────────────────────────────────────────
 
@@ -1137,7 +1139,7 @@ class Sam3Dialog(QMainWindow):
     def _on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
         box = self._sidebar_content.get_last_box()
         if box is None:
-            self._sidebar_content.set_status("⚠️ Aucune box disponible.")
+            self._sidebar_content.set_status(self.translator.tr("⚠️ Aucune box disponible."))
             return
 
         x0, y0, x1, y1 = box
@@ -1160,18 +1162,18 @@ class Sam3Dialog(QMainWindow):
 
     def _on_search_started(self, total: int) -> None:
         self._sidebar_content.set_searching(True)
-        self._sidebar_content.set_status(f"🔍 Analyse de {total} image(s)…")
+        self._sidebar_content.set_status(self.translator.tr("🔍 Analyse de {total} image(s)…").format(total=total))
         self._results_panel.start_search(total)
 
     def _on_search_finished(self, matched: list) -> None:
         self._sidebar_content.set_searching(False)
         n = len(matched)
-        self._sidebar_content.set_status(f"✅ Recherche terminée — {n} correspondance(s)")
+        self._sidebar_content.set_status(self.translator.tr("✅ Recherche terminée — {n} correspondance(s)").format(n=n))
         self._results_panel.finish_search(matched)
 
     def _on_search_cancelled(self) -> None:
         self._sidebar_content.set_searching(False)
-        self._sidebar_content.set_status("⛔ Recherche annulée")
+        self._sidebar_content.set_status(self.translator.tr("⛔ Recherche annulée"))
         self._results_panel.show_cancelled()
 
     def _on_result_clicked(self, img_name: str) -> None:
@@ -1196,7 +1198,7 @@ class Sam3Dialog(QMainWindow):
 
         if self._vm.is_model_loaded and not self._vm.is_busy:
             self._vm.encode_image(pixmap, img_path)
-            self._sidebar_content.set_status(f"⏳ Encodage de {img_name}…")
+            self._sidebar_content.set_status(self.translator.tr("⏳ Encodage de {img_name}…").format(img_name=img_name))
 
     # ── Slots UI → ViewModel ──────────────────────────────────────────────────
 

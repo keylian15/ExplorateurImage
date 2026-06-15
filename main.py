@@ -31,7 +31,7 @@ def main():
     client = OllamaWrapper()
     config = config_repository.load()
     translator = I18nManager()
-    translator.set_language("fr")
+    translator.set_language("en")
 
     window = MainWindow(client, config, translator)
     window.show()

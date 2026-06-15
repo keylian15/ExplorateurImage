@@ -48,6 +48,7 @@ from PyQt6.QtWidgets import (
 )
 
 from models.image_model import IMG_NAME_ROLE
+from services.i18n_manager import I18nManager
 from styles import THUMB
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.gallery_vm import GalleryViewModel
@@ -64,6 +65,7 @@ class GalleryWidget(QWidget):
         gallery_vm: GalleryViewModel,
         autocomplete_vm: AutocompleteViewModel,
         sam3_vm: Sam3ViewModel,
+        translator: I18nManager,
         parent=None,
     ):
         """
@@ -77,6 +79,7 @@ class GalleryWidget(QWidget):
         self._avm = autocomplete_vm
         self._sam3_vm = sam3_vm
         self._search_dock: QDockWidget | None = None
+        self.translator = translator
 
         self.build_ui()
         self.connect_vm()
@@ -92,19 +95,19 @@ class GalleryWidget(QWidget):
         top = QHBoxLayout()
         top.setSpacing(8)
 
-        self.btn_open = QPushButton("Ouvrir un dossier")
+        self.btn_open = QPushButton(self.translator.tr("Ouvrir un dossier"))
         top.addWidget(self.btn_open)
 
-        self.btn_batch = QPushButton("Tout auto-compléter")
+        self.btn_batch = QPushButton(self.translator.tr("Tout auto-compléter"))
         top.addWidget(self.btn_batch)
 
-        self.btn_cancel = QPushButton("Annuler")
+        self.btn_cancel = QPushButton(self.translator.tr("Annuler"))
         self.btn_cancel.setVisible(False)
         top.addWidget(self.btn_cancel)
 
-        self.btn_search_dock = QPushButton("🔍 Recherche")
+        self.btn_search_dock = QPushButton(self.translator.tr("🔍 Recherche"))
         self.btn_search_dock.setCheckable(True)
-        self.btn_search_dock.setToolTip("Afficher / masquer le panneau de recherche")
+        self.btn_search_dock.setToolTip(self.translator.tr("Afficher / masquer le panneau de recherche"))
         top.addWidget(self.btn_search_dock)
 
         top.addStretch()
@@ -126,7 +129,7 @@ class GalleryWidget(QWidget):
         self.list_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.list_view.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.list_view.setToolTip("Clic gauche : sélectionner | Clic droit : SAM3 segmentation")
+        self.list_view.setToolTip(self.translator.tr("Clic gauche : sélectionner | Clic droit : SAM3 segmentation"))
         layout.addWidget(self.list_view)
 
         # ── Progression batch ─────────────────────────────────────────────────
@@ -145,7 +148,7 @@ class GalleryWidget(QWidget):
         self._prefetch_timer.timeout.connect(self.prefetch_visible)
 
     def build_search_dock(self, main_window) -> QDockWidget:
-        dock = QDockWidget("Recherche dans la Galerie", main_window)
+        dock = QDockWidget(self.translator.tr("Recherche dans la Galerie"), main_window)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea)
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
         dock.setMinimumWidth(220)
@@ -157,19 +160,19 @@ class GalleryWidget(QWidget):
 
         self.search_bar = QLineEdit()
         self.search_bar.setObjectName("search_bar")
-        self.search_bar.setPlaceholderText("Rechercher…")
+        self.search_bar.setPlaceholderText(self.translator.tr("Rechercher en francais…"))
         self.search_bar.setClearButtonEnabled(True)
         layout.addWidget(self.search_bar)
 
         actions_row = QHBoxLayout()
         actions_row.setSpacing(6)
 
-        self.btn_save_search = QPushButton("💾 Sauvegarder")
-        self.btn_save_search.setToolTip("Enregistrer la recherche dans l'historique")
+        self.btn_save_search = QPushButton(self.translator.tr("💾 Sauvegarder"))
+        self.btn_save_search.setToolTip(self.translator.tr("Enregistrer la recherche dans l'historique"))
         actions_row.addWidget(self.btn_save_search)
 
-        self.checkbox_affinage = QCheckBox("Affinage")
-        self.checkbox_affinage.setToolTip("Si activé, les recherches suivantes seront affinées à partir des résultats actuels")
+        self.checkbox_affinage = QCheckBox(self.translator.tr("Affinage"))
+        self.checkbox_affinage.setToolTip(self.translator.tr("Si activé, les recherches suivantes seront affinées à partir des résultats actuels"))
         actions_row.addWidget(self.checkbox_affinage)
 
         layout.addLayout(actions_row)
@@ -179,7 +182,7 @@ class GalleryWidget(QWidget):
         sep.setStyleSheet("color: #1f2937;")
         layout.addWidget(sep)
 
-        self.tree_widget = TreeViewWidget(self._gvm.search_tree)
+        self.tree_widget = TreeViewWidget(self._gvm.search_tree, self.translator)
         self.tree_widget.signal_node_clicked.connect(self.on_signal_tree_node_clicked)
         layout.addWidget(self.tree_widget)
 
@@ -266,6 +269,7 @@ class GalleryWidget(QWidget):
             sam3_vm=self._sam3_vm,
             title=img_name,
             img_path=img_path,
+            translator=self.translator,
             parent=self,
         )
         dlg.show()
@@ -273,7 +277,7 @@ class GalleryWidget(QWidget):
     def on_cancel(self):
         self._avm.cancel()
         self.btn_cancel.setEnabled(False)
-        self.progress_label.setText("⛔ Annulation…")
+        self.progress_label.setText(self.translator.tr("⛔ Annulation…"))
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
@@ -286,7 +290,7 @@ class GalleryWidget(QWidget):
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
-        self.progress_label.setText(f"0 / {total} - en attente…")
+        self.progress_label.setText(self.translator.tr("0 / {total} - en attente…").format(total=total))
         self.progress_label.setVisible(True)
         self.btn_batch.setEnabled(False)
         self.btn_cancel.setVisible(True)
@@ -298,7 +302,7 @@ class GalleryWidget(QWidget):
 
     def on_batch_finished(self, cancelled: bool):
         total = self.progress_bar.maximum()
-        self.progress_label.setText("⛔ Annulé" if cancelled else f"✅ Terminé - {total} images traitées")
+        self.progress_label.setText(self.translator.tr("⛔ Annulé") if cancelled else self.translator.tr("✅ Terminé - {total} images traitées").format(total=total))
         self.btn_batch.setEnabled(True)
         self.btn_cancel.setVisible(False)
         QTimer.singleShot(

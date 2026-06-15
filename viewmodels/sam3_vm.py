@@ -41,6 +41,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 
 from models import workspace_repository as ws_repo
+from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from services.sam3_service import Sam3Service, SegmentationResult
 from services.workers import (
@@ -124,15 +125,7 @@ class Sam3ViewModel(QObject):
     # ── Signal spécifique box search (informe la View de la stratégie active) ─
     signal_box_search_strategy = pyqtSignal(str)  # nom de la stratégie en cours
 
-    def __init__(
-        self,
-        client: OllamaWrapper,
-        config: dict,
-        gallery_vm: GalleryViewModel,
-        ws_id: str,
-        ws_data: dict,
-        parent=None,
-    ):
+    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, ws_id: str, ws_data: dict, parent=None, translator: I18nManager = None):
         super().__init__(parent)
 
         self._client = client
@@ -140,6 +133,7 @@ class Sam3ViewModel(QObject):
         self._gallery_vm = gallery_vm
         self._ws_id = ws_id
         self._params = ws_repo.get_map_params(ws_data)
+        self.translator = translator
 
         self._service = Sam3Service()
         self._state: dict | None = None
@@ -205,7 +199,7 @@ class Sam3ViewModel(QObject):
 
         pil = self._to_pil(pixmap, img_path)
         if pil is None:
-            self.signal_encoding_error.emit("Impossible de convertir l'image.")
+            self.signal_encoding_error.emit(self.translator.tr("Impossible de convertir l'image."))
             return
 
         self._encode_worker = Sam3EncodeWorker(self._service, pil, self)
@@ -289,7 +283,7 @@ class Sam3ViewModel(QObject):
             threshold: score minimum SAM3 pour qu'une image soit retenue (0–1).
         """
         if not self._service.is_loaded:
-            self.signal_search_error.emit("Le modèle SAM3 n'est pas encore chargé.")
+            self.signal_search_error.emit(self.translator.tr("Le modèle SAM3 n'est pas encore chargé."))
             return
 
         if self.is_searching:
@@ -297,12 +291,12 @@ class Sam3ViewModel(QObject):
 
         folder = self._gallery_vm.current_folder
         if not folder:
-            self.signal_search_error.emit("Aucun dossier ouvert.")
+            self.signal_search_error.emit(self.translator.tr("Aucun dossier ouvert."))
             return
 
         images = self._gallery_vm.all_images()
         if not images:
-            self.signal_search_error.emit("Aucune image dans le dossier.")
+            self.signal_search_error.emit(self.translator.tr("Aucune image dans le dossier."))
             return
 
         self.signal_search_started.emit(len(images))
@@ -353,42 +347,42 @@ class Sam3ViewModel(QObject):
             max_results: Nombre maximum de résultats (0 = illimité).
         """
         if self.is_searching:
-            self.signal_search_error.emit("Une recherche est déjà en cours.")
+            self.signal_search_error.emit(self.translator.tr("Une recherche est déjà en cours."))
             return
 
         folder = self._gallery_vm.current_folder
         if not folder:
-            self.signal_search_error.emit("Aucun dossier ouvert.")
+            self.signal_search_error.emit(self.translator.tr("Aucun dossier ouvert."))
             return
 
         images = self._gallery_vm.all_images()
         if not images:
-            self.signal_search_error.emit("Aucune image dans le dossier.")
+            self.signal_search_error.emit(self.translator.tr("Aucune image dans le dossier."))
             return
 
         index = self._gallery_vm.index
         if not index:
-            self.signal_search_error.emit("Aucune image indexée dans ce dossier.")
+            self.signal_search_error.emit(self.translator.tr("Aucune image indexée dans ce dossier."))
             return
 
         # Crop PIL de la région de la box
         pil_source = self._to_pil(pixmap, None)
         if pil_source is None:
-            self.signal_search_error.emit("Impossible de convertir l'image courante.")
+            self.signal_search_error.emit(self.translator.tr("Impossible de convertir l'image courante."))
             return
 
         from services.box_search_strategies import crop_pil
 
         crop = crop_pil(pil_source, x0, y0, x1, y1)
         if crop.width < 4 or crop.height < 4:
-            self.signal_search_error.emit("La région sélectionnée est trop petite.")
+            self.signal_search_error.emit(self.translator.tr("La région sélectionnée est trop petite."))
             return
 
         strategy_name = strategy_name.lower()
 
         # Validation : SAM3 doit être chargé pour les stratégies qui l'utilisent
         if strategy_name in ("sam3", "hybrid") and not self._service.is_loaded:
-            self.signal_search_error.emit("Le modèle SAM3 n'est pas encore chargé.")
+            self.signal_search_error.emit(self.translator.tr("Le modèle SAM3 n'est pas encore chargé."))
             return
 
         self.signal_box_search_strategy.emit(strategy_name)
@@ -431,7 +425,7 @@ class Sam3ViewModel(QObject):
                 parent=self,
             )
         else:
-            self.signal_search_error.emit(f"Stratégie inconnue : {strategy_name!r}.")
+            self.signal_search_error.emit(self.translator.tr("Stratégie inconnue : {name}.").format(name=strategy_name))
             return
 
         self._search_worker = worker
@@ -468,7 +462,7 @@ class Sam3ViewModel(QObject):
         self.signal_overlay_ready.emit(overlay)
 
     def _on_segment_error(self, msg: str) -> None:
-        self.signal_segment_error.emit(msg)
+        self.signal_segment_error.emit(self.translator.tr(msg))
 
     def _to_overlay(self, result: SegmentationResult) -> MaskOverlay:
         """Convertit SegmentationResult (type Service) en MaskOverlay (type View)."""
