@@ -20,6 +20,8 @@ from PyQt6.QtWidgets import QApplication
 from models import config_repository
 from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
+from services.sam3_service import Sam3Service
+from services.workers import Sam3LoadWorker
 from styles import get_stylesheet
 from views.main_window import MainWindow
 
@@ -33,8 +35,14 @@ def main():
     translator = I18nManager()
     translator.set_language("en")
 
-    window = MainWindow(client, config, translator)
+    sam3_service = Sam3Service()
+
+    window = MainWindow(client, config, translator, sam3_service)
     window.show()
+
+    sam3_load_worker = Sam3LoadWorker(sam3_service)
+    sam3_load_worker.start()
+    window._sam3_load_worker = sam3_load_worker
 
     sys.exit(app.exec())
 

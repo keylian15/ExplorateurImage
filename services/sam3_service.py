@@ -64,6 +64,7 @@ class Sam3Service:
         self._model = None
         self._processor = None
         self._is_loaded = False
+        self._is_loading = False
 
     # ── Chargement ────────────────────────────────────────────────────────────
 
@@ -71,6 +72,11 @@ class Sam3Service:
     def _find_bpe_path() -> str:
         """Retourne le chemin du fichier BPE relatif au dossier d'exécution."""
         return str(Path("sam3") / "sam3" / "assets" / "bpe_simple_vocab_16e6.txt.gz")
+
+    @property
+    def is_loading(self) -> bool:
+        """Indique si le modèle est en cours de chargement."""
+        return self._is_loading
 
     def load_model(self, confidence_threshold: float = 0.5) -> None:
         """
@@ -84,17 +90,21 @@ class Sam3Service:
             FileNotFoundError: si le fichier BPE est introuvable.
             RuntimeError: si le chargement échoue.
         """
-        from sam3.sam3 import build_sam3_image_model
-        from sam3.sam3.model.sam3_image_processor import Sam3Processor
+        self._is_loading = True
+        try:
+            from sam3.sam3 import build_sam3_image_model
+            from sam3.sam3.model.sam3_image_processor import Sam3Processor
 
-        bpe_path = self._find_bpe_path()
+            bpe_path = self._find_bpe_path()
 
-        self._model = build_sam3_image_model(bpe_path=bpe_path)
-        self._processor = Sam3Processor(
-            self._model,
-            confidence_threshold=confidence_threshold,
-        )
-        self._is_loaded = True
+            self._model = build_sam3_image_model(bpe_path=bpe_path)
+            self._processor = Sam3Processor(
+                self._model,
+                confidence_threshold=confidence_threshold,
+            )
+            self._is_loaded = True
+        finally:
+            self._is_loading = False
 
     @property
     def is_loaded(self) -> bool:

@@ -43,7 +43,7 @@ from PyQt6.QtGui import QImage, QPixmap
 from models import workspace_repository as ws_repo
 from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
-from services.sam3_service import Sam3Service, SegmentationResult
+from services.sam3_service import SegmentationResult
 from services.workers import (
     EmbeddingBoxSearchWorker,
     HybridBoxSearchWorker,
@@ -125,7 +125,7 @@ class Sam3ViewModel(QObject):
     # ── Signal spécifique box search (informe la View de la stratégie active) ─
     signal_box_search_strategy = pyqtSignal(str)  # nom de la stratégie en cours
 
-    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, ws_id: str, ws_data: dict, parent=None, translator: I18nManager = None):
+    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, ws_id: str, ws_data: dict, sam3_service, parent=None, translator: I18nManager = None):
         super().__init__(parent)
 
         self._client = client
@@ -135,7 +135,7 @@ class Sam3ViewModel(QObject):
         self._params = ws_repo.get_map_params(ws_data)
         self.translator = translator
 
-        self._service = Sam3Service()
+        self._service = sam3_service
         self._state: dict | None = None
         self._confidence: float = 0.5
 
@@ -170,8 +170,8 @@ class Sam3ViewModel(QObject):
     # ── Chargement modèle ─────────────────────────────────────────────────────
 
     def load_model(self) -> None:
-        """Lance le chargement du modèle en arrière-plan."""
-        if self._service.is_loaded or self.is_busy:
+        """Lance le chargement du modèle en arrière-plan (si pas déjà fait/en cours)."""
+        if self._service.is_loaded or self._service.is_loading or self.is_busy:
             return
         self.signal_model_loading.emit()
         self._load_worker = Sam3LoadWorker(self._service, self)

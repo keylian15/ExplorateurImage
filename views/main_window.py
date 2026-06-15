@@ -117,12 +117,13 @@ class MainWindow(QMainWindow):
             Configuration globale chargée au démarrage.
     """
 
-    def __init__(self, client: OllamaWrapper, config: dict, translator: I18nManager):
+    def __init__(self, client: OllamaWrapper, config: dict, translator: I18nManager, sam3_service):
         super().__init__()
 
         self.client = client
         self.config = config
         self.translator = translator
+        self.sam3_service = sam3_service
         self._tab_flip_direction = 1
 
         self.setWindowTitle(self.translator.tr("Explorateur d'images"))
@@ -318,6 +319,7 @@ class MainWindow(QMainWindow):
             folder=folder,
             ws_data=ws_data,
             translator=self.translator,
+            sam3_service=self.sam3_service,
         )
 
         widget.signal_folder_changed.connect(self.on_workspace_folder_changed)

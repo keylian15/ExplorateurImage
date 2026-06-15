@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import os
 
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
     QDockWidget,
@@ -65,6 +65,7 @@ class WorkspaceWidget(QWidget):
         ws_data: dict | None = None,
         parent=None,
         translator: I18nManager = None,
+        sam3_service=None,
     ):
         """
         Args:
@@ -90,7 +91,7 @@ class WorkspaceWidget(QWidget):
         self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
         self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
-        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
+        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data, sam3_service, translator=translator)
 
         # ── Vues ──────────────────────────────────────────────────────────────
         self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, translator, parent=self)
@@ -143,16 +144,6 @@ class WorkspaceWidget(QWidget):
         # ── Restauration du dossier ───────────────────────────────────────────
         if folder and os.path.exists(folder):
             self.gallery_vm.open_folder(folder)
-
-        # ── Chargement SAM3 en fond (différé de 2 s pour ne pas bloquer Qt) ──
-        QTimer.singleShot(2000, self._start_sam3_loading)
-
-    # ── SAM3 ─────────────────────────────────────────────────────────────────
-
-    def _start_sam3_loading(self):
-        """Lance le chargement du modèle SAM3 en arrière-plan."""
-        if not self.sam3_vm.is_model_loaded and not self.sam3_vm.is_busy:
-            self.sam3_vm.load_model()
 
     # ── Propriétés ────────────────────────────────────────────────────────────
 
