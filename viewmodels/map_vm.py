@@ -39,6 +39,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from models import config_repository
 from models import workspace_repository as ws_repo
 from models.tree.search_tree import SearchTree
+from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import MapWorker
 from viewmodels.gallery_vm import GalleryViewModel
@@ -71,6 +72,7 @@ class MapViewModel(QObject):
         gallery_vm: GalleryViewModel,
         ws_id: str,
         ws_data: dict,
+        translator: I18nManager = None,
         parent=None,
     ):
         """
@@ -80,6 +82,7 @@ class MapViewModel(QObject):
             gallery_vm (GalleryViewModel): ViewModel de la gallerie
             ws_id (str): identifiant du workspace
             ws_data (dict): données du workspace (contient map_params et history_search)
+            translator (I18nManager): gestionnaire de traduction
         """
 
         super().__init__(parent)
@@ -89,6 +92,7 @@ class MapViewModel(QObject):
         self._ws_id = ws_id
         self._worker: MapWorker | None = None
         self._params = ws_repo.get_map_params(ws_data)
+        self.translator = translator
 
         # ── Recherche ─────────────────────────────────────────────────────────
         self._search_text = ""
@@ -151,7 +155,7 @@ class MapViewModel(QObject):
 
         indexed = {k: v for k, v in self._gallery_vm.index.items() if v.get("embedding") and len(v["embedding"]) > 0}
         if len(indexed) < 2:
-            self.signal_compute_error.emit(f"Pas assez d'embeddings ({len(indexed)} / min 2).")
+            self.signal_compute_error.emit(self.translator.tr("Pas assez d'embeddings ({count} / min 2).").format(count=len(indexed)))
             return
 
         self.signal_compute_started.emit()

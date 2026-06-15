@@ -48,6 +48,7 @@ from PyQt6.QtWidgets import (
 )
 
 from models import color_repository
+from services.i18n_manager import I18nManager
 from styles import get_stylesheet, style_label_name_style, style_label_subname_style, style_presset_style, style_separator_style, style_tittle_style
 
 # ── Labels lisibles en français ───────────────────────────────────────────────
@@ -337,8 +338,9 @@ class ColorRow(QWidget):
 class StyleTab(QWidget):
     """Onglet éditeur de thème visuel."""
 
-    def __init__(self, parent=None):
+    def __init__(self, translator: I18nManager = None, parent=None):
         super().__init__(parent)
+        self.translator = translator
         self._colors: dict[str, str] = color_repository.load()
         self._rows: dict[str, ColorRow] = {}
 
@@ -354,18 +356,18 @@ class StyleTab(QWidget):
 
         # ── En-tête ───────────────────────────────────────────────────────────
         header = QHBoxLayout()
-        title = QLabel("Éditeur de thème")
+        title = QLabel(self.translator.tr("Éditeur de thème"))
         title.setStyleSheet(style_tittle_style())
         header.addWidget(title)
         header.addStretch()
 
-        self._btn_reset = QPushButton("↺ Réinitialiser")
-        self._btn_reset.setToolTip("Revenir aux couleurs par défaut")
+        self._btn_reset = QPushButton(self.translator.tr("↺ Réinitialiser"))
+        self._btn_reset.setToolTip(self.translator.tr("Revenir aux couleurs par défaut"))
         self._btn_reset.clicked.connect(self.reset_defaults)
         header.addWidget(self._btn_reset)
 
-        self._btn_apply = QPushButton("✓ Appliquer")
-        self._btn_apply.setToolTip("Appliquer et sauvegarder le thème")
+        self._btn_apply = QPushButton(self.translator.tr("✓ Appliquer"))
+        self._btn_apply.setToolTip(self.translator.tr("Appliquer et sauvegarder le thème"))
         self._btn_apply.clicked.connect(self.apply)
         header.addWidget(self._btn_apply)
 
@@ -376,7 +378,7 @@ class StyleTab(QWidget):
         root.addWidget(sep0)
 
         # ── Section thèmes prédéfinis ─────────────────────────────────────────
-        lbl_presets = QLabel("Thèmes prédéfinis")
+        lbl_presets = QLabel(self.translator.tr("Thèmes prédéfinis"))
         lbl_presets.setStyleSheet(style_presset_style())
         root.addWidget(lbl_presets)
 
@@ -394,7 +396,7 @@ class StyleTab(QWidget):
         root.addWidget(sep1)
 
         # ── Personnalisation fine ─────────────────────────────────────────────
-        lbl_custom = QLabel("Personnalisation fine")
+        lbl_custom = QLabel(self.translator.tr("Personnalisation fine"))
         lbl_custom.setStyleSheet(style_presset_style())
         root.addWidget(lbl_custom)
 
@@ -487,7 +489,7 @@ class StyleTab(QWidget):
             key (str): Clé de la couleur modifiée.
             hex_val (str): Nouvelle valeur hexadécimale de la couleur."""
         self._colors[key] = hex_val
-        self._lbl_status.setText(f"Modifié : {_LABELS.get(key, (key,))[0]} → {hex_val}  (non sauvegardé)")
+        self._lbl_status.setText(self.translator.tr("Modifié : {label} → {hex_val} (non sauvegardé)").format(label=_LABELS.get(key, (key,))[0], hex_val=hex_val))
 
     def load_preset(self, name: str):
         """Charge un thème prédéfini dans tous les champs sans sauvegarder."""
@@ -496,7 +498,7 @@ class StyleTab(QWidget):
             if key in preset:
                 row.set_color(preset[key])
         self._colors.update(preset)
-        self._lbl_status.setText(f"Thème « {name} » chargé — cliquez « ✓ Appliquer » pour confirmer.")
+        self._lbl_status.setText(self.translator.tr("Thème « {name} » chargé — cliquez « ✓ Appliquer » pour confirmer.").format(name=name))
 
     def apply(self):
         """Sauvegarde colors.json et applique le stylesheet Qt en live."""
@@ -512,9 +514,9 @@ class StyleTab(QWidget):
         if app:
             app.setStyleSheet(get_stylesheet())
 
-        self._lbl_status.setText("✅ Thème sauvegardé et appliqué.")
+        self._lbl_status.setText(self.translator.tr("✅ Thème sauvegardé et appliqué."))
 
     def reset_defaults(self):
         """Charge le thème par défaut (Bleu nuit) sans sauvegarder."""
         self.load_preset("Bleu nuit")
-        self._lbl_status.setText("Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer.")
+        self._lbl_status.setText(self.translator.tr("Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer."))

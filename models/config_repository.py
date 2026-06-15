@@ -18,7 +18,7 @@ import os
 
 CONFIG_FILE = "config.json"
 
-_DEFAULTS = {"workspaces": []}
+_DEFAULTS = {"workspaces": [], "language": "fr"}
 
 
 def load() -> dict:

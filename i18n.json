@@ -1,0 +1,386 @@
+{
+  "Explorateur d'images": {
+    "fr": "Explorateur d'images",
+    "en": "Image Explorer"
+  },
+  "Renommer l'espace de travail": {
+    "fr": "Renommer l'espace de travail",
+    "en": "Rename the workspace."
+  },
+  "Nouveau nom :": {
+    "fr": "Nouveau nom :",
+    "en": "New name :"
+  },
+  "Un fichier avec ce nom existe déjà.": {
+    "fr": "Un fichier avec ce nom existe déjà.",
+    "en": "A file with this name already exists."
+  },
+  "Pas assez d'embeddings ({count} / min 2).": {
+    "fr": "Pas assez d'embeddings ({count} / min 2).",
+    "en": "Not enough embeddings ({count} / min 2)."
+  },
+  "Impossible de convertir l'image.": {
+    "fr": "Impossible de convertir l'image.",
+    "en": "Cannot convert the image."
+  },
+  "Le modèle SAM3 n'est pas encore chargé.": {
+    "fr": "Le modèle SAM3 n'est pas encore chargé.",
+    "en": "The SAM3 model is not yet loaded."
+  },
+  "Aucun dossier ouvert.": {
+    "fr": "Aucun dossier ouvert.",
+    "en": "No open file."
+  },
+  "Aucune image dans le dossier.": {
+    "fr": "Aucune image dans le dossier.",
+    "en": "No image in the folder."
+  },
+  "Une recherche est déjà en cours.": {
+    "fr": "Une recherche est déjà en cours.",
+    "en": "A research is already in progress."
+  },
+  "Aucune image indexée dans ce dossier.": {
+    "fr": "Aucune image indexée dans ce dossier.",
+    "en": "No image indexed in this folder."
+  },
+  "Impossible de convertir l'image courante.": {
+    "fr": "Impossible de convertir l'image courante.",
+    "en": "Cannot convert the current image."
+  },
+  "La région sélectionnée est trop petite.": {
+    "fr": "La région sélectionnée est trop petite.",
+    "en": "The selected region is too small."
+  },
+  "Stratégie inconnue : {name}.": {
+    "fr": "Stratégie inconnue : {name}.",
+    "en": "Unknown strategy: {name}."
+  },
+  "Ouvrir un dossier": {
+    "fr": "Ouvrir un dossier",
+    "en": "Open a folder"
+  },
+  "Tout auto-compléter": {
+    "fr": "Tout auto-compléter",
+    "en": "All auto-complete"
+  },
+  "Annuler": {
+    "fr": "Annuler",
+    "en": "Cancel"
+  },
+  "🔍 Recherche": {
+    "fr": "🔍 Recherche",
+    "en": "🔍 Search"
+  },
+  "Afficher / masquer le panneau de recherche": {
+    "fr": "Afficher / masquer le panneau de recherche",
+    "en": "Show / Hide the search panel"
+  },
+  "Recherche dans la Galerie": {
+    "fr": "Recherche dans la Galerie",
+    "en": "Search in the Gallery"
+  },
+  "Rechercher en francais…": {
+    "fr": "Rechercher en francais…",
+    "en": "Search in French…"
+  },
+  "💾 Sauvegarder": {
+    "fr": "💾 Sauvegarder",
+    "en": "Save"
+  },
+  "Enregistrer la recherche dans l'historique": {
+    "fr": "Enregistrer la recherche dans l'historique",
+    "en": "Save the search in the history"
+  },
+  "Affinage": {
+    "fr": "Affinage",
+    "en": "Refining"
+  },
+  "Si activé, les recherches suivantes seront affinées à partir des résultats actuels": {
+    "fr": "Si activé, les recherches suivantes seront affinées à partir des résultats actuels",
+    "en": "If activated, the following searches will be refined from the current results."
+  },
+  "Nom de l'image…": {
+    "fr": "Nom de l'image…",
+    "en": "Image name…"
+  },
+  "Renommer le fichier": {
+    "fr": "Renommer le fichier",
+    "en": "Rename the file"
+  },
+  "Épingler / désépingler cette image": {
+    "fr": "Épingler / désépingler cette image",
+    "en": "Pin / Unpin this image"
+  },
+  "Clic : ouvrir dans SAM3 (segmentation interactive)": {
+    "fr": "Clic : ouvrir dans SAM3 (segmentation interactive)",
+    "en": "Click: Open in SAM3 (interactive segmentation)"
+  },
+  "Description…": {
+    "fr": "Description…",
+    "en": "Description…"
+  },
+  "Mots-clés…": {
+    "fr": "Mots-clés…",
+    "en": "Keywords…"
+  },
+  "Auto-compléter": {
+    "fr": "Auto-compléter",
+    "en": "Auto-complete"
+  },
+  "Analyse en cours…": {
+    "fr": "Analyse en cours…",
+    "en": "Analysis in progress…"
+  },
+  "Images similaires": {
+    "fr": "Images similaires",
+    "en": "Similar Images"
+  },
+  "Search": {
+    "fr": "Search",
+    "en": "Search"
+  },
+  "Désépingler cette image": {
+    "fr": "Désépingler cette image",
+    "en": "Unpin this image"
+  },
+  "Épingler cette image": {
+    "fr": "Épingler cette image",
+    "en": "Pin this image"
+  },
+  "Images similaires (aucune)": {
+    "fr": "Images similaires (aucune)",
+    "en": "Similar images (none)"
+  },
+  "Images similaires (top {count})": {
+    "fr": "Images similaires (top {count})",
+    "en": "Similar Images (top {count})"
+  },
+  "Clic gauche : sélectionner | Clic droit : SAM3": {
+    "fr": "Clic gauche : sélectionner | Clic droit : SAM3",
+    "en": "Left click : select | Right click : SAM3"
+  },
+  "Erreur : {msg}": {
+    "fr": "Erreur : {msg}",
+    "en": "Error: {msg}"
+  },
+  "❌ {msg}": {
+    "fr": "❌ {msg}",
+    "en": "❌ {msg}"
+  },
+  "Clic gauche : sélectionner | Clic droit : SAM3 segmentation": {
+    "fr": "Clic gauche : sélectionner | Clic droit : SAM3 segmentation",
+    "en": "Left click: select | Right click: SAM3 segmentation"
+  },
+  "⛔ Annulation…": {
+    "fr": "⛔ Annulation…",
+    "en": "⛔ Cancellation…"
+  },
+  "⛔ Annulé": {
+    "fr": "⛔ Annulé",
+    "en": "⛔ Canceled"
+  },
+  "✅ Terminé - {total} images traitées": {
+    "fr": "✅ Terminé - {total} images traitées",
+    "en": "✅ Finished - {total} images processed"
+  },
+  "Petit → détail local. Grand → vue globale.": {
+    "fr": "Petit → détail local. Grand → vue globale.",
+    "en": "Small → local detail. Large → global view."
+  },
+  "0.0 → clusters serrés. 1.0 → carte diffuse.": {
+    "fr": "0.0 → clusters serrés. 1.0 → carte diffuse.",
+    "en": "0.0 → tight clusters. 1.0 → diffuse map."
+  },
+  "Petit → beaucoup de clusters. Grand → clusters stables.": {
+    "fr": "Petit → beaucoup de clusters. Grand → clusters stables.",
+    "en": "Small → many clusters. Large → stable clusters."
+  },
+  "Appliquer et recalculer": {
+    "fr": "Appliquer et recalculer",
+    "en": "Apply and recalculate"
+  },
+  "Calculer la carte": {
+    "fr": "Calculer la carte",
+    "en": "Calculate the card"
+  },
+  "⚙ Paramètres": {
+    "fr": "⚙ Paramètres",
+    "en": "⚙ Settings"
+  },
+  "Réinitialiser le filtre": {
+    "fr": "Réinitialiser le filtre",
+    "en": "Reset the filter"
+  },
+  "Chargement en cours…": {
+    "fr": "Chargement en cours…",
+    "en": "Loading in progress…"
+  },
+  "Clusters": {
+    "fr": "Clusters",
+    "en": "Clusters"
+  },
+  "Clic : isoler et zoomer sur ce cluster": {
+    "fr": "Clic : isoler et zoomer sur ce cluster",
+    "en": "Click: Isolate and zoom on this cluster"
+  },
+  "Éditeur de thème": {
+    "fr": "Éditeur de thème",
+    "en": "Theme Editor"
+  },
+  "↺ Réinitialiser": {
+    "fr": "↺ Réinitialiser",
+    "en": "↺ Reset"
+  },
+  "Revenir aux couleurs par défaut": {
+    "fr": "Revenir aux couleurs par défaut",
+    "en": "Return to default colors"
+  },
+  "✓ Appliquer": {
+    "fr": "✓ Appliquer",
+    "en": "✓ Apply"
+  },
+  "Appliquer et sauvegarder le thème": {
+    "fr": "Appliquer et sauvegarder le thème",
+    "en": "Apply and save the theme"
+  },
+  "Thèmes prédéfinis": {
+    "fr": "Thèmes prédéfinis",
+    "en": "Predefined Themes"
+  },
+  "Personnalisation fine": {
+    "fr": "Personnalisation fine",
+    "en": "Fine personalisation"
+  },
+  "Modifié : {label} → {hex_val} (non sauvegardé)": {
+    "fr": "Modifié : {label} → {hex_val} (non sauvegardé)",
+    "en": "Modified : {label} → {hex_val} (not saved)"
+  },
+  "Thème « {name} » chargé — cliquez « ✓ Appliquer » pour confirmer.": {
+    "fr": "Thème « {name} » chargé — cliquez « ✓ Appliquer » pour confirmer.",
+    "en": "Theme « {name} » loaded — click « ✓ Apply » to confirm."
+  },
+  "✅ Thème sauvegardé et appliqué.": {
+    "fr": "✅ Thème sauvegardé et appliqué.",
+    "en": "✅ Theme saved and applied."
+  },
+  "Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer.": {
+    "fr": "Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer.",
+    "en": "Theme « Night Blue » restored — click « ✓ Apply » to confirm."
+  },
+  "🖼 Galerie": {
+    "fr": "🖼 Galerie",
+    "en": "🖼 Gallery"
+  },
+  "🗺 Carte 2D": {
+    "fr": "🗺 Carte 2D",
+    "en": "🗺 Map 2D"
+  },
+  "🎨 Thème": {
+    "fr": "🎨 Thème",
+    "en": "🎨 Theme"
+  },
+  "0 / {total} - en attente…": {
+    "fr": "0 / {total} - en attente…",
+    "en": "0 / {total} - pending…"
+  },
+  "Paramètres de la carte": {
+    "fr": "Paramètres de la carte",
+    "en": "Parameters of the card"
+  },
+  "Aucune recherche sauvegardée": {
+    "fr": "Aucune recherche sauvegardée",
+    "en": "No saved search"
+  },
+  "Historique": {
+    "fr": "Historique",
+    "en": "Historical"
+  },
+  "Détails - {name}": {
+    "fr": "Détails - {name}",
+    "en": "Details - {name}"
+  },
+  "SAM3 — Segmentation interactive": {
+    "fr": "SAM3 — Segmentation interactive",
+    "en": "SAM3 — Interactive Segmentation"
+  },
+  "Contrôles SAM3": {
+    "fr": "Contrôles SAM3",
+    "en": "Controls SAM3"
+  },
+  "⏳ Chargement du modèle…": {
+    "fr": "⏳ Chargement du modèle…",
+    "en": "⏳ Loading the model…"
+  },
+  "❌ Erreur modèle : {e}": {
+    "fr": "❌ Erreur modèle : {e}",
+    "en": "❌ Model error: {e}"
+  },
+  "Encodage de l'image…": {
+    "fr": "Encodage de l'image…",
+    "en": "Encoding of the image…"
+  },
+  "❌ Encodage : {e}": {
+    "fr": "❌ Encodage : {e}",
+    "en": "❌ Encoding : {e} /think"
+  },
+  "Segmentation en cours…": {
+    "fr": "Segmentation en cours…",
+    "en": "Segmentation in progress…"
+  },
+  "❌ Segmentation : {e}": {
+    "fr": "❌ Segmentation : {e}",
+    "en": "❌ Segmentation : {e} /think"
+  },
+  "Réinitialisation…": {
+    "fr": "Réinitialisation…",
+    "en": "Initialization…"
+  },
+  "❌ Recherche : {error}": {
+    "fr": "❌ Recherche : {error}",
+    "en": "❌ Search : {error} /think"
+  },
+  "⏳ Chargement du modèle en cours…": {
+    "fr": "⏳ Chargement du modèle en cours…",
+    "en": "⏳ Model loading in progress…"
+  },
+  "✅ Modèle prêt": {
+    "fr": "✅ Modèle prêt",
+    "en": "✅ Model ready"
+  },
+  "✅ Prêt — saisissez un prompt ou dessinez une boîte": {
+    "fr": "✅ Prêt — saisissez un prompt ou dessinez une boîte",
+    "en": "✅ Ready — enter a prompt or draw a box"
+  },
+  "✅ {n} objet(s) trouvé(s)": {
+    "fr": "✅ {n} objet(s) trouvé(s)",
+    "en": "✅ {n} object(s) found"
+  },
+  "✅ Prompts réinitialisés": {
+    "fr": "✅ Prompts réinitialisés",
+    "en": "✅ Prompts reset"
+  },
+  "🔍 Recherche par box — stratégie : {label}": {
+    "fr": "🔍 Recherche par box — stratégie : {label}",
+    "en": "🔍 Search by box — strategy : {label}"
+  },
+  "⚠️ Aucune box disponible.": {
+    "fr": "⚠️ Aucune box disponible.",
+    "en": "⚠️ No box available."
+  },
+  "🔍 Analyse de {total} image(s)…": {
+    "fr": "🔍 Analyse de {total} image(s)…",
+    "en": "🔍 Analysis of {total} image(s)..."
+  },
+  "✅ Recherche terminée — {n} correspondance(s)": {
+    "fr": "✅ Recherche terminée — {n} correspondance(s)",
+    "en": "✅ Search completed — {n} match(es)"
+  },
+  "⛔ Recherche annulée": {
+    "fr": "⛔ Recherche annulée",
+    "en": "⛔ Search Cancelled"
+  },
+  "⏳ Encodage de {img_name}…": {
+    "fr": "⏳ Encodage de {img_name}…",
+    "en": "⏳ Encoding of {img_name}…"
+  }
+}

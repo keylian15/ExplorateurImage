@@ -18,6 +18,7 @@ import sys
 from PyQt6.QtWidgets import QApplication
 
 from models import config_repository
+from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from styles import get_stylesheet
 from views.main_window import MainWindow
@@ -29,8 +30,10 @@ def main():
 
     client = OllamaWrapper()
     config = config_repository.load()
+    translator = I18nManager()
+    translator.set_language("en")
 
-    window = MainWindow(client, config)
+    window = MainWindow(client, config, translator)
     window.show()
 
     sys.exit(app.exec())

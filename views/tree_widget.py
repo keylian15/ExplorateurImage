@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
 )
 
 from models.tree.search_tree import SearchTree
+from services.i18n_manager import I18nManager
 
 
 class SearchNodeLabel(QLabel):
@@ -51,9 +52,10 @@ class TreeViewWidget(QWidget):
 
     signal_node_clicked = pyqtSignal(str)  # node_id
 
-    def __init__(self, tree: SearchTree, parent=None):
+    def __init__(self, tree: SearchTree, translator: I18nManager, parent=None):
         super().__init__(parent)
         self.tree = tree
+        self.translator = translator
 
         root_layout = QVBoxLayout(self)
         root_layout.setContentsMargins(0, 0, 0, 0)
@@ -87,14 +89,14 @@ class TreeViewWidget(QWidget):
                 item.widget().deleteLater()
 
         if self.tree.root is None:
-            placeholder = QLabel("Aucune recherche sauvegardée")
+            placeholder = QLabel(self.translator.tr("Aucune recherche sauvegardée"))
             placeholder.setStyleSheet("color: #4b5563; font-size: 11px; font-style: italic; padding: 4px;")
             self._tree_layout.addWidget(placeholder)
             return
 
         # Noeud racine
         root_lbl = SearchNodeLabel(
-            text="Historique",
+            text=self.translator.tr("Historique"),
             node_id=self.tree.root.id,
             is_root=True,
         )

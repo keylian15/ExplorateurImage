@@ -36,6 +36,7 @@ from PyQt6.QtGui import QPixmap
 
 from models import config_repository, index_repository
 from models import workspace_repository as ws_repo
+from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import AutoCompleteWorker, SaveMetadataWorker
 
@@ -67,6 +68,7 @@ class DetailViewModel(QObject):
         ws_id: str,
         ws_data: dict,
         parent=None,
+        translator: I18nManager = None,
     ):
         """
         Args:
@@ -83,6 +85,7 @@ class DetailViewModel(QObject):
         self._gallery_vm = gallery_vm
         self._ws_id = ws_id
         self._k_neighbors = ws_repo.get_k_neighbors(ws_data)
+        self.translator = translator
 
         self.selected_image: str | None = None
         self._worker: AutoCompleteWorker | None = None
@@ -305,7 +308,7 @@ class DetailViewModel(QObject):
         new_path = os.path.join(self._folder, new_name)
 
         if os.path.exists(new_path):
-            self.signal_rename_error.emit("Un fichier avec ce nom existe déjà.")
+            self.signal_rename_error.emit(self.translator.tr("Un fichier avec ce nom existe déjà."))
             return
 
         try:
