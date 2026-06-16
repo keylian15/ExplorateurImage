@@ -146,8 +146,10 @@ class ImageCanvas(QLabel):
             self.clear()
             return
 
-        w = int(self._base_pixmap.width() * self._zoom)
-        h = int(self._base_pixmap.height() * self._zoom)
+        dpr = self.devicePixelRatioF()
+
+        w = int(self._base_pixmap.width() * self._zoom * dpr)
+        h = int(self._base_pixmap.height() * self._zoom * dpr)
 
         scaled = self._base_pixmap.scaled(
             w,
@@ -155,6 +157,8 @@ class ImageCanvas(QLabel):
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
+
+        scaled.setDevicePixelRatio(dpr)
 
         if self._overlay and self._overlay.masks:
             scaled = self._draw_overlay(scaled)
