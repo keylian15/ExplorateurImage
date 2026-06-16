@@ -1,0 +1,1 @@
+::: views.workspace_widget

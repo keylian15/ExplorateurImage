@@ -18,33 +18,57 @@ plugins:
 
 nav:
   - Développeurs:
-    - Accueil: index.md
-    - Main: main.md
-    - Style: styles.md
-    - Models:
-      - color_repository: models/color_repository.md
-      - config_repository: models/config_repository.md
-      - image_model: models/image_model.md
-      - index_repository: models/index_repository.md
-    - Services:
-      - ollama_wrapper: services/ollama_wrapper.md
-      - thumbnail_cache: services/thumbnail_cache.md
-      - workers: services/workers.md
-    - ViewModels:
-      - autocomplete_vm: viewmodels/autocomplete_vm.md
-      - detail_vm: viewmodels/detail_vm.md
-      - gallery_vm: viewmodels/gallery_vm.md
-      - map_vm: viewmodels/map_vm.md
-    - Views:
-      - components:
-        - clickable_label: views/components/clickable_label.md
-        - fullscreen_dialog: views/components/fullscreen_dialog.md
-      - detail_widget: views/detail_widget.md
-      - gallery_widget: views/gallery_widget.md
-      - main_window: views/main_window.md
-      - map_widget: views/map_widget.md
-      - style_tab: views/style_tab.md
-  - Utilisateur : 
-    - Introduction: user/main.md
-    - Guide d'installation: user/install.md
-    - Guide d'utilisation: user/demo.md
+      - Accueil: index.md
+      - Main: main.md
+      - Style: styles.md
+
+      - Models:
+          - color_repository: models/color_repository.md
+          - config_repository: models/config_repository.md
+          - image_model: models/image_model.md
+          - index_repository: models/index_repository.md
+          - workspace_repository: models/workspace_repository.md
+
+      - Tree:
+          - search_node: models/tree/search_node.md
+          - search_tree: models/tree/search_tree.md
+          - tree: models/tree/tree.md
+          - tree_node: models/tree/tree_node.md
+
+      - Services:
+          - box_search_strategies: services/box_search_strategies.md
+          - i18n_manager: services/i18n_manager.md
+          - ollama_wrapper: services/ollama_wrapper.md
+          - sam3_service: services/sam3_service.md
+          - thumbnail_cache: services/thumbnail_cache.md
+          - workers: services/workers.md
+
+      - Tools:
+          - i18n_builder: tools/i18n_builder.md
+
+      - ViewModels:
+          - autocomplete_vm: viewmodels/autocomplete_vm.md
+          - detail_vm: viewmodels/detail_vm.md
+          - gallery_vm: viewmodels/gallery_vm.md
+          - map_vm: viewmodels/map_vm.md
+          - sam3_vm: viewmodels/sam3_vm.md
+
+      - Views:
+          - Components:
+              - clickable_label: views/components/clickable_label.md
+              - collapsible_frame: views/components/collapsible_frame.md
+              - language_selector: views/components/language_selector.md
+              - sam3_dialog: views/components/sam3_dialog.md
+
+          - detail_widget: views/detail_widget.md
+          - gallery_widget: views/gallery_widget.md
+          - main_window: views/main_window.md
+          - map_widget: views/map_widget.md
+          - style_tab: views/style_tab.md
+          - tree_widget: views/tree_widget.md
+          - workspace_widget: views/workspace_widget.md
+
+  - Utilisateur:
+      - Introduction: user/main.md
+      - Guide d'installation: user/install.md
+      - Guide d'utilisation: user/demo.md
