@@ -399,6 +399,50 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#styles.lang_card_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_card_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_check_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_check_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_flag_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_flag_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_name_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_name_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#styles.legend_label_style" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1414,6 +1458,50 @@
     <span class="md-ellipsis">
       
         image_preview_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_card_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_card_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_check_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_check_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_flag_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_flag_style
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#styles.lang_name_style" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lang_name_style
       
     </span>
   </a>
@@ -2580,6 +2668,372 @@ défini dans COLORS. Utilisé dans le dock de détail.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="styles.lang_card_style" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">lang_card_style</span><span class="p">(</span><span class="n">selected</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourne le style QSS pour une carte de langue cliquable.</p>
+<p>Affiche une bordure accentuée si la langue est actuellement sélectionnée,
+une bordure neutre sinon. Coins arrondis et fond « carte » dans les deux cas.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>selected</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True si cette langue est la langue active.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chaîne de style QSS.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>styles.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span>
+<span class="normal">555</span>
+<span class="normal">556</span>
+<span class="normal">557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_card_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour une carte de langue cliquable.</span>
+
+<span class="sd">    Affiche une bordure accentuée si la langue est actuellement sélectionnée,</span>
+<span class="sd">    une bordure neutre sinon. Coins arrondis et fond « carte » dans les deux cas.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        selected (bool): True si cette langue est la langue active.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Chaîne de style QSS.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">border</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s2">&quot;accent&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">selected</span> <span class="k">else</span> <span class="n">COLORS</span><span class="p">[</span><span class="s2">&quot;border&quot;</span><span class="p">]</span>
+    <span class="n">bg</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s2">&quot;bg_hover&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">selected</span> <span class="k">else</span> <span class="n">COLORS</span><span class="p">[</span><span class="s2">&quot;bg_card&quot;</span><span class="p">]</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">selected</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;QWidget[class=&quot;lang-card&quot;] </span><span class="se">{{</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s2">&quot;background-color: </span><span class="si">{</span><span class="n">bg</span><span class="si">}</span><span class="s2">;&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;border: </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s2">px solid </span><span class="si">{</span><span class="n">border</span><span class="si">}</span><span class="s2">;&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;border-radius: </span><span class="si">{</span><span class="n">METRICS</span><span class="p">[</span><span class="s1">&#39;border_radius_lg&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">;&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">}}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s1">&#39;QWidget[class=&quot;lang-card&quot;]:hover </span><span class="se">{{</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s2">&quot;border: 2px solid </span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;accent_hover&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">;&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">}}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="styles.lang_check_style" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">lang_check_style</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourne le style QSS pour la coche affichée sur la langue active.</p>
+<p>Applique la couleur de succès et une taille de police adaptée pour
+indiquer clairement la langue actuellement sélectionnée.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chaîne de style QSS inline.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>styles.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_check_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour la coche affichée sur la langue active.</span>
+
+<span class="sd">    Applique la couleur de succès et une taille de police adaptée pour</span>
+<span class="sd">    indiquer clairement la langue actuellement sélectionnée.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Chaîne de style QSS inline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;color: </span><span class="si">{</span><span class="n">COLORS</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">; font-size: 14px; font-weight: </span><span class="si">{</span><span class="n">FONTS</span><span class="p">[</span><span class="s1">&#39;weight_bold&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">; border: none; background: transparent;&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="styles.lang_flag_style" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">lang_flag_style</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourne le style QSS pour l'emoji drapeau d'une carte de langue.</p>
+<p>Applique une grande taille de police pour que le drapeau soit
+immédiatement reconnaissable dans la grille de sélection.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chaîne de style QSS inline.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>styles.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_flag_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour l&#39;emoji drapeau d&#39;une carte de langue.</span>
+
+<span class="sd">    Applique une grande taille de police pour que le drapeau soit</span>
+<span class="sd">    immédiatement reconnaissable dans la grille de sélection.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Chaîne de style QSS inline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;font-size: 28px; border: none; background: transparent;&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="styles.lang_name_style" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">lang_name_style</span><span class="p">(</span><span class="n">selected</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourne le style QSS pour le nom d'une langue dans sa carte.</p>
+<p>Le texte est en accent et en gras si la langue est sélectionnée,
+en texte secondaire sinon.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>selected</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True si cette langue est la langue active.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chaîne de style QSS inline.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>styles.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
+<span class="normal">585</span>
+<span class="normal">586</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_name_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le nom d&#39;une langue dans sa carte.</span>
+
+<span class="sd">    Le texte est en accent et en gras si la langue est sélectionnée,</span>
+<span class="sd">    en texte secondaire sinon.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        selected (bool): True si cette langue est la langue active.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Chaîne de style QSS inline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">COLORS</span><span class="p">[</span><span class="s2">&quot;accent&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">selected</span> <span class="k">else</span> <span class="n">COLORS</span><span class="p">[</span><span class="s2">&quot;text_secondary&quot;</span><span class="p">]</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">FONTS</span><span class="p">[</span><span class="s2">&quot;weight_bold&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">selected</span> <span class="k">else</span> <span class="n">FONTS</span><span class="p">[</span><span class="s2">&quot;weight_normal&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;font-size: </span><span class="si">{</span><span class="n">FONTS</span><span class="p">[</span><span class="s1">&#39;size_small&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">; color: </span><span class="si">{</span><span class="n">color</span><span class="si">}</span><span class="s2">; font-weight: </span><span class="si">{</span><span class="n">weight</span><span class="si">}</span><span class="s2">; border: none; background: transparent;&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="styles.legend_label_style" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">legend_label_style</span><span class="p">()</span></code>
 
@@ -3298,7 +3752,7 @@ les groupes de couleurs restent subtiles et cohérentes avec le fond.</p>
 
         <p>Retourne le style QSS pour le titre principal de l'onglet Thème.</p>
 <p>Applique une grande taille de police et une graisse élevée pour mettre
-en valeur le titre « Éditeur de thème » en haut de l'onglet.</p>
+en valeur le titre « Éditeur de paramètres » en haut de l'onglet.</p>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -3339,7 +3793,7 @@ en valeur le titre « Éditeur de thème » en haut de l'onglet.</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le titre principal de l&#39;onglet Thème.</span>
 
 <span class="sd">    Applique une grande taille de police et une graisse élevée pour mettre</span>
-<span class="sd">    en valeur le titre « Éditeur de thème » en haut de l&#39;onglet.</span>
+<span class="sd">    en valeur le titre « Éditeur de paramètres » en haut de l&#39;onglet.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Chaîne de style QSS inline.</span>

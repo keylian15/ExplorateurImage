@@ -291,6 +291,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="main">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main.restart_app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        restart_app
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1136,6 +1153,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="main">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main.restart_app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        restart_app
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1183,6 +1217,7 @@ fenêtre principale. Les ViewModels sont désormais créés par chaque workspace
 <li>Instancier le client Ollama partagé</li>
 <li>Créer et afficher la MainWindow</li>
 <li>Lancer la boucle événementielle Qt</li>
+<li>Permettre le redémarrage complet de l'application (changement de langue)</li>
 </ol>
 </details>
 
@@ -1204,6 +1239,62 @@ fenêtre principale. Les ViewModels sont désormais créés par chaque workspace
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="main.restart_app" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">restart_app</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Redémarre complètement le processus de l'application.</p>
+<p>Utilisé après un changement de langue : la configuration (incluant la
+nouvelle langue) a déjà été sauvegardée dans config.json via
+I18nManager.set_language(), donc le nouveau processus la rechargera
+automatiquement au démarrage.</p>
+<p>Remplace le processus courant via os.execv (même interpréteur, mêmes
+arguments), ce qui évite de laisser un second processus tourner et
+libère proprement les ressources (incluant SAM3) avant le redémarrage.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>main.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">restart_app</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Redémarre complètement le processus de l&#39;application.</span>
+
+<span class="sd">    Utilisé après un changement de langue : la configuration (incluant la</span>
+<span class="sd">    nouvelle langue) a déjà été sauvegardée dans config.json via</span>
+<span class="sd">    I18nManager.set_language(), donc le nouveau processus la rechargera</span>
+<span class="sd">    automatiquement au démarrage.</span>
+
+<span class="sd">    Remplace le processus courant via os.execv (même interpréteur, mêmes</span>
+<span class="sd">    arguments), ce qui évite de laisser un second processus tourner et</span>
+<span class="sd">    libère proprement les ressources (incluant SAM3) avant le redémarrage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">python</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">execv</span><span class="p">(</span><span class="n">python</span><span class="p">,</span> <span class="p">[</span><span class="n">python</span><span class="p">]</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
