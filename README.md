@@ -1,32 +1,16 @@
-## Auteurs : 
+# Explorateur Image Sémantique
 
-Keylian Turbé
+L'Explorateur Image Sémantique est une application de bureau permettant d'explorer un corpus d'images à partir de leur contenu plutôt que de leur nom ou de leur emplacement.
 
-# ExplorateurImage
-Projet pour créer un explorateur d'image par recherche sémantique.
+L'application analyse et enrichit automatiquement les images avec des informations sémantiques, afin de permettre une recherche intelligente, le regroupement visuel et la navigation dans un espace d'images.
+
+Elle fonctionne entièrement en local et s'appuie sur des modèles d'intelligence artificielle exécutés sur la machine de l'utilisateur  et le serveur local de l'IUT de Calais.
 
 
-## Installation
+## 📚 Documentation
 
-### Prérequis
+### Guide utilisateur & installation
+https://keylian15.github.io/ExplorateurImage/user/main/
 
-- Python 3.11.9
-
-### Création d'un environnement virtuel
-
-```bash
-python -m venv venv
-.\venv\Scripts\Activate 
-```
-
-### Installation des packages
-
-```bash
-pip install -r requirements.txt
-```
-
-### Lancement de l'application.
-
-```bash
-python main.py
-```
+### Documentation technique
+https://keylian15.github.io/ExplorateurImage/

@@ -43,10 +43,9 @@ La suite de la documentation est divisée en deux parties :
 
 Elle présente :
 
-1. l'installation du projet ;
-2. la prise en main de l'application ;
-3. les différentes fonctionnalités disponibles.
+1. [l'installation du projet.](https://keylian15.github.io/ExplorateurImage/user/install/)
+2. [la prise en main de l'application ainsi que les différentes fonctionnalités disponibles.](http://keylian15.github.io/user/demo/)
 
 ### Partie développeur
 
-Elle regroupe la documentation technique du projet, son architecture ainsi que les outils utilisés pour son développement.
+Elle regroupe la [documentation technique du projet](https://keylian15.github.io/ExplorateurImage/), son architecture ainsi que les outils utilisés pour son développement.
