@@ -310,7 +310,7 @@ class SearchResultsPanel(QWidget):
     THUMB = 80
     COLS = 3
     # Nombre de cellules insérées par tick du timer de flush
-    _BATCH_SIZE = 5
+    _BATCH_SIZE = 50
     # Intervalle entre deux ticks (ms)
     _FLUSH_INTERVAL_MS = 16  # ~60fps
 

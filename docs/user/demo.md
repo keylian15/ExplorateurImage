@@ -85,8 +85,18 @@ SAM3 simple qui est precis et plus long : on va aussi demander a qwenn2.5vl la d
 
 Enfin l'hybride, il fait comme sam3 simple sauf qu'avant de rendre les images il verifie avec l'embedding. Il n'est pas forcément plus long mais il est plus prècis. 
 
+![Segmentation](../Images/SAM3_Segmentation_Image.png)
 ** Details la lenteur dépend de deux choses : l'appel a qwenn2.5vl et l'appel a sam3 par image. 
 
 La checkbox attendre la fin est utile seulement si vous voulez les résultats par ordre de correspondance. 
 
-Donc dans notre cas si on utilise la premiere méthode 
+Donc dans notre cas si on utilise la premiere méthode avec la recherche par box on obtient 207 résultats.
+![SEGMENTATION RESULTAT](../Images/SAM3_Segmentation_Resultat.png)
+Il est possible de cliquer sur les images et d'enchainer les recherches etc. 
+
+
+** DETAILS : L'affichage des résultats peut etre gros donc l'affichage est en asynchrone. Comme la rechercher pour ne pas paralyser l'application. 
+
+Un onglet parametre permet de modifier le théme de l'application mais aussi la langue. si vous avez besoin de faire montrer a d'autre personne non francaise. 
+
+![Settings](../Images/Settings1.png) ![Settings](../Images/Settings2.png)
