@@ -1,8 +1,8 @@
 {
   "workspaces": [
     {
-      "id": "c8a5f562-0980-4903-b8b6-2bb8f3ccc698",
-      "name": "Images",
+      "id": "a52f5256-2844-477c-9655-af34f636a29c",
+      "name": "Travail 1",
       "folder": "C:/Users/keyli/Documents/ExplorateurImage/Images/Dataset",
       "k_neighbors": 5,
       "map_params": {
@@ -12,8 +12,36 @@
       },
       "pinned_images": [],
       "history_search": {
-        "gallery": {},
-        "map": {}
+        "gallery": {
+          "type": "SearchTree",
+          "root_id": "ac0dedbe-f4f6-4f5d-aca5-98c1a8fbd38e",
+          "current_id": "ac0dedbe-f4f6-4f5d-aca5-98c1a8fbd38e",
+          "nodes": [
+            {
+              "id": "ac0dedbe-f4f6-4f5d-aca5-98c1a8fbd38e",
+              "parent_id": null,
+              "children_ids": [],
+              "type": "SearchNode",
+              "query": "__root__",
+              "results": []
+            }
+          ]
+        },
+        "map": {
+          "type": "SearchTree",
+          "root_id": "3474e3fe-0b1b-4ad4-b798-9d4465887de5",
+          "current_id": "3474e3fe-0b1b-4ad4-b798-9d4465887de5",
+          "nodes": [
+            {
+              "id": "3474e3fe-0b1b-4ad4-b798-9d4465887de5",
+              "parent_id": null,
+              "children_ids": [],
+              "type": "SearchNode",
+              "query": "__root__",
+              "results": []
+            }
+          ]
+        }
       }
     }
   ],

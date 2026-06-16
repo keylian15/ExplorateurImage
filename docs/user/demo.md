@@ -1,102 +1,222 @@
-Voici la démonstration de l'application suivant un fil conducteur ainsi que l'explication des features au fur et a mesures. 
+# Guide de démonstration — Explorateur Image Sémantique
 
-Vous etes un photographe, vous avez dans votre disque 41 000 images mais vous ne les avez pas rangés ni renommé. 
-Vous devez retrouver cette image et les images similaires:
+> **Contexte :** Vous êtes photographe. Votre disque dur contient 41 000 images non classées, sans noms significatifs. Vous devez retrouver une photo précise — une scène hivernale en montagne avec des personnages — puis trouver toutes les images visuellement et sémantiquement proches.
 
-![Image a retrouver](../Images/A_Retrouver.jpg)
+---
 
-Dans un premier temps il faut ouvrir le dossier correspondant a votre disque, et lancer l'auto complétion sur toutes les images. (Ou le faire a la main.)
-Si une image est déjà traité comme celle ci alors elle a une pastille verte. ![Image Indéxé](../Images/Image_Indexe.png)
+## 1. Ouvrir un corpus d'images
 
-** Details : Pour afficher autant d'images j'ai mis en place un system de thumbnails pour ne pas surcharger l'affichage, un affichage dynamique en fonction de ce qu'on voit sur l'ecran, et un LRU Cache Memoire. 
-J'ai utilisé l'amélioration visuel 
+Au lancement de l'application, vous disposez d'un espace de travail vide (un *workspace*). Cliquez sur **Ouvrir un dossier** pour sélectionner le répertoire contenant vos images.
 
-L'auto complétion va parcourir chaque images, les envoyer ollama pour obtenir une description ainsi que des mots clés.
+![Galerie vide avec bouton Ouvrir un dossier](../Images/demo/01_galerie_vide.png)
 
-** DETAILS : L'auto complétion boucle sur l'entierté du dossier en asyncrhone. Il ne réindexe pas les images déjà indéxé et sauvegarde l'index ainsi que l'embedding généré en meme temps. 
+Vos images s'affichent immédiatement sous forme de miniatures dans la galerie.
 
-Pour voir ce qu'est le description d'image il suffit de clic gauche sur l'image. Vous pouvez également faire votre propre description avec les mots clés. ![Details Image](../Images/Details_Image.png)
+<details>
+<summary>🔧 Détail technique — Affichage des miniatures</summary>
 
-(Avec un clic droit on a une vue plus grande de l'image et d'autre utilisations qu'on verra plus bas)
+L'application génère des thumbnails à la volée et les met en cache à deux niveaux : un cache mémoire LRU (600 entrées) et un cache disque JPEG dans `.thumbnails/`. Seules les images visibles à l'écran sont chargées (prefetch de 3 lignes), ce qui permet d'afficher des milliers d'images sans saturer la mémoire.
 
-Vous pourrez chercher une image qui ressemble de près ou de loin a l'image rechercher parmis les images indéxés puis naviguer par ses voisins mais ca serait très long. 
+</details>
 
-** Details : Les k-voinsins fonctionnent par similarité cosinus de l'embedding donc il triera que les images indéxés. 
+---
 
-On peut donc essayer d'avoir une vue d'ensemble sur le corpus via l'onglet carte 2D. Qui est une réprensentation de notre dossier d'images indexé. 
+## 2. Indexer les images — l'auto-complétion
 
-![MAP2D](../Images/MAP2D.png)
+Pour pouvoir rechercher par contenu, chaque image doit être **indexée** : l'application lui associe une description textuelle, des mots-clés et un vecteur sémantique (embedding).
 
-Différents paramétres peuvent etre modifier pour changer le visuel de la map ![PARAM MAP_2D](../Images/Param_2DMAP.png)
+Cliquez sur **Tout auto-compléter** pour lancer l'analyse en lot.
 
-(QUESTION : La description des params est déjà en tooltips je la rajoute quand meme ? )
+![Barre de progression de l'auto-complétion](../Images/demo/02_autocomplete_progress.png)
 
-** Details : La map utilise UMAP pour passer l'embedding de dimensions 768 a 2. Puis j'utilise HDBSCAN pour la séparation en culster et enfin qwen2.5vl:7b avec un nombre d'image aléatoire pour qu'il nomme le cluster. 
+Une barre de progression indique l'avancement. Vous pouvez annuler à tout moment via le bouton **Annuler**.
 
-On pourrait chercher un cluster qui correspond a notre thème sur l'image a savoir groupe hivernal / montagne. puis fouiller dans ce cluster. C'est fonctionnel et moins longs que de juste fouiller dans le dossier. 
+Les images déjà indexées sont signalées par une **pastille verte** dans le coin de leur miniature — elles ne seront pas réanalysées.
 
-C'est donc la que la recherche est très utile. On peut chercher un mot clé en francais. Cela marche sur la map ou sur la gallerie. 
-Prenons la gallerie et recherchons montagne par exemple. 
-![Recherche Gallerie Montagne](../Images/Recherche_Gallerie.png)
-Nous avons des images en lien avec la montagne. 
+![Pastille verte sur une image indexée](../Images/demo/03_image_indexee.png)
 
-** Details : La recherche est la même que les k-voinsins avec l'embedding de la recherche.
+<details>
+<summary>🔧 Détail technique — Pipeline d'indexation</summary>
 
-Si nous voulons pas perdre les recherches qu'on a fait nous avons plusieurs possiblités. 
-La premiere est d'épingler les images qui nous sembles importantes pour pas les perdres. ![Image Epinglé](../Images/Recherche_Gallerie_Epingle.png)
+Pour chaque image, l'application appelle **Qwen2.5-VL** (modèle vision-langage via Ollama) avec un prompt structuré qui demande une description en 2 à 4 phrases et exactement 5 mots-clés. Le texte obtenu est ensuite envoyé au modèle **nomic-embed-text** pour produire un vecteur de 768 dimensions. L'ensemble (description, mots-clés, embedding) est sauvegardé dans un fichier `index.json` local au dossier — il n'y a donc aucun recalcul au prochain démarrage.
 
-La seconde est d'enregistrer la recherche ce qui permettera de revenir par la suite a cette recherche et de naviguer entre elles.
+</details>
 
-** DETAILS : L'historique est un Arbre qui prend en node la recherche et les noms des images résultantes de la recherche. L'affinage se base sur les résultats de la précédente requete comme base.
+---
 
-![Historique](../Images/Recherche_Gallerie_Historique.png)
+## 3. Consulter le détail d'une image
 
-L'affinage est possible, et pratique dans notre cas car on recherche des personnes en montagnes avec une croix. Donc nous pouvons faire plusieurs affinage en fonction des résultats. On peut affiner montagne pour mettre personnes puis croix ou meme faire d'autre branche. La navigation entre elle permet de vite voir le meilleur résultat.
+Cliquez sur n'importe quelle miniature pour ouvrir le **panneau de détail** à droite.
 
-![Affinage](../Images/Recherche_Gallerie_Affinage.png)
+![Panneau de détail d'une image](../Images/demo/04_detail_image.png)
 
-La recherche n'est pas uniquement par mot clés, vous pouvez ecrire une phrase.
-![Phrase dans la recherche](../Images/Recherche_Gallerie_Phrase.png)
+Ce panneau affiche :
 
-** DETAILS : Cela fonctionne car c'est de la recherche par embedding.
+- un aperçu agrandi de l'image
+- la description générée automatiquement
+- les mots-clés associés
+- les **images similaires** (voisins sémantiques les plus proches)
 
-Lorsque vous selectionner l'image dans la gallerie elle sera selectionner egalement dans la map ce qui permet d'avoir un visuel sur son cluster. 
+Vous pouvez modifier la description et les mots-clés manuellement, ou lancer **Auto-compléter** sur cette seule image pour les générer.
 
+<details>
+<summary>🔧 Détail technique — Calcul des voisins</summary>
 
-Maintenant qu'on a l'image voulu il faut les images similaires. On pourrait regarder les k-voinsins mais nous allons utiliser autre chose. 
+Les k voisins sont calculés par **similarité cosinus** entre l'embedding de l'image sélectionnée et ceux de toutes les images indexées. Le nombre k est réglable via le compteur dans le panneau. Le calcul est effectué à la sélection..
 
-Le clic droit permet de voir l'image en gros plan et meilleur qualité mais surtout d'avoir accès au panel de sam3.
+</details>
 
-** DETAILS : Pour les images agrandi j'utilise les images orignal améliorer comme fait windows explorer avec device Ratio etc. 
+---
 
-SAM3 est une IA de Méta qui permet de faire de la recherche sur des images. 
-![SAM3](../Images/SAM3.png)
+## 4. Rechercher une image par son contenu
 
-3 différents zones sont présentes : La semgentation dans l'image qui permet de reperer plusieurs meme objet, on peut soit le faire par recherche textuel en anglais (car sam3 est en anglais) soit par box en dessinant sur l'image.
+C'est ici que l'application prend tout son sens. Ouvrez le **panneau de recherche** via le bouton **🔍 Recherche**, puis tapez une description en français.
 
-Par exemple sur notre image on peut marquer "person" (ou tout autre mot clés) ou dessiner sur une personne. la confiance est le minimum pour que le resultat soit affiché, si la confiance est bas alors beaucoup plus de box (parfois qui n'ont pas de rapport) seront affiché. 
+Par exemple : `montagne`
 
-La recherche dans le dossier est la fonctionnalité la plus utile ici. car elle permet d'analyser l'entierté du dossier des images indéxé mais celle non indéxé également. 
+![Résultats de recherche pour "montagne"](../Images/demo/05_recherche_montagne.png)
 
-Trois méthodes sont proposés : 
-Embbeding la plus rapide : on va demander a qwenn2.5vl ce qu'il voit sur la zone selectionner par sam3, puis faire une recherche comme la barre de recherche, c'est très rapide et se base sur les images indéxés. Le parametre de seuil embedding est important plus il est bas plus les résultat seront eloingnés de la recherche
+Les images les plus proches sémantiquement de votre requête remontent en tête. La recherche fonctionne même si les mots exacts ne figurent pas dans les métadonnées — elle compare les sens.
 
-SAM3 simple qui est precis et plus long : on va aussi demander a qwenn2.5vl la description de la zone mais cette fois on va parcourir chaque image du dossier demander a sam3 de donner les resultats pour la description en prompt, si le resutat n'est pas au dessus de la confiance donnée alors on ne le garde pas. Il se base sur tout le dossier d'image indéxé ou non
+Essayez aussi une phrase complète : `Montagne avec une croix et des personnes`
 
-Enfin l'hybride, il fait comme sam3 simple sauf qu'avant de rendre les images il verifie avec l'embedding. Il n'est pas forcément plus long mais il est plus prècis. 
+![Recherche par phrase complète](../Images/demo/06_recherche_phrase.png)
 
-![Segmentation](../Images/SAM3_Segmentation_Image.png)
-** Details la lenteur dépend de deux choses : l'appel a qwenn2.5vl et l'appel a sam3 par image. 
+<details>
+<summary>🔧 Détail technique — Recherche sémantique</summary>
 
-La checkbox attendre la fin est utile seulement si vous voulez les résultats par ordre de correspondance. 
+La requête est convertie en embedding par **nomic-embed-text**, puis comparée à tous les embeddings de l'index par similarité cosinus. Un bonus de score est accordé si le texte de la requête apparaît littéralement dans la description ou les mots-clés (`+0.3`), et un bonus supplémentaire si la similarité cosinus dépasse 0.5 ET qu'il y a correspondance textuelle (`+0.5`). Les 100 meilleurs résultats sont retournés.
 
-Donc dans notre cas si on utilise la premiere méthode avec la recherche par box on obtient 207 résultats.
-![SEGMENTATION RESULTAT](../Images/SAM3_Segmentation_Resultat.png)
-Il est possible de cliquer sur les images et d'enchainer les recherches etc. 
+</details>
 
+---
 
-** DETAILS : L'affichage des résultats peut etre gros donc l'affichage est en asynchrone. Comme la rechercher pour ne pas paralyser l'application. 
+## 5. Sauvegarder et affiner les recherches
 
-Un onglet parametre permet de modifier le théme de l'application mais aussi la langue. si vous avez besoin de faire montrer a d'autre personne non francaise. 
+### Épingler des images importantes
 
-![Settings](../Images/Settings1.png) ![Settings](../Images/Settings2.png)
+Si une image vous intéresse, **épinglez-la** via l'icône 📌 dans le panneau de détail (ou `Ctrl+E`). Les images épinglées apparaissent toujours en tête de galerie, quelle que soit la recherche en cours.
+
+![Images épinglées en tête de galerie](../Images/demo/07_images_epinglees.png)
+
+### Sauvegarder une recherche
+
+Cliquez sur **💾 Sauvegarder** pour mémoriser la recherche courante dans l'**historique**.
+
+![Historique des recherches sous forme d'arbre](../Images/demo/08_historique_recherches.png)
+
+L'historique prend la forme d'un arbre : chaque recherche sauvegardée devient un nœud. Cliquer sur un nœud restaure instantanément les résultats correspondants.
+
+### Affiner une recherche
+
+Activez la case **Affinage** pour que la prochaine recherche s'effectue *à l'intérieur* des résultats actuels. Cela permet d'affiner progressivement :
+
+1. `montagne` → sauvegardez
+2. Activez **Affinage** → tapez `personnes` → sauvegardez
+3. Activez **Affinage** → tapez `croix` → sauvegardez
+
+Vous naviguez entre les branches de l'arbre pour comparer les résultats.
+
+![Arbre d'affinages successifs](../Images/demo/09_affinage_arbre.png)
+
+<details>
+<summary>🔧 Détail technique — Arbre de recherche</summary>
+
+L'historique est implémenté comme un arbre d'objets `SearchNode`, chacun portant la requête et la liste des noms d'images résultantes. Cet arbre est sérialisé dans `config.json` (clé `history_search`) et restauré à l'ouverture du workspace. L'affinage utilise la liste de résultats du nœud courant comme contexte de la prochaine recherche (paramètre `context` de `filtered_images`).
+
+</details>
+
+---
+
+## 6. Visualiser la carte sémantique 2D
+
+Passez à l'onglet **🗺 Carte 2D** pour voir l'ensemble du corpus organisé spatialement.
+
+![Carte 2D du corpus avec clusters colorés](../Images/demo/10_carte_2d.png)
+
+Chaque point représente une image. Les points proches sont sémantiquement similaires. Les couleurs indiquent les **clusters** (groupes thématiques) détectés automatiquement, nommés par l'IA en 2 à 3 mots.
+
+Cliquez sur un cluster dans la légende pour l'isoler et zoomer dessus. Cliquez sur un point pour sélectionner l'image correspondante (elle se surligne aussi dans la galerie).
+
+![Zoom sur un cluster montagne](../Images/demo/11_cluster_zoom.png)
+
+La barre de recherche fonctionne également sur la carte : les points correspondants se mettent en valeur, les autres s'estompent.
+
+<details>
+<summary>🔧 Détail technique — UMAP + HDBSCAN</summary>
+
+Les embeddings de 768 dimensions sont réduits à 2 dimensions via **UMAP** (`n_neighbors=30`, `min_dist=0.3`, métrique cosinus). Les clusters sont ensuite détectés par **HDBSCAN** (`min_cluster_size=15`). Chaque cluster est nommé par un appel à `qwen2.5vl:7b` sur un échantillon aléatoire de 8 descriptions. La carte est mise en cache dans `.semantic_map/map_cache.pkl` pour éviter les recalculs. Les paramètres sont modifiables dans le dock **⚙️ Paramètres** (accessible depuis l'onglet Carte 2D).
+
+![Parametres de la carte](../Images/demo/11_2_parametres.png)
+
+</details>
+
+---
+
+## 7. Trouver les images similaires visuellement — SAM3
+
+Vous avez retrouvé l'image cible. Maintenant, vous voulez toutes les images qui contiennent la même scène ou les mêmes éléments visuels.
+
+Faites un **clic droit** sur l'image dans la galerie (ou cliquez sur son aperçu dans le panneau de détail) pour ouvrir la fenêtre **SAM3**.
+
+![Fenêtre SAM3 avec l'image chargée](../Images/demo/12_sam3_ouverture.png)
+
+### Segmentation dans l'image
+
+Avant de lancer la recherche, vous pouvez explorer l'image :
+
+- **Prompt texte (en anglais)** : tapez `person` ou `cross` pour localiser les objets (le modèle surligne les zones détectées avec des masques colorés).
+- **Boîte dessinée** : tracez un rectangle autour d'un objet avec la souris.
+
+![Masques SAM3 sur l'image](../Images/demo/13_sam3_segmentation.png)
+
+Le curseur de **Confiance** contrôle le seuil de détection : plus il est bas, plus de zones sont surlignées (y compris des faux positifs).
+
+### Recherche dans tout le dossier
+
+C'est la fonctionnalité la plus puissante. Dans la section **📁 Recherche dans le dossier**, trois stratégies sont disponibles :
+
+| Stratégie | Vitesse | Précision | Fonctionne sur |
+|---|---|---|---|
+| ⚡ Embedding | Rapide | Sémantique | Images indexées |
+| 🎯 SAM3 | Lent | Visuel | Tout le dossier |
+| 🔬 Hybride | Lent | Très précis | Images indexées |
+
+**Pour une première recherche**, utilisez **Embedding** : dessinez une boîte autour de la zone d'intérêt, puis cliquez **🔲 Rechercher par box**.
+
+![Résultats de la recherche par box embedding](../Images/demo/14_sam3_resultats_embedding.png)
+
+**Pour affiner**, utilisez **Hybride** : l'embedding présélectionne les candidats, SAM3 valide visuellement chaque image.
+
+Les résultats s'affichent sous forme de miniatures avec leur score. Cliquez sur une miniature pour l'ouvrir dans SAM3 et enchaîner les recherches.
+
+<details>
+<summary>🔧 Détail technique — Stratégies de recherche</summary>
+
+**Embedding** : le contenu de la boîte est décrit par Qwen2.5-VL en français, puis converti en embedding. La similarité cosinus est calculée sur l'index.
+
+**SAM3** : Qwen2.5-VL nomme l'objet en 1-2 mots anglais. SAM3 analyse ensuite chaque image du dossier avec ce prompt texte. Score = meilleur score SAM3 obtenu.
+
+**Hybride** : deux appels VLM (description FR pour l'embedding, nom EN pour SAM3). L'embedding présélectionne les candidats au-dessus du seuil. SAM3 valide chaque candidat. Score final = score_embedding × score_SAM3.
+
+L'affichage des résultats est progressif (par lots de 50 via QTimer) pour ne jamais bloquer l'interface. La case **⏳ Attendre la fin** accumule tous les résultats avant de les afficher, triés par score décroissant.
+
+</details>
+
+---
+
+## 8. Fonctionnalités complémentaires
+
+### Multi-workspace
+
+L'application supporte plusieurs espaces de travail indépendants, accessibles via les onglets en haut de fenêtre. Chaque workspace a son propre dossier, son historique de recherche, ses images épinglées et ses paramètres de carte. Utilisez `Ctrl+T` pour créer un nouveau workspace, `Ctrl+W` pour fermer, `Ctrl+Tab` pour naviguer.
+
+### Renommage d'images
+
+Dans le panneau de détail, modifiez le nom dans le champ titre et cliquez ✏️. Le fichier est renommé sur le disque, l'index est mis à jour, et le cache de miniatures est invalidé automatiquement.
+
+### Personnalisation de l'interface
+
+L'onglet **⚙️ Paramètres** permet de changer le thème visuel (3 thèmes prédéfinis : Bleu nuit, Noir minuit, Blanc givré) ou de personnaliser chaque couleur individuellement. Il permet également de changer la langue de l'interface (français / anglais).
+
+![Onglet paramètres avec sélection de thème](../Images/demo/15_parametres_theme.png)
