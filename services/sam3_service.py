@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from PyQt6.QtCore import QObject
 
 # ── Résultat de segmentation ──────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ class SegmentationResult:
 # ── Service principal ─────────────────────────────────────────────────────────
 
 
-class Sam3Service:
+class Sam3Service(QObject):
     """
     Wrapper autour de Sam3Processor.
 
@@ -61,6 +62,7 @@ class Sam3Service:
     """
 
     def __init__(self):
+        super().__init__()
         self._model = None
         self._processor = None
         self._is_loaded = False
@@ -103,6 +105,7 @@ class Sam3Service:
                 confidence_threshold=confidence_threshold,
             )
             self._is_loaded = True
+            self.signal_loaded.emit()
         finally:
             self._is_loading = False
 
