@@ -47,9 +47,7 @@ class I18nManager:
         config_repository.save(current_config)
 
     def tr(self, text: str) -> str:
-        """
-        Retourne la traduction (clé = texte FR).
-        """
+        """Retourne la traduction (clé = texte FR)."""
         entry = self.translations.get(text)
 
         if not entry:
@@ -70,6 +68,7 @@ class I18nManager:
 
         Returns:
             list[str]: Liste des codes de langue (ex: ["fr", "en", "es"]).
+
         """
         codes: set[str] = set()
         for entry in self.translations.values():
@@ -90,6 +89,7 @@ class I18nManager:
 
         Returns:
             str: Libellé du type "🇫🇷 Français", ou "🌐 EN" si inconnu.
+
         """
         name, flag = _LANGUAGE_META.get(code, (code.upper(), "🌐"))
         return f"{flag} {name}"

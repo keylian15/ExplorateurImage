@@ -1,5 +1,4 @@
-"""
-Onglet de visualisation de la carte 2D sémantique.
+"""Onglet de visualisation de la carte 2D sémantique.
 
 Ce widget représente l'interface graphique de la projection 2D des images après réduction
 dimensionnelle (UMAP) et clustering (HDBSCAN). Il permet de visualiser les images sous forme
@@ -95,12 +94,12 @@ _HOVER_RADIUS = 0.5
 
 class MapNode(QGraphicsEllipseItem):
     def __init__(self, img_name: str, cluster: int, color: QColor, callback_select):
-        """
-        Args:
-            img_name (str): Nom de l'image
-            cluster (int): Numéro du cluster
-            color (QColor): Couleur du cluster
-            callback_select (function): Fonction de sélection
+        """Args:
+        img_name (str): Nom de l'image
+        cluster (int): Numéro du cluster
+        color (QColor): Couleur du cluster
+        callback_select (function): Fonction de sélection
+
         """
         r = _POINT_RADIUS
         super().__init__(-r, -r, 2 * r, 2 * r)
@@ -120,6 +119,7 @@ class MapNode(QGraphicsEllipseItem):
 
         Args:
             event (QGraphicsSceneHoverEvent): Evènement de survol
+
         """
         r = _HOVER_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
@@ -133,6 +133,7 @@ class MapNode(QGraphicsEllipseItem):
 
         Args:
             event (QGraphicsSceneHoverEvent): Evènement de survol
+
         """
         r = _POINT_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
@@ -145,6 +146,7 @@ class MapNode(QGraphicsEllipseItem):
 
         Args:
             event (QGraphicsSceneMouseEvent): Evènement de clic
+
         """
         if event.button() == Qt.MouseButton.LeftButton:
             self._cb_sel(self.img_name)
@@ -154,7 +156,9 @@ class MapNode(QGraphicsEllipseItem):
         """Marque selectionné le noeud.
 
         Args:
-            selected (bool): True si le noeud est sélectionné"""
+            selected (bool): True si le noeud est sélectionné
+
+        """
         r = _POINT_RADIUS
         self.setRect(-r, -r, 2 * r, 2 * r)
         self.setPen(QPen(QColor(_SELECT_COLOR), 2) if selected else QPen(Qt.GlobalColor.transparent))
@@ -170,10 +174,10 @@ class MapView(QGraphicsView):
     ZOOM_FACTOR = 1.15
 
     def __init__(self, scene: QGraphicsScene, parent=None):
-        """
-        Args:
-            scene (QGraphicsScene): Scene à afficher.
-            parent (QWidget, optional): Parent. Defaults to None.
+        """Args:
+        scene (QGraphicsScene): Scene à afficher.
+        parent (QWidget, optional): Parent. Defaults to None.
+
         """
         super().__init__(scene, parent)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -188,6 +192,7 @@ class MapView(QGraphicsView):
 
         Args:
             event (QWheelEvent): Evènement de roulette de souris.
+
         """
         factor = self.ZOOM_FACTOR if event.angleDelta().y() > 0 else 1 / self.ZOOM_FACTOR
         self.scale(factor, factor)
@@ -198,6 +203,7 @@ class MapView(QGraphicsView):
         Args:
             rect (QRectF): Zone à zoomer.
             margin (float, optional): Marge. Defaults to 60.0.
+
         """
         padded = rect.adjusted(-margin, -margin, margin, margin)
         self.fitInView(padded, Qt.AspectRatioMode.KeepAspectRatio)
@@ -214,14 +220,13 @@ class MapView(QGraphicsView):
 
 class SettingsDock(QDockWidget):
     def __init__(self, params: dict[str, int], on_apply, parent=None, translator: I18nManager = None):
-        """
-        Args:
-            params (dict[str, int]): Paramètres de la carte.
-            on_apply (function): Fonction à appeler lors de l'application des paramètres.
-            parent (QWidget, optional): Parent. Defaults to None.
-            translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
-        """
+        """Args:
+        params (dict[str, int]): Paramètres de la carte.
+        on_apply (function): Fonction à appeler lors de l'application des paramètres.
+        parent (QWidget, optional): Parent. Defaults to None.
+        translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
 
+        """
         super().__init__(translator.tr("Paramètres de la carte"), parent)
         self.on_apply = on_apply
         self.translator = translator
@@ -278,7 +283,9 @@ class SettingsDock(QDockWidget):
         """Renvoi les parametres actuels.
 
         Returns:
-            dict[str, int]: Les parametres actuels."""
+            dict[str, int]: Les parametres actuels.
+
+        """
         return {
             "umap_n_neighbors": self._spin_neighbors.value(),
             "umap_min_dist": self._spin_min_dist.value(),
@@ -289,7 +296,9 @@ class SettingsDock(QDockWidget):
         """Change les parametres.
 
         Args:
-            params (dict[str, int]): Les parametres."""
+            params (dict[str, int]): Les parametres.
+
+        """
         self._spin_neighbors.setValue(params["umap_n_neighbors"])
         self._spin_min_dist.setValue(params["umap_min_dist"])
         self._spin_hdbscan.setValue(params["hdbscan_min_cluster"])
@@ -302,14 +311,13 @@ class SettingsDock(QDockWidget):
 
 class MapTab(QWidget):
     def __init__(self, map_vm: MapViewModel, main_window, translator: I18nManager, parent=None):
-        """
-        Args:
-            map_vm (MapViewModel): Le view model de la carte.
-            main_window (MainWindow): La fenetre principale.
-            parent (QWidget, optional): Le parent. Defaults to None.
-            translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
-        """
+        """Args:
+        map_vm (MapViewModel): Le view model de la carte.
+        main_window (MainWindow): La fenetre principale.
+        parent (QWidget, optional): Le parent. Defaults to None.
+        translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
 
+        """
         super().__init__(parent)
         self._vm = map_vm
         self._main_window = main_window
@@ -427,6 +435,7 @@ class MapTab(QWidget):
 
         Returns:
             QDockWidget: Le dock de recherche.
+
         """
         dock = QDockWidget("Recherche sur la Carte", main_window)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea)
@@ -506,6 +515,7 @@ class MapTab(QWidget):
 
         Args:
             node_id (str): Identifiant du noeud.
+
         """
         node = self._vm.search_tree.get_node(node_id)
         if node is None:
@@ -524,6 +534,7 @@ class MapTab(QWidget):
 
         Args:
             text (str): Texte saisi dans le dock.
+
         """
         if not text.strip():
             self._vm.clear_search()
@@ -544,7 +555,9 @@ class MapTab(QWidget):
         """Callback pour afficher un message d'erreur
 
         Args:
-            msg (str): Message d'erreur"""
+            msg (str): Message d'erreur
+
+        """
         self._lbl_status.setText(self.translator.tr("❌ {msg}").format(msg=msg))
         self._btn_compute.setEnabled(True)
 
@@ -556,6 +569,7 @@ class MapTab(QWidget):
             labels (list[int]): Labels des clusters
             names (list[str]): Noms des images
             cluster_names (dict[int, str]): Noms des clusters
+
         """
         self.build_scene(points, labels, names, cluster_names)
         n_clusters = len({label for label in labels if label >= 0})
@@ -574,7 +588,9 @@ class MapTab(QWidget):
 
         Args:
             cid (int): Identifiant du cluster
-            name (str): Nom du cluster"""
+            name (str): Nom du cluster
+
+        """
         self._cluster_names[cid] = name
         self.refresh_legend_names()
 
@@ -584,6 +600,7 @@ class MapTab(QWidget):
         Args:
             matching_names (list[str]): Noms des images correspondant à la requête.
                                         Liste vide = afficher tout.
+
         """
         if not self._nodes:
             return
@@ -632,6 +649,7 @@ class MapTab(QWidget):
             labels (list[int]): Labels
             names (list[str]): Noms des images
             cluster_names (dict[int, str]): Noms des clusters
+
         """
         self._scene.clear()
         self._nodes.clear()
@@ -703,6 +721,7 @@ class MapTab(QWidget):
             color_map (dict[int, QColor]): Carte des couleurs.
             labels (list[int]): Labels des clusters.
             cluster_names (dict[int, str]): Nom des clusters.
+
         """
         from collections import Counter
 
@@ -745,7 +764,9 @@ class MapTab(QWidget):
         """Highlight le node lorsqu'on clique dessus.
 
         Args:
-            img_name (str): Nom de l'image."""
+            img_name (str): Nom de l'image.
+
+        """
         self.highlight(img_name)
         self._vm._gallery_vm.select_image(img_name)
 
@@ -753,7 +774,9 @@ class MapTab(QWidget):
         """Highlight un node.
 
         Args:
-            img_name (str): Nom de l'image."""
+            img_name (str): Nom de l'image.
+
+        """
         if self._current_selected and self._current_selected in self._nodes:
             self._nodes[self._current_selected].mark_selected(False)
         self._current_selected = img_name
@@ -767,6 +790,7 @@ class MapTab(QWidget):
 
         Args:
             cluster_id (int): ID du cluster.
+
         """
         # Vider la recherche du dock si elle était active
         if hasattr(self, "dock_search_bar"):
@@ -805,7 +829,9 @@ class MapTab(QWidget):
         """Highlight un node.
 
         Args:
-            img_name (str): Nom de l'image."""
+            img_name (str): Nom de l'image.
+
+        """
         if self._nodes:
             self.highlight(img_name)
 

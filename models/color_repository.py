@@ -1,5 +1,4 @@
-"""
-Gestion centralisée de la palette de couleurs de l'application avec persistance JSON.
+"""Gestion centralisée de la palette de couleurs de l'application avec persistance JSON.
 
 Permet de charger, modifier et sauvegarder dynamiquement les couleurs utilisées
 dans l'interface, tout en garantissant une base cohérente grâce à une fusion
@@ -56,6 +55,7 @@ def load() -> dict[str, str]:
 
     Returns:
         dict[str, str]: Palette de couleurs.
+
     """
     if os.path.exists(COLORS_FILE):
         try:
@@ -74,6 +74,7 @@ def save(colors: dict[str, str]):
 
     Args:
         colors (dict[str, str]): Palette à sauvegarder.
+
     """
     with open(COLORS_FILE, "w", encoding="utf-8") as f:
         json.dump(colors, f, indent=2, ensure_ascii=False)
@@ -84,5 +85,6 @@ def defaults() -> dict[str, str]:
 
     Returns:
         dict[str, str]: Couleurs par défaut.
+
     """
     return dict(_DEFAULTS)

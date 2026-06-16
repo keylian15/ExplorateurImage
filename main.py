@@ -1,5 +1,4 @@
-"""
-Point d'entrée principal de l'application Explorateur d'images.
+"""Point d'entrée principal de l'application Explorateur d'images.
 
 Initialise Qt, charge la configuration, instancie le client Ollama et la
 fenêtre principale. Les ViewModels sont désormais créés par chaque workspace.

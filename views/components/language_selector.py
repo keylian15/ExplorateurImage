@@ -1,5 +1,4 @@
-"""
-Sélecteur de langue visuel, dynamique selon les langues présentes dans i18n.json.
+"""Sélecteur de langue visuel, dynamique selon les langues présentes dans i18n.json.
 
 Ce composant affiche une grille de « cartes » cliquables, une par langue
 disponible (déterminée dynamiquement via I18nManager.available_languages()).
@@ -41,11 +40,11 @@ class LanguageCard(QWidget):
     signal_clicked = pyqtSignal(str)  # code langue
 
     def __init__(self, code: str, label: str, selected: bool, parent=None):
-        """
-        Args:
-            code (str): Code de la langue (ex: "fr", "en").
-            label (str): Libellé affiché (ex: "🇫🇷 Français").
-            selected (bool): True si cette langue est la langue active.
+        """Args:
+        code (str): Code de la langue (ex: "fr", "en").
+        label (str): Libellé affiché (ex: "🇫🇷 Français").
+        selected (bool): True si cette langue est la langue active.
+
         """
         super().__init__(parent)
         self._code = code
@@ -99,6 +98,7 @@ class LanguageCard(QWidget):
 
         Args:
             event (QMouseEvent): Événement de clic.
+
         """
         if event.button() == Qt.MouseButton.LeftButton and not self._selected:
             self.signal_clicked.emit(self._code)
@@ -112,10 +112,10 @@ class LanguageSelector(QWidget):
     signal_language_chosen = pyqtSignal(str)  # nouveau code langue
 
     def __init__(self, translator: I18nManager, parent=None):
-        """
-        Args:
-            translator (I18nManager): Gestionnaire de traduction (fournit la
-                langue active et la liste des langues disponibles).
+        """Args:
+        translator (I18nManager): Gestionnaire de traduction (fournit la
+            langue active et la liste des langues disponibles).
+
         """
         super().__init__(parent)
         self.translator = translator

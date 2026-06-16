@@ -1,5 +1,4 @@
-"""
-Onglet d'édition et de personnalisation du thème visuel de l'application.
+"""Onglet d'édition et de personnalisation du thème visuel de l'application.
 
 Ce widget permet de modifier dynamiquement la palette de couleurs globale utilisée par
 l'interface. Il agit comme un éditeur visuel de thème, offrant à l'utilisateur un contrôle
@@ -287,7 +286,9 @@ class ColorRow(QWidget):
         """Met à jour la couleur du swatch.
 
         Args:
-            hex_color (str): Couleur au format hexa."""
+            hex_color (str): Couleur au format hexa.
+
+        """
         color = QColor(hex_color)
         if color.isValid():
             # Bordure contrastée pour les couleurs sombres
@@ -298,7 +299,9 @@ class ColorRow(QWidget):
         """Déclenche le signal si la valeur hex est valide.
 
         Args:
-            text (str): Nouvelle valeur hex."""
+            text (str): Nouvelle valeur hex.
+
+        """
         if QColor(text).isValid():
             self._hex = text
             self.update_swatch(text)
@@ -315,7 +318,9 @@ class ColorRow(QWidget):
         """Met à jour la couleur depuis l'extérieur.
 
         Args:
-            hex_color (str): Nouvelle valeur hex."""
+            hex_color (str): Nouvelle valeur hex.
+
+        """
         self._edit.blockSignals(True)
         self._edit.setText(hex_color)
         self._hex = hex_color
@@ -327,7 +332,9 @@ class ColorRow(QWidget):
         """Retourne la valeur hex.
 
         Returns:
-            str: Valeur hex."""
+            str: Valeur hex.
+
+        """
         return self._hex
 
 
@@ -441,6 +448,7 @@ class StyleTab(QWidget):
 
         Returns:
             QWidget: Groupe de couleurs.
+
         """
         group = QWidget()
         layout = QVBoxLayout(group)
@@ -497,7 +505,9 @@ class StyleTab(QWidget):
 
         Args:
             key (str): Clé de la couleur modifiée.
-            hex_val (str): Nouvelle valeur hexadécimale de la couleur."""
+            hex_val (str): Nouvelle valeur hexadécimale de la couleur.
+
+        """
         self._colors[key] = hex_val
         self._lbl_status.setText(self.translator.tr("Modifié : {label} → {hex_val} (non sauvegardé)").format(label=_LABELS.get(key, (key,))[0], hex_val=hex_val))
 
@@ -536,6 +546,7 @@ class StyleTab(QWidget):
 
         Args:
             lang_code (str): Nouveau code de langue (ex: "en", "fr").
+
         """
         self.translator.set_language(lang_code)
         self._lbl_status.setText(self.translator.tr("🌐 Langue changée — redémarrage…"))

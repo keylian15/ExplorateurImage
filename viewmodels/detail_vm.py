@@ -1,5 +1,4 @@
-"""
-ViewModel du panneau de détail d'une image.
+"""ViewModel du panneau de détail d'une image.
 
 Ce composant gère toute la logique liée à l'inspection et à la modification
 d'une image sélectionnée : affichage des métadonnées, sauvegarde, auto-complétion,
@@ -70,15 +69,14 @@ class DetailViewModel(QObject):
         parent=None,
         translator: I18nManager = None,
     ):
-        """
-        Args:
-            client (OllamaWrapper): client Ollama
-            config (dict): config globale
-            gallery_vm (GalleryViewModel): gallery viewmodel
-            ws_id (str): identifiant du workspace
-            ws_data (dict): données du workspace (contient k_neighbors)
-        """
+        """Args:
+        client (OllamaWrapper): client Ollama
+        config (dict): config globale
+        gallery_vm (GalleryViewModel): gallery viewmodel
+        ws_id (str): identifiant du workspace
+        ws_data (dict): données du workspace (contient k_neighbors)
 
+        """
         super().__init__(parent)
         self._client = client
         self._config = config
@@ -110,7 +108,9 @@ class DetailViewModel(QObject):
         """Donne le nombre de voisins.
 
         Returns:
-            int: nombre de voisins"""
+            int: nombre de voisins
+
+        """
         return self._k_neighbors
 
     @k_neighbors.setter
@@ -119,6 +119,7 @@ class DetailViewModel(QObject):
 
         Args:
             value (int): nombre de voisins.
+
         """
         self._k_neighbors = value
         self.save_k_neighbors_to_workspace(value)
@@ -128,6 +129,7 @@ class DetailViewModel(QObject):
 
         Args:
             value (int): Valeur à sauvegarder.
+
         """
         workspaces = ws_repo.load(self._config)
         workspaces = ws_repo.update_workspace(workspaces, self._ws_id, k_neighbors=value)
@@ -140,6 +142,7 @@ class DetailViewModel(QObject):
 
         Returns:
             dict: index de l'application
+
         """
         return self._gallery_vm.index
 
@@ -149,6 +152,7 @@ class DetailViewModel(QObject):
 
         Returns:
             str | None: dossier courant
+
         """
         return self._gallery_vm.current_folder
 
@@ -159,6 +163,7 @@ class DetailViewModel(QObject):
 
         Args:
             img_name (str): nom de l'image
+
         """
         self.selected_image = img_name
 
@@ -192,6 +197,7 @@ class DetailViewModel(QObject):
 
         Returns:
             bool: True si épinglée.
+
         """
         if self.selected_image:
             return self._gallery_vm.is_pinned(self.selected_image)
@@ -205,6 +211,7 @@ class DetailViewModel(QObject):
         Args:
             desc (str): description de l'image
             keywords (list[str]): liste de mots-clés de l'image
+
         """
         if not self.selected_image:
             return
@@ -266,6 +273,7 @@ class DetailViewModel(QObject):
 
         Args:
             img_name (str): Nom de l'image.
+
         """
         if img_name not in self._index:
             self.signal_neighbors_ready.emit({})
@@ -294,7 +302,9 @@ class DetailViewModel(QObject):
         """Renomme l'image sélectionnée.
 
         Args:
-            new_name (str): Nouveau nom de l'image."""
+            new_name (str): Nouveau nom de l'image.
+
+        """
         if not self.selected_image or not self._folder:
             return
         if not new_name or new_name == self.selected_image:

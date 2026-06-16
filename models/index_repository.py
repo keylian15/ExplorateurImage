@@ -1,5 +1,4 @@
-"""
-Gestion de la persistance de l'index des images (index.json).
+"""Gestion de la persistance de l'index des images (index.json).
 
 Ce module fournit une couche d'accès simple et indépendante de l'UI pour lire,
 écrire et maintenir les métadonnées associées aux images d'un dossier.
@@ -38,8 +37,8 @@ def load(folder: str) -> dict:
 
     Returns:
         dict: Contenu de index.json.
-    """
 
+    """
     path = get_path(folder)
     if os.path.exists(path):
         try:
@@ -56,8 +55,8 @@ def save(folder: str, index: dict):
     Args:
         folder (str): Dossier contenant index.json.
         index (dict): Contenu à écrire.
-    """
 
+    """
     with open(get_path(folder), "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2, ensure_ascii=False)
 
@@ -72,8 +71,8 @@ def upsert_entry(folder: str, img_name: str, entry: dict) -> dict:
 
     Returns:
         dict: Index mis à jour.
-    """
 
+    """
     index = load(folder)
     index[img_name] = entry
     save(folder, index)
@@ -91,8 +90,8 @@ def rename_entry(folder: str, old_name: str, new_name: str, new_path: str) -> di
 
     Returns:
         dict: Index mis à jour.
-    """
 
+    """
     index = load(folder)
     if old_name in index:
         entry = index.pop(old_name)
@@ -115,8 +114,8 @@ def build_entry(img_name: str, folder: str, description: str, keywords: list[str
 
     Returns:
         dict: Entrée standardisée.
-    """
 
+    """
     return {
         "id": img_name,
         "path": os.path.join(folder, img_name),
@@ -134,6 +133,6 @@ def get_path(folder: str) -> str:
 
     Returns:
         str: Chemin du fichier d'index.
-    """
 
+    """
     return os.path.join(folder, "index.json")

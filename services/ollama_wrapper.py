@@ -82,8 +82,7 @@ class OllamaGenerateResult:
 
 
 class OllamaWrapper:
-    """
-    Wrapper Python (simple, robuste, typé) autour de l'API HTTP d'Ollama.
+    """Wrapper Python (simple, robuste, typé) autour de l'API HTTP d'Ollama.
 
     Base URL par défaut : xxxx
     Endpoints utilisés :
@@ -107,8 +106,7 @@ class OllamaWrapper:
     # --------------------------
 
     def is_server_running(self) -> bool:
-        """
-        Retourne True si le serveur Ollama répond.
+        """Retourne True si le serveur Ollama répond.
 
         Stratégie : on essaie GET /api/version (léger et dédié à ça).
         """
@@ -128,8 +126,7 @@ class OllamaWrapper:
         wait_timeout_s: float = 10.0,
         extra_env: Mapping[str, str] | None = None,
     ) -> subprocess.Popen[bytes]:
-        """
-        Lance `ollama serve` via subprocess.
+        """Lance `ollama serve` via subprocess.
 
         Args:
             wait: si True, attend que le port réponde avant de rendre la main.
@@ -141,6 +138,7 @@ class OllamaWrapper:
 
         Raises:
             OllamaServerStartError: si ollama n'est pas trouvé ou ne démarre pas.
+
         """
         # Vérifie que l'exécutable "ollama" est présent dans le PATH.
         ollama_path: str | None = shutil.which("ollama")
@@ -179,8 +177,7 @@ class OllamaWrapper:
         raise OllamaServerStartError(f"Le serveur Ollama ne répond pas après {wait_timeout_s:.1f}s.")
 
     def _is_port_open(self) -> bool:
-        """
-        Test rapide TCP du port du base_url (sans HTTP).
+        """Test rapide TCP du port du base_url (sans HTTP).
 
         Utile pour savoir si quelque chose écoute déjà, sans dépendre d'une réponse JSON.
         """
@@ -211,9 +208,7 @@ class OllamaWrapper:
     # --------------------------
 
     def get_version(self) -> str:
-        """
-        Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}
-        """
+        """Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}"""
         payload = self._http_request_json("GET", "/api/version", body=None)
         # La doc renvoie typiquement { "version": "x.y.z" }.
         version = payload.get("version")
@@ -222,9 +217,7 @@ class OllamaWrapper:
         return version
 
     def list_models(self) -> list[OllamaModelInfo]:
-        """
-        Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}
-        """
+        """Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}"""
         payload = self._http_request_json("GET", "/api/tags", body=None)
         raw_models = payload.get("models")
         if not isinstance(raw_models, list):
@@ -276,8 +269,7 @@ class OllamaWrapper:
         system: str | None = None,
         options: Mapping[str, Any] | None = None,
     ) -> OllamaGenerateResult:
-        """
-        Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}
+        """Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}
 
         Args:
             model: nom du modèle (ex: "llama3", "mistral", etc.)
@@ -287,6 +279,7 @@ class OllamaWrapper:
 
         Returns:
             OllamaGenerateResult : réponse texte + quelques métriques si présentes.
+
         """
         body: dict[str, Any] = {
             "model": model,  # Modèle ciblé
@@ -329,8 +322,7 @@ class OllamaWrapper:
         system: str | None = None,
         options: Mapping[str, Any] | None = None,
     ) -> OllamaGenerateResult:
-        """
-        Appelle POST /api/generate avec une image (multimodal).
+        """Appelle POST /api/generate avec une image (multimodal).
         Ollama attend une liste "images" contenant des chaînes base64. :contentReference[oaicite:6]{index=6}
 
         Args:
@@ -343,6 +335,7 @@ class OllamaWrapper:
 
         Returns:
             OllamaGenerateResult
+
         """
         # Convertit l'image en bytes.
         image_bytes: bytes
@@ -402,8 +395,7 @@ class OllamaWrapper:
         model: str,
         text: str,
     ) -> list[float]:
-        """
-        Génère un embedding.
+        """Génère un embedding.
 
         Note doc : l'endpoint "Generate Embedding" a été supersédé par /api/embed
         (selon docs/api.md). :contentReference[oaicite:7]{index=7}
@@ -438,8 +430,7 @@ class OllamaWrapper:
         *,
         body: Mapping[str, Any] | None,
     ) -> dict[str, Any]:
-        """
-        Exécute une requête HTTP et retourne un dict JSON.
+        """Exécute une requête HTTP et retourne un dict JSON.
 
         On utilise urllib (stdlib) pour éviter une dépendance à requests/httpx dans un contexte étudiant.
         """
@@ -499,8 +490,7 @@ class OllamaWrapper:
         return payload
 
     def similarite_cosinus(self, vec_a: list[float], vec_b: list[float]) -> float:
-        """
-        Calcule la similarité cosinus entre deux vecteurs numériques.
+        """Calcule la similarité cosinus entre deux vecteurs numériques.
         Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.
         """
         import math

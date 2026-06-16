@@ -1,5 +1,4 @@
-"""
-Stratégies de recherche d'objet à partir d'une région (box) dessinée sur une image.
+"""Stratégies de recherche d'objet à partir d'une région (box) dessinée sur une image.
 
 Ce module fournit une abstraction propre pour trois approches de recherche :
  - Embedding : description VLM → embedding → similarité cosinus sur l'index
@@ -55,6 +54,7 @@ def crop_pil(pil_image: PILImage.Image, x0: float, y0: float, x1: float, y1: flo
 
     Returns:
         PIL.Image recadrée, clampée aux dimensions de l'image.
+
     """
     w, h = pil_image.size
     left = max(0, int(min(x0, x1)))
@@ -100,6 +100,7 @@ class BoxSearchStrategy(ABC):
 
         Returns:
             Liste de (img_name, score) triée par score décroissant.
+
         """
 
 
@@ -355,6 +356,7 @@ def _pil_to_bytes(pil_image: PILImage.Image) -> bytes:
 
     Returns:
         Bytes JPEG de l'image.
+
     """
     import io
 
@@ -374,6 +376,7 @@ def _parse_hybrid_response(raw: str) -> tuple[str, str]:
     Returns:
         Tuple (object_name, concepts_string). En cas d'échec du parsing,
         retourne (raw[:40], "").
+
     """
     name = ""
     concepts = ""
@@ -409,6 +412,7 @@ def get_strategy(name: str) -> BoxSearchStrategy:
 
     Raises:
         KeyError: si le nom est inconnu.
+
     """
     cls = STRATEGIES.get(name.lower())
     if cls is None:

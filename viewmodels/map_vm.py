@@ -1,5 +1,4 @@
-"""
-ViewModel de la carte 2D sémantique.
+"""ViewModel de la carte 2D sémantique.
 
 Ce composant gère la génération et l'affichage de la projection 2D des images
 à partir de leurs embeddings. Il orchestre le calcul UMAP + HDBSCAN via un worker,
@@ -75,16 +74,15 @@ class MapViewModel(QObject):
         translator: I18nManager = None,
         parent=None,
     ):
-        """
-        Args:
-            client (OllamaWrapper): client Ollama
-            config (dict): configuration globale
-            gallery_vm (GalleryViewModel): ViewModel de la gallerie
-            ws_id (str): identifiant du workspace
-            ws_data (dict): données du workspace (contient map_params et history_search)
-            translator (I18nManager): gestionnaire de traduction
-        """
+        """Args:
+        client (OllamaWrapper): client Ollama
+        config (dict): configuration globale
+        gallery_vm (GalleryViewModel): ViewModel de la gallerie
+        ws_id (str): identifiant du workspace
+        ws_data (dict): données du workspace (contient map_params et history_search)
+        translator (I18nManager): gestionnaire de traduction
 
+        """
         super().__init__(parent)
         self._client = client
         self._config = config
@@ -121,7 +119,9 @@ class MapViewModel(QObject):
         """Renvoie les paramètres de la carte
 
         Returns:
-            dict: paramètres."""
+            dict: paramètres.
+
+        """
         return dict(self._params)
 
     def apply_params(self, params: dict):
@@ -129,6 +129,7 @@ class MapViewModel(QObject):
 
         Args:
             params (dict): Nouveaux paramètres.
+
         """
         self._params = params
         self.save_params_to_workspace(params)
@@ -140,6 +141,7 @@ class MapViewModel(QObject):
 
         Args:
             params (dict): Paramètres à sauvegarder.
+
         """
         workspaces = ws_repo.load(self._config)
         workspaces = ws_repo.update_workspace(workspaces, self._ws_id, map_params=params)
@@ -193,8 +195,8 @@ class MapViewModel(QObject):
             labels (list[int]): Les labels des clusters.
             names (list[str]): Les noms des images.
             cluster_names (dict[int, str]): Les noms des clusters.
-        """
 
+        """
         self.save_cache(points, labels, names, cluster_names)
         self.signal_compute_finished.emit(points, labels, names, cluster_names)
 
@@ -205,6 +207,7 @@ class MapViewModel(QObject):
 
         Args:
             text (str): Texte de la requête.
+
         """
         self._search_text = text
         self._search_timer.start()
@@ -233,7 +236,6 @@ class MapViewModel(QObject):
 
     def save_search(self) -> None:
         """Enregistre la recherche courante dans l'arbre de recherche."""
-
         text = self._search_text.strip()
         if not text:
             return
@@ -253,6 +255,7 @@ class MapViewModel(QObject):
         Args:
             enabled (bool): Si True, les recherches suivantes seront affinées
                             à partir des résultats actuels.
+
         """
         self._affinage_enabled = enabled
         self.do_search()
@@ -264,8 +267,8 @@ class MapViewModel(QObject):
 
         Returns:
             str: chemin du fichier pickle.
-        """
 
+        """
         folder = self._gallery_vm.current_folder
 
         cache_dir = os.path.join(folder, _MAP_CACHE_DIR)
@@ -281,6 +284,7 @@ class MapViewModel(QObject):
             labels (list[int]): Les labels des points.
             names (list[str]): Les noms des images.
             cluster_names (dict[int, str]): Les noms des clusters.
+
         """
         data = {"points": points, "labels": labels, "names": names, "cluster_names": cluster_names}
         with open(self.cache_path(), "wb") as f:
@@ -291,6 +295,7 @@ class MapViewModel(QObject):
 
         Returns:
             dict | None: Le cache ou None si il n'existe pas.
+
         """
         try:
             path = self.cache_path()

@@ -3,8 +3,7 @@ from models.tree.tree import Tree
 
 
 class SearchTree(Tree):
-    """
-    Arbre de recherche.
+    """Arbre de recherche.
 
     Chaque noeud représente :
     - une requête
@@ -20,8 +19,8 @@ class SearchTree(Tree):
 
         Returns:
             SearchNode: Noeud racine créé.
-        """
 
+        """
         node = SearchNode(query=query, results=results)
         self.add_root(node)
         return node
@@ -40,8 +39,8 @@ class SearchTree(Tree):
 
         Returns:
             SearchNode: Noeud de recherche ajouté.
-        """
 
+        """
         if self.current is None:
             raise ValueError("No current node")
 
@@ -57,16 +56,13 @@ class SearchTree(Tree):
 
         Returns:
             SearchNode: Noeud racine.
-        """
 
+        """
         self.current = self.root
         return self.current
 
     def to_dict(self) -> dict:
-        """
-        Sérialise l'arbre de recherche.
-        """
-
+        """Sérialise l'arbre de recherche."""
         return {
             "type": "SearchTree",
             "root_id": self.root.id if self.root else None,
@@ -86,6 +82,7 @@ class SearchTree(Tree):
 
         Returns:
             SearchTree: Arbre restauré, ou arbre vide si data est invalide.
+
         """
         tree = cls()
 

@@ -1,5 +1,4 @@
-"""
-Cache de thumbnails à deux niveaux pour optimiser l'affichage des images.
+"""Cache de thumbnails à deux niveaux pour optimiser l'affichage des images.
 
 Ce module implémente un système de cache hybride combinant mémoire et disque afin
 d'améliorer les performances de génération et d'affichage des miniatures.
@@ -32,8 +31,7 @@ THUMB_FOLDER = ".thumbnails"
 
 class ThumbnailCache:
     def __init__(self, folder: str, thumb_size: int = 192, max_memory: int = 500):
-        """
-        Deux niveaux de cache pour les thumbnails :
+        """Deux niveaux de cache pour les thumbnails :
         - Niveau 1 : LRU en mémoire (OrderedDict, taille configurable)
         - Niveau 2 : Fichiers JPEG dans .thumbnails/ au côté des images
 
@@ -41,8 +39,8 @@ class ThumbnailCache:
             folder (str): Le dossier courant.
             thumb_size (int, optional): La taille du thumbnail. Defaults to 192.
             max_memory (int, optional): La mémoire maximum allouée. Defaults to 500.
-        """
 
+        """
         self.thumb_size = thumb_size
         self.max_memory = max_memory
         self._memory: OrderedDict[str, QPixmap] = OrderedDict()
@@ -57,15 +55,14 @@ class ThumbnailCache:
 
         Args:
             folder (str): Chemin du dossier contenant les images.
-        """
 
+        """
         self.folder = folder
         self.thumb_folder = os.path.join(folder, THUMB_FOLDER)
         self._memory.clear()
 
     def ensure_thumb_dir(self):
         """Crée le dossier de stockage des thumbnails s'il n'existe pas déjà."""
-
         os.makedirs(self.thumb_folder, exist_ok=True)
 
     # ──────────────────────────────────────────────
@@ -80,8 +77,8 @@ class ThumbnailCache:
 
         Returns:
             str: Chemin du fichier thumbnail sur disque.
-        """
 
+        """
         h = hashlib.md5(img_name.encode()).hexdigest()
         return os.path.join(self.thumb_folder, f"{h}_{self.thumb_size}.jpg")
 
@@ -90,8 +87,7 @@ class ThumbnailCache:
     # ──────────────────────────────────────────────
 
     def get(self, img_name: str) -> QPixmap | None:
-        """
-        Retourne le QPixmap mis en cache, ou None s'il est absent.
+        """Retourne le QPixmap mis en cache, ou None s'il est absent.
         Promotionne automatiquement depuis le disque vers la mémoire.
 
         Args:
@@ -99,6 +95,7 @@ class ThumbnailCache:
 
         Returns:
             QPixmap | None: Le thumbnail en mémoire ou None s'il n'existe pas.
+
         """
         # Niveau 1 : mémoire
         if img_name in self._memory:
@@ -121,6 +118,7 @@ class ThumbnailCache:
         Args:
             img_name (str): Nom de l'image.
             pixmap (QPixmap): Le thumbnail à stocker.
+
         """
         if pixmap.isNull():
             return
@@ -132,6 +130,7 @@ class ThumbnailCache:
 
         Args:
             img_name (str): Nom de l'image.
+
         """
         self._memory.pop(img_name, None)
         disk_path = self.disk_key(img_name)
@@ -146,12 +145,12 @@ class ThumbnailCache:
         self._memory.clear()
 
     def resize(self, new_size: int):
-        """
-        Change la taille des thumbnails. Vide la mémoire.
+        """Change la taille des thumbnails. Vide la mémoire.
         Le cache disque de l'ancienne taille reste intact (autre nom de fichier).
 
         Args:
             new_size (int): Nouvelle taille des thumbnails.
+
         """
         self.thumb_size = new_size
         self._memory.clear()
@@ -166,8 +165,8 @@ class ThumbnailCache:
         Args:
             img_name (str): Nom de l'image.
             pixmap (QPixmap): Thumbnail.
-        """
 
+        """
         self._memory[img_name] = pixmap
         self._memory.move_to_end(img_name)
         # Éviction LRU si dépassement
@@ -180,8 +179,8 @@ class ThumbnailCache:
         Args:
             img_name (str): Nom de l'image.
             pixmap (QPixmap): Thumbnail.
-        """
 
+        """
         self.ensure_thumb_dir()
         disk_path = self.disk_key(img_name)
         if not os.path.exists(disk_path):
@@ -192,13 +191,13 @@ class ThumbnailCache:
     # ──────────────────────────────────────────────
 
     def make_thumbnail(self, img_name: str) -> QPixmap | None:
-        """
-        Charge l'image source, la redimensionne et la met en cache.
+        """Charge l'image source, la redimensionne et la met en cache.
         Retourne le QPixmap ou None si le fichier est illisible.
         Pensé pour être appelé depuis un thread secondaire.
 
         Args:
             img_name (str): Nom de l'image.
+
         """
         src_path = os.path.join(self.folder, img_name)
         image = QImage(src_path)

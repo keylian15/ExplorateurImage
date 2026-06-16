@@ -2,8 +2,7 @@ from models.tree.tree_node import TreeNode
 
 
 class SearchNode(TreeNode):
-    """
-    Noeud de recherche.
+    """Noeud de recherche.
 
     Contient :
     - la requête
@@ -23,10 +22,7 @@ class SearchNode(TreeNode):
         self.results: list[str] = results or []
 
     def to_dict(self) -> dict:
-        """
-        Sérialise le noeud de recherche.
-        """
-
+        """Sérialise le noeud de recherche."""
         base = super().to_dict()
 
         base.update(

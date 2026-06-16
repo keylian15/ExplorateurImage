@@ -1,5 +1,4 @@
-"""
-ViewModel orchestrant l'auto-complétion en batch des images non indexées.
+"""ViewModel orchestrant l'auto-complétion en batch des images non indexées.
 
 Ce composant pilote le processus de génération automatique de métadonnées
 (descriptions, mots-clés et embeddings) pour un ensemble d'images, via un worker
@@ -48,10 +47,10 @@ class AutocompleteViewModel(QObject):
         gallery_vm,  # GalleryViewModel
         parent=None,
     ):
-        """
-        Args:
-            client (OllamaWrapper): Instance de OllamaWrapper
-            gallery_vm (GalleryViewModel): Instance de GalleryViewModel
+        """Args:
+        client (OllamaWrapper): Instance de OllamaWrapper
+        gallery_vm (GalleryViewModel): Instance de GalleryViewModel
+
         """
         super().__init__(parent)
         self._client = client
@@ -90,6 +89,7 @@ class AutocompleteViewModel(QObject):
             idx (int): Index de l'image.
             img_name (str): Nom de l'image.
             result (dict): Résultat de l'auto-complétion.
+
         """
         folder = self._gallery_vm.current_folder
         desc = result["description"]
@@ -114,8 +114,8 @@ class AutocompleteViewModel(QObject):
             idx (int): Index de l'image.
             img_name (str): Nom de l'image.
             msg (str): Message d'erreur.
-        """
 
+        """
         total = self._worker.images.__len__()
         self.signal_image_error.emit(idx, img_name, msg)
         self.signal_progress.emit(idx + 1, total, img_name)

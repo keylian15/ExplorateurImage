@@ -1,5 +1,4 @@
-"""
-ViewModel de la galerie d'images.
+"""ViewModel de la galerie d'images.
 
 Ce composant pilote la logique principale d'affichage et d'interaction avec un dossier
 d'images. Il gère le chargement des fichiers, la synchronisation avec l'index, le cache
@@ -63,15 +62,14 @@ class GalleryViewModel(QObject):
     signal_saved_search = pyqtSignal()  # une recherche a été sauvegardée
 
     def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None, parent=None):
-        """
-        Args:
-            client (OllamaWrapper): client Ollama
-            config (dict): configuration
-            ws_id (str): identifiant du workspace (pour la persistance des épingles)
-            ws_data (dict | None): données du workspace (pour restaurer les épingles et l'arbre)
-            parent (QObject, optional): parent. Defaults to None.
-        """
+        """Args:
+        client (OllamaWrapper): client Ollama
+        config (dict): configuration
+        ws_id (str): identifiant du workspace (pour la persistance des épingles)
+        ws_data (dict | None): données du workspace (pour restaurer les épingles et l'arbre)
+        parent (QObject, optional): parent. Defaults to None.
 
+        """
         super().__init__(parent)
         self._client = client
         self._config = config
@@ -125,7 +123,9 @@ class GalleryViewModel(QObject):
         """Renvoi la taille de la cellule en pixels.
 
         Returns:
-            int: Taille de la cellule en pixels."""
+            int: Taille de la cellule en pixels.
+
+        """
         return self._cell_size
 
     @property
@@ -134,6 +134,7 @@ class GalleryViewModel(QObject):
 
         Returns:
             list[str]: Noms des images épinglées.
+
         """
         return list(self._pinned)
 
@@ -144,6 +145,7 @@ class GalleryViewModel(QObject):
 
         Args:
             folder (str): Chemin du dossier.
+
         """
         self.current_folder = folder
 
@@ -172,6 +174,7 @@ class GalleryViewModel(QObject):
 
         Args:
             images (list[str] | None): Liste des images à charger.
+
         """
         if images is None:
             try:
@@ -191,6 +194,7 @@ class GalleryViewModel(QObject):
 
         Returns:
             list[str]: Liste triée, épinglées en tête.
+
         """
         image_set = set(images)
         # Épinglées présentes dans la liste, dans l'ordre d'épinglage
@@ -204,6 +208,7 @@ class GalleryViewModel(QObject):
 
         Returns:
             list[str]: Liste des images.
+
         """
         try:
             return [f for f in os.listdir(self.current_folder) if f.lower().endswith(EXTENSIONS)]
@@ -228,6 +233,7 @@ class GalleryViewModel(QObject):
 
         Returns:
             bool: True si épinglée.
+
         """
         return img_name in self._pinned
 
@@ -236,6 +242,7 @@ class GalleryViewModel(QObject):
 
         Args:
             img_name (str): Nom de l'image à épingler.
+
         """
         if img_name in self._pinned:
             return
@@ -250,6 +257,7 @@ class GalleryViewModel(QObject):
 
         Args:
             img_name (str): Nom de l'image à désépingler.
+
         """
         if img_name not in self._pinned:
             return
@@ -264,6 +272,7 @@ class GalleryViewModel(QObject):
 
         Args:
             img_name (str): Nom de l'image.
+
         """
         if self.is_pinned(img_name):
             self.unpin_image(img_name)
@@ -285,13 +294,14 @@ class GalleryViewModel(QObject):
         """Lance la recherche après un delai.
 
         Args:
-            text (str): Mot à rechercher."""
+            text (str): Mot à rechercher.
+
+        """
         self._search_text = text
         self._search_timer.start()
 
     def do_search(self):
         """Effectue la recherche sémantique et met à jour la liste des images."""
-
         text = self._search_text.strip()
         if not text:
             self.refresh(None)
@@ -321,8 +331,8 @@ class GalleryViewModel(QObject):
 
         Returns:
             list[str]: Liste des images. Les épinglées sont en tête.
-        """
 
+        """
         # Récupère les embeddings de la requête
         ft = filter_text.lower().strip()
         query_emb = self._client.embed(model=MODEL_EMBED, text=ft)
@@ -353,7 +363,6 @@ class GalleryViewModel(QObject):
 
     def save_search(self) -> None:
         """Enregistre la recherche dans l'historique."""
-
         text = self._search_text.strip()
         if not text:
             return
@@ -371,6 +380,7 @@ class GalleryViewModel(QObject):
 
         Args:
             enabled (bool): Si True, les recherches suivantes seront affinées à partir des résultats actuels.
+
         """
         self._affinage_enabled = enabled
         self.do_search()
@@ -382,6 +392,7 @@ class GalleryViewModel(QObject):
 
         Args:
             img_name (str): Nom de l'image.
+
         """
         self.model.set_selected(img_name)
         self.signal_image_selected.emit(img_name)
@@ -415,5 +426,7 @@ class GalleryViewModel(QObject):
         """Notifie quand une image a été modifiée.
 
         Args:
-            img_name (str): Nom de l'image modifiée."""
+            img_name (str): Nom de l'image modifiée.
+
+        """
         self.model.notify_image_updated(img_name)

@@ -1,5 +1,4 @@
-"""
-Widget principal de la galerie d'images.
+"""Widget principal de la galerie d'images.
 
 Ce composant constitue la vue centrale de navigation des images. Il affiche une grille
 d'images en mode icônes avec recherche, zoom dynamique, préchargement des thumbnails
@@ -68,11 +67,11 @@ class GalleryWidget(QWidget):
         translator: I18nManager,
         parent=None,
     ):
-        """
-        Args:
-            gallery_vm: ViewModel de la galerie.
-            autocomplete_vm: ViewModel de l'auto-complétion.
-            sam3_vm: ViewModel SAM3 partagé du workspace.
+        """Args:
+        gallery_vm: ViewModel de la galerie.
+        autocomplete_vm: ViewModel de l'auto-complétion.
+        sam3_vm: ViewModel SAM3 partagé du workspace.
+
         """
         super().__init__(parent)
         self._gvm = gallery_vm

@@ -1,5 +1,4 @@
-"""
-Gestion de la persistance des espaces de travail (workspaces).
+"""Gestion de la persistance des espaces de travail (workspaces).
 
 Chaque workspace est un espace de travail indépendant avec son propre dossier
 d'images, son nom personnalisé, ses paramètres de carte (UMAP/HDBSCAN), son
@@ -42,6 +41,7 @@ def make_workspace(name: str = "Workspace", folder: str | None = None) -> dict:
 
     Returns:
         dict: Entrée workspace standardisée.
+
     """
     return {
         "id": str(uuid.uuid4()),
@@ -59,6 +59,7 @@ def default_map_params() -> dict:
 
     Returns:
         dict: Paramètres UMAP/HDBSCAN par défaut.
+
     """
     return dict(_DEFAULT_MAP_PARAMS)
 
@@ -68,6 +69,7 @@ def default_k_neighbors() -> int:
 
     Returns:
         int: k_neighbors par défaut.
+
     """
     return _DEFAULT_K_NEIGHBORS
 
@@ -80,6 +82,7 @@ def get_map_params(ws_data: dict) -> dict:
 
     Returns:
         dict: Paramètres UMAP/HDBSCAN.
+
     """
     raw = ws_data.get("map_params", {})
     defaults = _DEFAULT_MAP_PARAMS
@@ -98,6 +101,7 @@ def get_k_neighbors(ws_data: dict) -> int:
 
     Returns:
         int: k_neighbors.
+
     """
     return int(ws_data.get("k_neighbors", _DEFAULT_K_NEIGHBORS))
 
@@ -110,6 +114,7 @@ def get_pinned_images(ws_data: dict) -> list[str]:
 
     Returns:
         list[str]: Liste ordonnée des noms de fichiers épinglés.
+
     """
     pinned = ws_data.get("pinned_images", [])
     if isinstance(pinned, list):
@@ -128,6 +133,7 @@ def get_search_trees(ws_data: dict) -> dict:
 
     Returns:
         dict: {"gallery": {...}, "map": {...}}
+
     """
     raw = ws_data.get("history_search", {})
     if not isinstance(raw, dict):
@@ -151,6 +157,7 @@ def load(config: dict) -> list[dict]:
 
     Returns:
         list[dict]: Liste de workspaces.
+
     """
     workspaces = config.get("workspaces")
 
@@ -187,6 +194,7 @@ def save(config: dict, workspaces: list[dict]) -> dict:
 
     Returns:
         dict: Configuration mise à jour.
+
     """
     config = dict(config)
     config["workspaces"] = workspaces
@@ -203,6 +211,7 @@ def update_workspace(workspaces: list[dict], ws_id: str, **kwargs) -> list[dict]
 
     Returns:
         list[dict]: Liste mise à jour (copie défensive).
+
     """
     result = []
     for ws in workspaces:
@@ -222,6 +231,7 @@ def remove_workspace(workspaces: list[dict], ws_id: str) -> list[dict]:
 
     Returns:
         list[dict]: Liste mise à jour.
+
     """
     filtered = [ws for ws in workspaces if ws["id"] != ws_id]
     return filtered if filtered else [make_workspace("Workspace 1")]

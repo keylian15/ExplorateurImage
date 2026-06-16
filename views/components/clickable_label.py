@@ -1,5 +1,4 @@
-"""
-Composant UI QLabel interactif avec gestion des clics.
+"""Composant UI QLabel interactif avec gestion des clics.
 
 Ce widget étend QLabel pour permettre l'ajout de callbacks sur les clics gauche
 et droit de la souris, facilitant l'interaction directe dans l'interface.
@@ -26,11 +25,10 @@ class ClickableLabel(QLabel):
     """Class qui représente une QLabel avec callbacks clic gauche et droit."""
 
     def __init__(self, text_or_parent=None, parent=None):
+        """Args:
+        text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.
+        parent (QWidget, optional): QWidget parent. Defaults to None.
         """
-        Args:
-            text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.
-            parent (QWidget, optional): QWidget parent. Defaults to None."""
-
         if isinstance(text_or_parent, str):
             super().__init__(text_or_parent, parent)
         elif isinstance(text_or_parent, QWidget):
@@ -45,6 +43,7 @@ class ClickableLabel(QLabel):
 
         Args:
             event (QMouseEvent): Event de clic.
+
         """
         if event.button() == Qt.MouseButton.RightButton:
             if self.rightClicked:

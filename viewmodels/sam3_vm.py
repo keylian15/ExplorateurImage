@@ -1,5 +1,4 @@
-"""
-ViewModel SAM3 pour la segmentation d'image interactive.
+"""ViewModel SAM3 pour la segmentation d'image interactive.
 
 Ce composant orchestre le chargement du modèle SAM3, l'initialisation de l'état
 à partir d'une image, et l'application des prompts (texte ou boîte) via des
@@ -61,8 +60,7 @@ from viewmodels.gallery_vm import GalleryViewModel
 
 @dataclass
 class MaskOverlay:
-    """
-    Données de segmentation prêtes pour l'affichage dans la View.
+    """Données de segmentation prêtes pour l'affichage dans la View.
 
     La View n'a pas besoin d'importer services/ pour utiliser ce type.
     Toutes les valeurs sont en coordonnées pixel de l'image originale.
@@ -79,8 +77,7 @@ class MaskOverlay:
 
 
 class Sam3ViewModel(QObject):
-    """
-    ViewModel SAM3 - pilote le chargement du modèle et la segmentation interactive.
+    """ViewModel SAM3 - pilote le chargement du modèle et la segmentation interactive.
 
     Cycle de vie :
         1. Instancier dans WorkspaceWidget (partagé entre GalleryWidget et DetailWidget).
@@ -191,12 +188,12 @@ class Sam3ViewModel(QObject):
     # ── Encodage image ────────────────────────────────────────────────────────
 
     def encode_image(self, pixmap: QPixmap, img_path: str | None = None) -> None:
-        """
-        Encode l'image dans l'état SAM3 (arrière-plan).
+        """Encode l'image dans l'état SAM3 (arrière-plan).
 
         Args:
             pixmap: QPixmap de l'image à segmenter.
             img_path: chemin disque optionnel - préféré à la conversion en mémoire.
+
         """
         if not self._service.is_loaded or self.is_busy:
             return
@@ -278,8 +275,7 @@ class Sam3ViewModel(QObject):
     # ── Recherche globale (texte direct) ──────────────────────────────────────
 
     def search_objects(self, text: str, threshold: float = 0.75, strategy_name: str = "sam3") -> None:
-        """
-        Lance la recherche de l'objet `text` sur toutes les images du dossier.
+        """Lance la recherche de l'objet `text` sur toutes les images du dossier.
 
         Bloque si le modèle n'est pas chargé ou si une recherche est déjà en cours.
         Chaque correspondance est émise via signal_search_match au fil de l'eau.
@@ -287,6 +283,7 @@ class Sam3ViewModel(QObject):
         Args:
             text: texte décrivant l'objet (ex: "shoe", "dog").
             threshold: score minimum SAM3 pour qu'une image soit retenue (0–1).
+
         """
         if not self._service.is_loaded:
             self.signal_search_error.emit(self.translator.tr("Le modèle SAM3 n'est pas encore chargé."))
@@ -380,8 +377,7 @@ class Sam3ViewModel(QObject):
         sam3_threshold: float = 0.75,
         max_results: int = 0,
     ) -> None:
-        """
-        Lance une recherche d'objet à partir d'une région dessinée sur l'image.
+        """Lance une recherche d'objet à partir d'une région dessinée sur l'image.
 
         Recadre la région de la box, choisit la stratégie demandée et lance
         le worker correspondant. Utilise les mêmes signaux que search_objects.
@@ -394,6 +390,7 @@ class Sam3ViewModel(QObject):
             threshold: Seuil principal (cosinus pour embedding, SAM3 score pour sam3).
             sam3_threshold: Seuil SAM3 utilisé uniquement par les stratégies sam3/hybrid.
             max_results: Nombre maximum de résultats (0 = illimité).
+
         """
         if self.is_searching:
             self.signal_search_error.emit(self.translator.tr("Une recherche est déjà en cours."))
@@ -525,8 +522,7 @@ class Sam3ViewModel(QObject):
 
     @staticmethod
     def _to_pil(pixmap: QPixmap, img_path: str | None) -> PILImage.Image | None:
-        """
-        Convertit un QPixmap en PIL.Image RGB.
+        """Convertit un QPixmap en PIL.Image RGB.
 
         Utilise le chemin disque si disponible (qualité maximale),
         sinon convertit via QImage en mémoire.

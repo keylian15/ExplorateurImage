@@ -1,5 +1,4 @@
-"""
-Service d'encapsulation de SAM3 (Segment Anything Model 3).
+"""Service d'encapsulation de SAM3 (Segment Anything Model 3).
 
 Ce module fournit une couche d'abstraction propre autour de l'API SAM3,
 permettant de charger le modèle, d'appliquer des prompts texte ou boîte,
@@ -49,8 +48,7 @@ class SegmentationResult:
 
 
 class Sam3Service(QObject):
-    """
-    Wrapper autour de Sam3Processor.
+    """Wrapper autour de Sam3Processor.
 
     Usage type :
         service = Sam3Service()
@@ -83,8 +81,7 @@ class Sam3Service(QObject):
         return self._is_loading
 
     def load_model(self, confidence_threshold: float = 0.5) -> None:
-        """
-        Charge le modèle SAM3. Bloquant - à appeler depuis un worker.
+        """Charge le modèle SAM3. Bloquant - à appeler depuis un worker.
 
         Args:
             confidence_threshold: seuil de confiance par défaut.
@@ -93,6 +90,7 @@ class Sam3Service(QObject):
             ImportError: si sam3 ou torch ne sont pas installés.
             FileNotFoundError: si le fichier BPE est introuvable.
             RuntimeError: si le chargement échoue.
+
         """
         self._is_loading = True
         try:
@@ -119,14 +117,14 @@ class Sam3Service(QObject):
     # ── Image ─────────────────────────────────────────────────────────────────
 
     def set_image(self, pil_image) -> dict[str, Any]:
-        """
-        Initialise l'état SAM3 à partir d'une image PIL RGB.
+        """Initialise l'état SAM3 à partir d'une image PIL RGB.
 
         Args:
             pil_image: PIL.Image en mode RGB.
 
         Returns:
             dict state utilisable par les méthodes suivantes.
+
         """
         self._check_loaded()
         import torch
@@ -137,8 +135,7 @@ class Sam3Service(QObject):
     # ── Prompts ───────────────────────────────────────────────────────────────
 
     def apply_text_prompt(self, prompt: str, state: dict[str, Any]) -> dict[str, Any]:
-        """
-        Applique un prompt texte sur l'état courant.
+        """Applique un prompt texte sur l'état courant.
 
         Args:
             prompt: texte décrivant l'objet (ex : "shoe").
@@ -146,6 +143,7 @@ class Sam3Service(QObject):
 
         Returns:
             Nouvel état avec masques mis à jour.
+
         """
         self._check_loaded()
         import torch
@@ -164,8 +162,7 @@ class Sam3Service(QObject):
         state: dict[str, Any],
         positive: bool = True,
     ) -> dict[str, Any]:
-        """
-        Applique un prompt boîte en coordonnées pixel xyxy.
+        """Applique un prompt boîte en coordonnées pixel xyxy.
 
         Convertit en cxcywh normalisé comme attendu par SAM3.
 
@@ -177,6 +174,7 @@ class Sam3Service(QObject):
 
         Returns:
             Nouvel état avec masques mis à jour.
+
         """
         self._check_loaded()
 
@@ -193,14 +191,14 @@ class Sam3Service(QObject):
             return self._processor.add_geometric_prompt(box_cxcywh, positive, state)
 
     def reset_prompts(self, state: dict[str, Any]) -> dict[str, Any]:
-        """
-        Supprime tous les prompts et réinitialise les masques.
+        """Supprime tous les prompts et réinitialise les masques.
 
         Args:
             state: état SAM3 courant.
 
         Returns:
             État nettoyé (encodage image conservé).
+
         """
         self._check_loaded()
         new_state = self._processor.reset_all_prompts(state)
@@ -213,8 +211,7 @@ class Sam3Service(QObject):
         return new_state
 
     def set_confidence_threshold(self, threshold: float, state: dict[str, Any]) -> dict[str, Any]:
-        """
-        Modifie le seuil de confiance.
+        """Modifie le seuil de confiance.
 
         Args:
             threshold: float entre 0 et 1.
@@ -222,6 +219,7 @@ class Sam3Service(QObject):
 
         Returns:
             État mis à jour.
+
         """
         self._check_loaded()
         import torch
@@ -232,8 +230,7 @@ class Sam3Service(QObject):
     # ── Extraction ────────────────────────────────────────────────────────────
 
     def extract_result(self, state: dict[str, Any]) -> SegmentationResult:
-        """
-        Extrait les masques, boîtes et scores depuis l'état SAM3.
+        """Extrait les masques, boîtes et scores depuis l'état SAM3.
 
         Gère proprement les tenseurs vides retournés quand SAM3
         ne détecte pas l'objet dans l'image.
@@ -243,6 +240,7 @@ class Sam3Service(QObject):
 
         Returns:
             SegmentationResult avec données numpy (listes vides si rien détecté).
+
         """
         result = SegmentationResult(
             img_w=state.get("original_width", 0),

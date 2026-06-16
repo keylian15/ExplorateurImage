@@ -1,5 +1,4 @@
-"""
-Gestion centralisée de la configuration globale de l'application.
+"""Gestion centralisée de la configuration globale de l'application.
 
 Résponsabilités :
  1. Charger la configuration depuis un fichier JSON avec fallback sécurisé
@@ -25,8 +24,9 @@ def load() -> dict:
     """Charge la configuration depuis le fichier config.json, ou retourne les valeurs par défaut si le fichier n'existe pas ou est invalide.
 
     Returns:
-        dict: Configuration ou les valeurs par défaut."""
+        dict: Configuration ou les valeurs par défaut.
 
+    """
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, encoding="utf-8") as f:
@@ -44,6 +44,7 @@ def save(config: dict):
 
     Args:
         config (dict): La configuration à enregistrer.
+
     """
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)

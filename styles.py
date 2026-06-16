@@ -1,5 +1,4 @@
-"""
-Ce module centralise l'ensemble du système de style de l'application (QSS, couleurs, typographie et métriques).
+"""Ce module centralise l'ensemble du système de style de l'application (QSS, couleurs, typographie et métriques).
 Il constitue l'unique point de configuration de l'apparence graphique et permet une mise à jour dynamique du thème.
 
 Les couleurs sont chargées depuis `colors.json` via `color_repository`, ce qui permet leur modification en temps réel
@@ -82,6 +81,7 @@ def get_stylesheet() -> str:
     Returns:
         str: La feuille de style QSS complète prête à être passée à
              ``QApplication.setStyleSheet()``.
+
     """
     c = COLORS
     f = FONTS
@@ -320,6 +320,7 @@ def image_preview_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"border: 1px solid {COLORS['border']}; border-radius: {METRICS['border_radius']}; background: {COLORS['bg_card']};"
 
@@ -336,6 +337,7 @@ def neighbor_thumb_style(selected: bool = False) -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     color = COLORS["accent"] if selected else COLORS["border"]
     return f"border: 1px solid {color}; border-radius: {METRICS['border_radius_sm']}; background: {COLORS['bg_card']};"
@@ -349,6 +351,7 @@ def score_label_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-size: {FONTS['size_small']}; color: {COLORS['text_secondary']};"
 
@@ -361,6 +364,7 @@ def section_title_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-weight: {FONTS['weight_bold']}; margin-top: 8px; color: {COLORS['text_primary']};"
 
@@ -373,6 +377,7 @@ def fullscreen_bar_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"background: {COLORS['bg_primary']}; border-bottom: 1px solid {COLORS['border']};"
 
@@ -385,6 +390,7 @@ def fullscreen_scroll_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"background: {COLORS['bg_card']}; {no_border_style()}"
 
@@ -397,6 +403,7 @@ def fullscreen_label_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"background: {COLORS['bg_card']};"
 
@@ -409,6 +416,7 @@ def rename_error_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"border: 1px solid {COLORS['error']}; border-radius: {METRICS['border_radius']};"
 
@@ -421,6 +429,7 @@ def legend_label_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-weight: {FONTS['weight_bold']}; font-size: {FONTS['size_normal']};"
 
@@ -437,6 +446,7 @@ def dot_color_style(color_name: str) -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"background:{color_name.name()}; border-radius: {METRICS['border_radius']};"
 
@@ -449,6 +459,7 @@ def dot_label_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-size: {FONTS['size_small']};"
 
@@ -462,6 +473,7 @@ def style_label_name_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-weight: {FONTS['weight_bold']}; font-size: {FONTS['size_normal']};"
 
@@ -474,6 +486,7 @@ def style_label_subname_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-size: {FONTS['size_small']}; color: {COLORS['text_secondary']};"
 
@@ -486,6 +499,7 @@ def style_tittle_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-size: {FONTS['size_large']}; font-weight: {FONTS['weight_bold']};"
 
@@ -499,6 +513,7 @@ def style_presset_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"font-weight: {FONTS['weight_bold']}; font-size: {FONTS['size_small']}; color: {COLORS['text_secondary']}; text-transform: uppercase; letter-spacing: 1px;"
 
@@ -511,6 +526,7 @@ def style_separator_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"color: {COLORS['bg_card']};"
 
@@ -523,6 +539,7 @@ def no_border_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline (``"border: none;"``).
+
     """
     return "border: none;"
 
@@ -541,6 +558,7 @@ def lang_card_style(selected: bool = False) -> str:
 
     Returns:
         str: Chaîne de style QSS.
+
     """
     border = COLORS["accent"] if selected else COLORS["border"]
     bg = COLORS["bg_hover"] if selected else COLORS["bg_card"]
@@ -565,6 +583,7 @@ def lang_flag_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return "font-size: 28px; border: none; background: transparent;"
 
@@ -580,6 +599,7 @@ def lang_name_style(selected: bool = False) -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     color = COLORS["accent"] if selected else COLORS["text_secondary"]
     weight = FONTS["weight_bold"] if selected else FONTS["weight_normal"]
@@ -594,5 +614,6 @@ def lang_check_style() -> str:
 
     Returns:
         str: Chaîne de style QSS inline.
+
     """
     return f"color: {COLORS['success']}; font-size: 14px; font-weight: {FONTS['weight_bold']}; border: none; background: transparent;"

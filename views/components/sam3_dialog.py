@@ -1,5 +1,4 @@
-"""
-Dialog plein écran avec segmentation SAM3 interactive.
+"""Dialog plein écran avec segmentation SAM3 interactive.
 
 SAM3 permettant :
   - Segmentation par prompt texte (ex : "shoe", "dog")
@@ -161,8 +160,7 @@ class ImageCanvas(QLabel):
         self.resize(scaled.size())
 
     def _draw_overlay(self, pixmap: QPixmap) -> QPixmap:
-        """
-        Dessine les masques et boîtes SAM3 sur le pixmap.
+        """Dessine les masques et boîtes SAM3 sur le pixmap.
 
         Utilise uniquement QImage/QPainter.
         Les données numpy (mask bool array) viennent du MaskOverlay produit
@@ -289,8 +287,7 @@ class ImageCanvas(QLabel):
 
 
 class SearchResultsPanel(QWidget):
-    """
-    Grille de miniatures des images retenues par la recherche globale.
+    """Grille de miniatures des images retenues par la recherche globale.
 
     Les résultats s'affichent au fur et à mesure grâce à un QTimer qui
     dépile une file d'attente (_pending_results) par petits lots, laissant
@@ -398,6 +395,7 @@ class SearchResultsPanel(QWidget):
 
         Args:
             enabled: True = attendre la fin, False = afficher au fil de l'eau.
+
         """
         self._wait_mode = enabled
 
@@ -429,6 +427,7 @@ class SearchResultsPanel(QWidget):
         Args:
             img_name: Nom du fichier image résultat.
             score: Score de similarité (0–1).
+
         """
         self._pending_results.append((img_name, score))
         if not self._wait_mode and self._flush_timer and not self._flush_timer.isActive():
@@ -511,6 +510,7 @@ class SearchResultsPanel(QWidget):
         Args:
             img_name: Nom du fichier image.
             score: Score de similarité.
+
         """
         if not self._folder:
             return
@@ -585,6 +585,7 @@ class Sam3SidebarContent(QWidget):
 
         Args:
             x0, y0, x1, y1: Coordonnées pixel sur l'image originale.
+
         """
         self._last_box = (x0, y0, x1, y1)
         # Active le bouton "Rechercher dans la box" si une box est disponible
@@ -604,6 +605,7 @@ class Sam3SidebarContent(QWidget):
 
         Returns:
             "embedding", "sam3" ou "hybrid".
+
         """
         if self._radio_sam3.isChecked():
             return "sam3"
@@ -947,8 +949,7 @@ class Sam3SidebarContent(QWidget):
 
 
 class Sam3Dialog(QMainWindow):
-    """
-    Fenêtre SAM3 interactive.
+    """Fenêtre SAM3 interactive.
 
     QMainWindow (et non QDialog) pour avoir :
       - Les 3 boutons natifs : réduire / plein écran / fermer
@@ -1215,6 +1216,7 @@ class Sam3Dialog(QMainWindow):
         Args:
             img_name: Nom du fichier image résultat sur lequel le clic droit
                 a été effectué.
+
         """
         folder = self._vm._gallery_vm.current_folder
         if not folder:

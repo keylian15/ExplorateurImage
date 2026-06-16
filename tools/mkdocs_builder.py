@@ -5,8 +5,7 @@ DOCS = Path("docs")  # dossier mkdocs
 
 
 def to_module(root: Path, file: Path) -> str:
-    """
-    Convertit un chemin fichier en module python.
+    """Convertit un chemin fichier en module python.
     ex: models/index_repository.py -> models.index_repository
         main.py -> main
     """

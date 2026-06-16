@@ -1,5 +1,4 @@
-"""
-models/tree/tree.py
+"""models/tree/tree.py
 
 Arbre générique.
 
@@ -23,7 +22,6 @@ class Tree:
 
     def __init__(self) -> None:
         """Initialise un arbre vide."""
-
         self.root: TreeNode | None = None
         self.current: TreeNode | None = None
         self._nodes: dict[str, TreeNode] = {}
@@ -31,19 +29,16 @@ class Tree:
     @property
     def is_empty(self) -> bool:
         """Indique si l'arbre est vide."""
-
         return self.root is None
 
     def clear(self) -> None:
         """Vide complètement l'arbre."""
-
         self.root = None
         self.current = None
         self._nodes.clear()
 
     def add_root(self, node: TreeNode) -> None:
-        """
-        Définit la racine de l'arbre.
+        """Définit la racine de l'arbre.
 
         Args:
             node (TreeNode): Noeud racine.
@@ -51,8 +46,8 @@ class Tree:
         Raises:
             ValueError:
                 Si une racine existe déjà.
-        """
 
+        """
         if self.root is not None:
             raise ValueError("L'arbre possède déjà une racine.")
 
@@ -62,8 +57,7 @@ class Tree:
         self._nodes[node.id] = node
 
     def push(self, node: TreeNode) -> None:
-        """
-        Ajoute un noeud enfant au noeud courant
+        """Ajoute un noeud enfant au noeud courant
         et le définit comme noeud courant.
 
         Args:
@@ -72,8 +66,8 @@ class Tree:
         Raises:
             ValueError:
                 Si l'arbre ne possède pas de racine.
-        """
 
+        """
         if self.current is None:
             raise ValueError("Impossible de push sans racine.")
 
@@ -84,14 +78,13 @@ class Tree:
         self.current = node
 
     def back(self) -> TreeNode | None:
-        """
-        Revient au parent du noeud courant.
+        """Revient au parent du noeud courant.
 
         Returns:
             TreeNode | None:
                 Nouveau noeud courant.
-        """
 
+        """
         if self.current is None:
             return None
 
@@ -103,8 +96,7 @@ class Tree:
         return self.current
 
     def set_current(self, node_id: str) -> TreeNode | None:
-        """
-        Définit le noeud courant.
+        """Définit le noeud courant.
 
         Args:
             node_id (str): ID du noeud.
@@ -112,8 +104,8 @@ class Tree:
         Returns:
             TreeNode | None:
                 Noeud trouvé.
-        """
 
+        """
         node = self._nodes.get(node_id)
 
         if node is not None:
@@ -124,49 +116,45 @@ class Tree:
         return node
 
     def get_node(self, node_id: str) -> TreeNode | None:
-        """
-        Récupère un noeud par son ID.
+        """Récupère un noeud par son ID.
 
         Args:
             node_id (str): ID du noeud.
 
         Returns:
             TreeNode | None
-        """
 
+        """
         return self._nodes.get(node_id)
 
     def contains(self, node_id: str) -> bool:
-        """
-        Indique si un noeud existe.
+        """Indique si un noeud existe.
 
         Args:
             node_id (str): ID du noeud.
 
         Returns:
             bool
-        """
 
+        """
         return node_id in self._nodes
 
     def iter_nodes(self):
-        """
-        Itère sur tous les noeuds.
+        """Itère sur tous les noeuds.
 
         Yields:
             TreeNode
-        """
 
+        """
         yield from self._nodes.values()
 
     def to_dict(self) -> dict:
-        """
-        Sérialise l'arbre.
+        """Sérialise l'arbre.
 
         Returns:
             dict
-        """
 
+        """
         return {
             "root_id": (self.root.id if self.root else None),
             "current_id": (self.current.id if self.current else None),
@@ -174,10 +162,7 @@ class Tree:
         }
 
     def print_tree(self) -> None:
-        """
-        Affiche tout l'arbre de manière hiérarchique.
-        """
-
+        """Affiche tout l'arbre de manière hiérarchique."""
         if self.root is None:
             print("[Tree] empty")
             return

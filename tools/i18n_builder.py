@@ -111,7 +111,7 @@ def main(project_root: str, languages: list[str]):
                 if lang == SOURCE_LANG:
                     continue
 
-                if lang in entry and entry[lang]:
+                if entry.get(lang):
                     continue
 
                 entry[lang] = ollama_translate(text, lang)

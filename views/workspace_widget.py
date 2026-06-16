@@ -1,5 +1,4 @@
-"""
-Widget représentant un espace de travail complet.
+"""Widget représentant un espace de travail complet.
 
 Chaque workspace est autonome : il possède ses propres instances de ViewModels
 (GalleryViewModel, DetailViewModel, AutocompleteViewModel, MapViewModel, Sam3ViewModel)
@@ -67,16 +66,16 @@ class WorkspaceWidget(QWidget):
         translator: I18nManager = None,
         sam3_service=None,
     ):
-        """
-        Args:
-            ws_id (str): Identifiant unique du workspace.
-            name (str): Nom affiché dans l'onglet parent.
-            client (OllamaWrapper): Client Ollama partagé.
-            config (dict): Configuration globale.
-            main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
-            folder (str | None): Dossier à restaurer, ou None.
-            ws_data (dict | None): Données complètes du workspace.
-            parent: Parent Qt.
+        """Args:
+        ws_id (str): Identifiant unique du workspace.
+        name (str): Nom affiché dans l'onglet parent.
+        client (OllamaWrapper): Client Ollama partagé.
+        config (dict): Configuration globale.
+        main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
+        folder (str | None): Dossier à restaurer, ou None.
+        ws_data (dict | None): Données complètes du workspace.
+        parent: Parent Qt.
+
         """
         super().__init__(parent)
         self.ws_id = ws_id

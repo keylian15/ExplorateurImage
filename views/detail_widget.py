@@ -1,5 +1,4 @@
-"""
-Panneau de détail d'une image dans l'interface de la galerie.
+"""Panneau de détail d'une image dans l'interface de la galerie.
 
 Ce composant constitue la vue dédiée à l'inspection et à l'édition des métadonnées
 d'une image sélectionnée. Il permet d'afficher un aperçu, de modifier la description
@@ -72,10 +71,10 @@ class DetailWidget(QWidget):
         translator: I18nManager,
         parent=None,
     ):
-        """
-        Args:
-            detail_vm: Le viewmodel de ce widget.
-            sam3_vm: ViewModel SAM3 partagé du workspace.
+        """Args:
+        detail_vm: Le viewmodel de ce widget.
+        sam3_vm: ViewModel SAM3 partagé du workspace.
+
         """
         super().__init__(parent)
         self._vm = detail_vm

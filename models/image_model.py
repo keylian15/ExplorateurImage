@@ -1,5 +1,4 @@
-"""
-Affichage et gestion d'une grille d'images avec thumbnails dans Qt.
+"""Affichage et gestion d'une grille d'images avec thumbnails dans Qt.
 
 Ce module fournit :
  - un modèle léger basé sur les noms de fichiers (sans chargement d'images en mémoire),
@@ -82,8 +81,8 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             images (list[str]): La nouvelle liste de noms de fichiers.
-        """
 
+        """
         self.beginResetModel()
         self._images = list(images)
         self.endResetModel()
@@ -93,8 +92,8 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             indexed (set[str]): Le nouvel ensemble de noms de fichiers indexés.
-        """
 
+        """
         self._indexed = indexed
         if self._images:
             self.dataChanged.emit(self.index(0), self.index(len(self._images) - 1), [INDEXED_ROLE])
@@ -104,6 +103,7 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             pinned (set[str]): Le nouvel ensemble de noms de fichiers épinglés.
+
         """
         self._pinned = set(pinned)
         if self._images:
@@ -114,8 +114,8 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             img_name (str | None): Le nom de fichier de la nouvelle image sélectionnée, ou None pour aucune sélection.
-        """
 
+        """
         old = self._selected
         self._selected = img_name
         for name in (old, img_name):
@@ -128,8 +128,10 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             row (int): L'index de la ligne.
+
         Returns:
             str: Le nom de fichier de l'image à la ligne donnée.
+
         """
         return self._images[row]
 
@@ -138,10 +140,11 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             img_name (str): Le nom de fichier de l'image.
+
         Returns:
             int | None: L'index de la ligne de l'image, ou None si elle n'est pas dans la liste.
-        """
 
+        """
         try:
             return self._images.index(img_name)
         except ValueError:
@@ -152,8 +155,8 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             img_name (str): Le nom de fichier de l'image mise à jour.
-        """
 
+        """
         row = self.row_of(img_name)
         if row is not None:
             mi = self.index(row)
@@ -166,10 +169,11 @@ class ImageListModel(QAbstractListModel):
 
         Args:
             _parent (QModelIndex | None): Ignoré, car ce modèle n'est pas hiérarchique.
+
         Returns:
             int: Le nombre d'images dans la liste.
-        """
 
+        """
         return len(self._images)
 
     def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole) -> str | bool | None:
@@ -178,10 +182,11 @@ class ImageListModel(QAbstractListModel):
         Args:
             index (QModelIndex): L'index de la cellule.
             role (Qt.ItemDataRole): Le rôle pour lequel les données sont demandées.
+
         Returns:
             str | bool | None: Les données pour la cellule et le rôle donnés, ou None si l'index n'est pas valide ou si le rôle n'est pas reconnu.
-        """
 
+        """
         if not index.isValid() or index.row() >= len(self._images):
             return None
         name = self._images[index.row()]
@@ -230,8 +235,8 @@ class ImageGridDelegate(QStyledItemDelegate):
             scheduler (ThumbnailScheduler): Le scheduler de génération de thumbnails à utiliser pour demander la génération de thumbnails manquants
             cell_size (int, optional): La taille des cellules en pixels. Par défaut à 192.
             parent (Any, optional): Le parent QObject. Par défaut à None.
-        """
 
+        """
         super().__init__(parent)
         self.cache = cache
         self.scheduler = scheduler
@@ -247,6 +252,7 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         Returns:
             QSize: La taille des cellules en pixels
+
         """
         return QSize(self.cell_size, self.cell_size)
 
@@ -255,10 +261,11 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         Args:
             size (int): La nouvelle taille des cellules en pixels.
+
         Returns:
             None
-        """
 
+        """
         self.cell_size = size
 
     def paint(self, painter: QPainter, option, index: QModelIndex):
@@ -269,6 +276,7 @@ class ImageGridDelegate(QStyledItemDelegate):
             painter (QPainter): Le painter à utiliser pour dessiner la cellule.
             option (QStyleOptionViewItem): Les options de dessin fournies par Qt.
             index (QModelIndex): L'index de la cellule à dessiner.
+
         """
         img_name = index.data(IMG_NAME_ROLE)
         if not img_name:
@@ -323,6 +331,7 @@ class ImageGridDelegate(QStyledItemDelegate):
         Args:
             painter (QPainter): Le painter actif.
             cell_rect (QRect): Rectangle de la cellule entière.
+
         """
         margin = self.BORDER + 3
         size = self.PIN_BADGE_SIZE
@@ -351,6 +360,6 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         Args:
             img_name (str): Le nom de fichier de l'image dont le thumbnail est prêt.
-        """
 
+        """
         self.signal_repaint_requested.emit(img_name)
