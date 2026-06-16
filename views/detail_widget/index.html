@@ -2073,7 +2073,8 @@ la segmentation interactive avec SAM3.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>views/detail_widget.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 64</span>
+<span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
 <span class="normal"> 68</span>
@@ -2370,8 +2371,7 @@ la segmentation interactive avec SAM3.</p>
 <span class="normal">359</span>
 <span class="normal">360</span>
 <span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Panneau de détail d&#39;une image sélectionnée.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -2381,10 +2381,10 @@ la segmentation interactive avec SAM3.</p>
         <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span><span class="p">,</span>
         <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            detail_vm: Le viewmodel de ce widget.</span>
-<span class="sd">            sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">        detail_vm: Le viewmodel de ce widget.</span>
+<span class="sd">        sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span> <span class="o">=</span> <span class="n">detail_vm</span>
@@ -2697,58 +2697,15 @@ la segmentation interactive avec SAM3.</p>
 
     <div class="doc doc-contents ">
 
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>detail_vm</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="DetailViewModel (viewmodels.detail_vm.DetailViewModel)" href="../../viewmodels/detail_vm/#viewmodels.detail_vm.DetailViewModel">DetailViewModel</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Le viewmodel de ce widget.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>sam3_vm</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="Sam3ViewModel (viewmodels.sam3_vm.Sam3ViewModel)" href="../../viewmodels/sam3_vm/#viewmodels.sam3_vm.Sam3ViewModel">Sam3ViewModel</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ViewModel SAM3 partagé du workspace.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Args:
+detail_vm: Le viewmodel de ce widget.
+sam3_vm: ViewModel SAM3 partagé du workspace.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">67</span>
+<span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
 <span class="normal">71</span>
@@ -2767,18 +2724,17 @@ la segmentation interactive avec SAM3.</p>
 <span class="normal">84</span>
 <span class="normal">85</span>
 <span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">detail_vm</span><span class="p">:</span> <span class="n">DetailViewModel</span><span class="p">,</span>
     <span class="n">sam3_vm</span><span class="p">:</span> <span class="n">Sam3ViewModel</span><span class="p">,</span>
     <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span><span class="p">,</span>
     <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        detail_vm: Le viewmodel de ce widget.</span>
-<span class="sd">        sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">    detail_vm: Le viewmodel de ce widget.</span>
+<span class="sd">    sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_vm</span> <span class="o">=</span> <span class="n">detail_vm</span>
@@ -2811,9 +2767,9 @@ la segmentation interactive avec SAM3.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/detail_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_sam3_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_sam3_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ouvre Sam3Dialog pour l&#39;image actuellement affichée.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_open_sam3_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_pixmap</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_img_path</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>

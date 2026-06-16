@@ -2344,7 +2344,8 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+<span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
@@ -2355,12 +2356,9 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaskOverlay</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Données de segmentation prêtes pour l&#39;affichage dans la View.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Données de segmentation prêtes pour l&#39;affichage dans la View.</span>
 
 <span class="sd">    La View n&#39;a pas besoin d&#39;importer services/ pour utiliser ce type.</span>
 <span class="sd">    Toutes les valeurs sont en coordonnées pixel de l&#39;image originale.</span>
@@ -2445,7 +2443,9 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 81</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
 <span class="normal"> 82</span>
 <span class="normal"> 83</span>
 <span class="normal"> 84</span>
@@ -2907,13 +2907,8 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="normal">540</span>
 <span class="normal">541</span>
 <span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Sam3ViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    ViewModel SAM3 - pilote le chargement du modèle et la segmentation interactive.</span>
+<span class="normal">543</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Sam3ViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ViewModel SAM3 - pilote le chargement du modèle et la segmentation interactive.</span>
 
 <span class="sd">    Cycle de vie :</span>
 <span class="sd">        1. Instancier dans WorkspaceWidget (partagé entre GalleryWidget et DetailWidget).</span>
@@ -3024,12 +3019,12 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
     <span class="c1"># ── Encodage image ────────────────────────────────────────────────────────</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">encode_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">img_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Encode l&#39;image dans l&#39;état SAM3 (arrière-plan).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode l&#39;image dans l&#39;état SAM3 (arrière-plan).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            pixmap: QPixmap de l&#39;image à segmenter.</span>
 <span class="sd">            img_path: chemin disque optionnel - préféré à la conversion en mémoire.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">is_loaded</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_busy</span><span class="p">:</span>
             <span class="k">return</span>
@@ -3111,8 +3106,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
     <span class="c1"># ── Recherche globale (texte direct) ──────────────────────────────────────</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">search_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">strategy_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sam3&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Lance la recherche de l&#39;objet `text` sur toutes les images du dossier.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance la recherche de l&#39;objet `text` sur toutes les images du dossier.</span>
 
 <span class="sd">        Bloque si le modèle n&#39;est pas chargé ou si une recherche est déjà en cours.</span>
 <span class="sd">        Chaque correspondance est émise via signal_search_match au fil de l&#39;eau.</span>
@@ -3120,6 +3114,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            text: texte décrivant l&#39;objet (ex: &quot;shoe&quot;, &quot;dog&quot;).</span>
 <span class="sd">            threshold: score minimum SAM3 pour qu&#39;une image soit retenue (0–1).</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">is_loaded</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">signal_search_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s2">&quot;Le modèle SAM3 n&#39;est pas encore chargé.&quot;</span><span class="p">))</span>
@@ -3213,8 +3208,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
         <span class="n">sam3_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
         <span class="n">max_results</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Lance une recherche d&#39;objet à partir d&#39;une région dessinée sur l&#39;image.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance une recherche d&#39;objet à partir d&#39;une région dessinée sur l&#39;image.</span>
 
 <span class="sd">        Recadre la région de la box, choisit la stratégie demandée et lance</span>
 <span class="sd">        le worker correspondant. Utilise les mêmes signaux que search_objects.</span>
@@ -3227,6 +3221,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="sd">            threshold: Seuil principal (cosinus pour embedding, SAM3 score pour sam3).</span>
 <span class="sd">            sam3_threshold: Seuil SAM3 utilisé uniquement par les stratégies sam3/hybrid.</span>
 <span class="sd">            max_results: Nombre maximum de résultats (0 = illimité).</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_searching</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">signal_search_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s2">&quot;Une recherche est déjà en cours.&quot;</span><span class="p">))</span>
@@ -3358,8 +3353,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_to_pil</span><span class="p">(</span><span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">img_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PILImage</span><span class="o">.</span><span class="n">Image</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Convertit un QPixmap en PIL.Image RGB.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convertit un QPixmap en PIL.Image RGB.</span>
 
 <span class="sd">        Utilise le chemin disque si disponible (qualité maximale),</span>
 <span class="sd">        sinon convertit via QImage en mémoire.</span>
@@ -3498,7 +3492,10 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span>
@@ -3513,10 +3510,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_box_prompt</span><span class="p">(</span>
+<span class="normal">248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_box_prompt</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">y0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -3557,16 +3551,16 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
 <span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_text_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_text_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Applique un prompt texte.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_can_segment</span><span class="p">():</span>
         <span class="k">return</span>
@@ -3598,11 +3592,11 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cancel_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">cancel_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Annule la recherche globale ou par box en cours.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_worker</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_worker</span><span class="o">.</span><span class="n">isRunning</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_search_worker</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
@@ -3676,7 +3670,10 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">193</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
@@ -3694,16 +3691,13 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">encode_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">img_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Encode l&#39;image dans l&#39;état SAM3 (arrière-plan).</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">encode_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">,</span> <span class="n">img_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Encode l&#39;image dans l&#39;état SAM3 (arrière-plan).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        pixmap: QPixmap de l&#39;image à segmenter.</span>
 <span class="sd">        img_path: chemin disque optionnel - préféré à la conversion en mémoire.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">is_loaded</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_busy</span><span class="p">:</span>
         <span class="k">return</span>
@@ -3741,7 +3735,10 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
@@ -3751,10 +3748,7 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance le chargement du modèle en arrière-plan (si pas déjà fait/en cours).&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">is_loaded</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_model_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
@@ -3790,15 +3784,15 @@ Toutes les valeurs sont en coordonnées pixel de l'image originale.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
 <span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reset_prompts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reset_prompts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime tous les prompts.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_busy</span><span class="p">:</span>
         <span class="k">return</span>
@@ -3956,7 +3950,10 @@ le worker correspondant. Utilise les mêmes signaux que search_objects.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">369</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
 <span class="normal">370</span>
 <span class="normal">371</span>
 <span class="normal">372</span>
@@ -4069,10 +4066,7 @@ le worker correspondant. Utilise les mêmes signaux que search_objects.</p>
 <span class="normal">479</span>
 <span class="normal">480</span>
 <span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">search_from_box</span><span class="p">(</span>
+<span class="normal">482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">search_from_box</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">y0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -4086,8 +4080,7 @@ le worker correspondant. Utilise les mêmes signaux que search_objects.</p>
     <span class="n">sam3_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
     <span class="n">max_results</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Lance une recherche d&#39;objet à partir d&#39;une région dessinée sur l&#39;image.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance une recherche d&#39;objet à partir d&#39;une région dessinée sur l&#39;image.</span>
 
 <span class="sd">    Recadre la région de la box, choisit la stratégie demandée et lance</span>
 <span class="sd">    le worker correspondant. Utilise les mêmes signaux que search_objects.</span>
@@ -4100,6 +4093,7 @@ le worker correspondant. Utilise les mêmes signaux que search_objects.</p>
 <span class="sd">        threshold: Seuil principal (cosinus pour embedding, SAM3 score pour sam3).</span>
 <span class="sd">        sam3_threshold: Seuil SAM3 utilisé uniquement par les stratégies sam3/hybrid.</span>
 <span class="sd">        max_results: Nombre maximum de résultats (0 = illimité).</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_searching</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_search_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s2">&quot;Une recherche est déjà en cours.&quot;</span><span class="p">))</span>
@@ -4260,7 +4254,10 @@ Chaque correspondance est émise via signal_search_match au fil de l'eau.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">280</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
@@ -4342,12 +4339,8 @@ Chaque correspondance est émise via signal_search_match au fil de l'eau.</p>
 <span class="normal">359</span>
 <span class="normal">360</span>
 <span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">search_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">strategy_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sam3&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Lance la recherche de l&#39;objet `text` sur toutes les images du dossier.</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">search_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span> <span class="n">strategy_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sam3&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance la recherche de l&#39;objet `text` sur toutes les images du dossier.</span>
 
 <span class="sd">    Bloque si le modèle n&#39;est pas chargé ou si une recherche est déjà en cours.</span>
 <span class="sd">    Chaque correspondance est émise via signal_search_match au fil de l&#39;eau.</span>
@@ -4355,6 +4348,7 @@ Chaque correspondance est émise via signal_search_match au fil de l'eau.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        text: texte décrivant l&#39;objet (ex: &quot;shoe&quot;, &quot;dog&quot;).</span>
 <span class="sd">        threshold: score minimum SAM3 pour qu&#39;une image soit retenue (0–1).</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_service</span><span class="o">.</span><span class="n">is_loaded</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_search_error</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s2">&quot;Le modèle SAM3 n&#39;est pas encore chargé.&quot;</span><span class="p">))</span>
@@ -4453,16 +4447,16 @@ Chaque correspondance est émise via signal_search_match au fil de l'eau.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/sam3_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">267</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
 <span class="normal">268</span>
 <span class="normal">269</span>
 <span class="normal">270</span>
 <span class="normal">271</span>
 <span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_confidence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_confidence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifie le seuil de confiance et relance la segmentation.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_busy</span><span class="p">:</span>

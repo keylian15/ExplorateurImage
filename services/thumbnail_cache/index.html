@@ -2281,7 +2281,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 33</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 32</span>
+<span class="normal"> 33</span>
 <span class="normal"> 34</span>
 <span class="normal"> 35</span>
 <span class="normal"> 36</span>
@@ -2463,11 +2464,9 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ThumbnailCache</span><span class="p">:</span>
+<span class="normal">215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ThumbnailCache</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">thumb_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">192</span><span class="p">,</span> <span class="n">max_memory</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Deux niveaux de cache pour les thumbnails :</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deux niveaux de cache pour les thumbnails :</span>
 <span class="sd">        - Niveau 1 : LRU en mémoire (OrderedDict, taille configurable)</span>
 <span class="sd">        - Niveau 2 : Fichiers JPEG dans .thumbnails/ au côté des images</span>
 
@@ -2475,8 +2474,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="sd">            folder (str): Le dossier courant.</span>
 <span class="sd">            thumb_size (int, optional): La taille du thumbnail. Defaults to 192.</span>
 <span class="sd">            max_memory (int, optional): La mémoire maximum allouée. Defaults to 500.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thumb_size</span> <span class="o">=</span> <span class="n">thumb_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_memory</span> <span class="o">=</span> <span class="n">max_memory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
@@ -2491,15 +2490,14 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            folder (str): Chemin du dossier contenant les images.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">folder</span> <span class="o">=</span> <span class="n">folder</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thumb_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">THUMB_FOLDER</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">ensure_thumb_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Crée le dossier de stockage des thumbnails s&#39;il n&#39;existe pas déjà.&quot;&quot;&quot;</span>
-
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thumb_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># ──────────────────────────────────────────────</span>
@@ -2514,8 +2512,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str: Chemin du fichier thumbnail sur disque.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">img_name</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thumb_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">thumb_size</span><span class="si">}</span><span class="s2">.jpg&quot;</span><span class="p">)</span>
 
@@ -2524,8 +2522,7 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
     <span class="c1"># ──────────────────────────────────────────────</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Retourne le QPixmap mis en cache, ou None s&#39;il est absent.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourne le QPixmap mis en cache, ou None s&#39;il est absent.</span>
 <span class="sd">        Promotionne automatiquement depuis le disque vers la mémoire.</span>
 
 <span class="sd">        Args:</span>
@@ -2533,6 +2530,7 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            QPixmap | None: Le thumbnail en mémoire ou None s&#39;il n&#39;existe pas.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Niveau 1 : mémoire</span>
         <span class="k">if</span> <span class="n">img_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="p">:</span>
@@ -2555,6 +2553,7 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            img_name (str): Nom de l&#39;image.</span>
 <span class="sd">            pixmap (QPixmap): Le thumbnail à stocker.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
             <span class="k">return</span>
@@ -2566,6 +2565,7 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            img_name (str): Nom de l&#39;image.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">disk_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_key</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
@@ -2580,12 +2580,12 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Change la taille des thumbnails. Vide la mémoire.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Change la taille des thumbnails. Vide la mémoire.</span>
 <span class="sd">        Le cache disque de l&#39;ancienne taille reste intact (autre nom de fichier).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            new_size (int): Nouvelle taille des thumbnails.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thumb_size</span> <span class="o">=</span> <span class="n">new_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -2600,8 +2600,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            img_name (str): Nom de l&#39;image.</span>
 <span class="sd">            pixmap (QPixmap): Thumbnail.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="p">[</span><span class="n">img_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pixmap</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">move_to_end</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
         <span class="c1"># Éviction LRU si dépassement</span>
@@ -2614,8 +2614,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            img_name (str): Nom de l&#39;image.</span>
 <span class="sd">            pixmap (QPixmap): Thumbnail.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_thumb_dir</span><span class="p">()</span>
         <span class="n">disk_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_key</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">disk_path</span><span class="p">):</span>
@@ -2626,13 +2626,13 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
     <span class="c1"># ──────────────────────────────────────────────</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">make_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Charge l&#39;image source, la redimensionne et la met en cache.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Charge l&#39;image source, la redimensionne et la met en cache.</span>
 <span class="sd">        Retourne le QPixmap ou None si le fichier est illisible.</span>
 <span class="sd">        Pensé pour être appelé depuis un thread secondaire.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            img_name (str): Nom de l&#39;image.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">src_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">QImage</span><span class="p">(</span><span class="n">src_path</span><span class="p">)</span>
@@ -2745,7 +2745,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
+<span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
@@ -2758,11 +2759,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">thumb_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">192</span><span class="p">,</span> <span class="n">max_memory</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Deux niveaux de cache pour les thumbnails :</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">thumb_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">192</span><span class="p">,</span> <span class="n">max_memory</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deux niveaux de cache pour les thumbnails :</span>
 <span class="sd">    - Niveau 1 : LRU en mémoire (OrderedDict, taille configurable)</span>
 <span class="sd">    - Niveau 2 : Fichiers JPEG dans .thumbnails/ au côté des images</span>
 
@@ -2770,8 +2768,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="sd">        folder (str): Le dossier courant.</span>
 <span class="sd">        thumb_size (int, optional): La taille du thumbnail. Defaults to 192.</span>
 <span class="sd">        max_memory (int, optional): La mémoire maximum allouée. Defaults to 500.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">thumb_size</span> <span class="o">=</span> <span class="n">thumb_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">max_memory</span> <span class="o">=</span> <span class="n">max_memory</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">QPixmap</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
@@ -2798,9 +2796,9 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clear_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Vide uniquement le LRU mémoire (libère RAM sans toucher au disque).&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -2879,7 +2877,10 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
@@ -2887,10 +2888,7 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 <span class="normal">80</span>
 <span class="normal">81</span>
 <span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">disk_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">disk_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Génère un chemin de fichier unique et stable pour le thumbnail associé à une image.</span>
 
 <span class="sd">    Args:</span>
@@ -2898,8 +2896,8 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        str: Chemin du fichier thumbnail sur disque.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">img_name</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thumb_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">thumb_size</span><span class="si">}</span><span class="s2">.jpg&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -2924,12 +2922,10 @@ d'améliorer les performances de génération et d'affichage des miniatures.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ensure_thumb_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ensure_thumb_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Crée le dossier de stockage des thumbnails s&#39;il n&#39;existe pas déjà.&quot;&quot;&quot;</span>
-
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thumb_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3008,7 +3004,10 @@ Promotionne automatiquement depuis le disque vers la mémoire.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 92</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
 <span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
@@ -3029,12 +3028,8 @@ Promotionne automatiquement depuis le disque vers la mémoire.</p>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retourne le QPixmap mis en cache, ou None s&#39;il est absent.</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le QPixmap mis en cache, ou None s&#39;il est absent.</span>
 <span class="sd">    Promotionne automatiquement depuis le disque vers la mémoire.</span>
 
 <span class="sd">    Args:</span>
@@ -3042,6 +3037,7 @@ Promotionne automatiquement depuis le disque vers la mémoire.</p>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        QPixmap | None: Le thumbnail en mémoire ou None s&#39;il n&#39;existe pas.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Niveau 1 : mémoire</span>
     <span class="k">if</span> <span class="n">img_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="p">:</span>
@@ -3110,7 +3106,9 @@ Promotionne automatiquement depuis le disque vers la mémoire.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
@@ -3121,12 +3119,12 @@ Promotionne automatiquement depuis le disque vers la mémoire.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">invalidate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime une entrée des deux niveaux (ex : après renommage).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        img_name (str): Nom de l&#39;image.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">disk_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_key</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
@@ -3190,7 +3188,8 @@ Pensé pour être appelé depuis un thread secondaire.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">194</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">193</span>
+<span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
@@ -3211,15 +3210,14 @@ Pensé pour être appelé depuis un thread secondaire.</p>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Charge l&#39;image source, la redimensionne et la met en cache.</span>
+<span class="normal">215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_thumbnail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QPixmap</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Charge l&#39;image source, la redimensionne et la met en cache.</span>
 <span class="sd">    Retourne le QPixmap ou None si le fichier est illisible.</span>
 <span class="sd">    Pensé pour être appelé depuis un thread secondaire.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        img_name (str): Nom de l&#39;image.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">src_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">img_name</span><span class="p">)</span>
     <span class="n">image</span> <span class="o">=</span> <span class="n">QImage</span><span class="p">(</span><span class="n">src_path</span><span class="p">)</span>
@@ -3304,7 +3302,10 @@ Pensé pour être appelé depuis un thread secondaire.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
@@ -3312,14 +3313,13 @@ Pensé pour être appelé depuis un thread secondaire.</p>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stocke le thumbnail dans les deux niveaux.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        img_name (str): Nom de l&#39;image.</span>
 <span class="sd">        pixmap (QPixmap): Le thumbnail à stocker.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pixmap</span><span class="o">.</span><span class="n">isNull</span><span class="p">():</span>
         <span class="k">return</span>
@@ -3379,7 +3379,8 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">147</span>
+<span class="normal">148</span>
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
@@ -3387,14 +3388,13 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Change la taille des thumbnails. Vide la mémoire.</span>
+<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Change la taille des thumbnails. Vide la mémoire.</span>
 <span class="sd">    Le cache disque de l&#39;ancienne taille reste intact (autre nom de fichier).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        new_size (int): Nouvelle taille des thumbnails.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">thumb_size</span> <span class="o">=</span> <span class="n">new_size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -3451,22 +3451,22 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
 <span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Définit le dossier source des images et met à jour le dossier de cache des thumbnails. Réinitialise le cache mémoire.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        folder (str): Chemin du dossier contenant les images.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">folder</span> <span class="o">=</span> <span class="n">folder</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">thumb_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">THUMB_FOLDER</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -3539,7 +3539,8 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">177</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
+<span class="normal">177</span>
 <span class="normal">178</span>
 <span class="normal">179</span>
 <span class="normal">180</span>
@@ -3549,15 +3550,14 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">store_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
+<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">store_disk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stocke le thumbnail sur le disque.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        img_name (str): Nom de l&#39;image.</span>
 <span class="sd">        pixmap (QPixmap): Thumbnail.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_thumb_dir</span><span class="p">()</span>
     <span class="n">disk_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">disk_key</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">disk_path</span><span class="p">):</span>
@@ -3631,7 +3631,8 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/thumbnail_cache.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">163</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">162</span>
+<span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
@@ -3642,15 +3643,14 @@ Le cache disque de l'ancienne taille reste intact (autre nom de fichier).</p>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">store_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
+<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">store_memory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pixmap</span><span class="p">:</span> <span class="n">QPixmap</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Stocke le thumbnail en mémoire et applique l&#39;éviction LRU si nécessaire.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        img_name (str): Nom de l&#39;image.</span>
 <span class="sd">        pixmap (QPixmap): Thumbnail.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="p">[</span><span class="n">img_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pixmap</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_memory</span><span class="o">.</span><span class="n">move_to_end</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
     <span class="c1"># Éviction LRU si dépassement</span>

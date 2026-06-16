@@ -2064,7 +2064,8 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>views/components/clickable_label.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+<span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
@@ -2092,16 +2093,14 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ClickableLabel</span><span class="p">(</span><span class="n">QLabel</span><span class="p">):</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ClickableLabel</span><span class="p">(</span><span class="n">QLabel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class qui représente une QLabel avec callbacks clic gauche et droit.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_or_parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.</span>
-<span class="sd">            parent (QWidget, optional): QWidget parent. Defaults to None.&quot;&quot;&quot;</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">        text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.</span>
+<span class="sd">        parent (QWidget, optional): QWidget parent. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text_or_parent</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">text_or_parent</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text_or_parent</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">):</span>
@@ -2116,6 +2115,7 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            event (QMouseEvent): Event de clic.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">MouseButton</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightClicked</span><span class="p">:</span>
@@ -2150,58 +2150,15 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 
     <div class="doc doc-contents ">
 
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>text_or_parent</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | <span title="PyQt6.QtWidgets.QWidget">QWidget</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Texte du QLabel ou QWidget parent. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>parent</code>
-            </td>
-            <td>
-                  <code><span title="PyQt6.QtWidgets.QWidget">QWidget</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>QWidget parent. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Args:
+text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.
+parent (QWidget, optional): QWidget parent. Defaults to None.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/components/clickable_label.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">27</span>
+<span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
@@ -2212,14 +2169,11 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_or_parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.</span>
-<span class="sd">        parent (QWidget, optional): QWidget parent. Defaults to None.&quot;&quot;&quot;</span>
-
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text_or_parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">    text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.</span>
+<span class="sd">    parent (QWidget, optional): QWidget parent. Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text_or_parent</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">text_or_parent</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text_or_parent</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">):</span>
@@ -2281,7 +2235,9 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/components/clickable_label.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
@@ -2291,12 +2247,12 @@ et droit de la souris, facilitant l'interaction directe dans l'interface.</p>
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect le clic gauche et droit.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        event (QMouseEvent): Event de clic.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">MouseButton</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightClicked</span><span class="p">:</span>

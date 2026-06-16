@@ -2069,7 +2069,8 @@ et gestion du batch d'auto-complétion.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>views/gallery_widget.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 62</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 61</span>
+<span class="normal"> 62</span>
 <span class="normal"> 63</span>
 <span class="normal"> 64</span>
 <span class="normal"> 65</span>
@@ -2342,8 +2343,7 @@ et gestion du batch d'auto-complétion.</p>
 <span class="normal">332</span>
 <span class="normal">333</span>
 <span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GalleryWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GalleryWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span>
@@ -2352,11 +2352,11 @@ et gestion du batch d'auto-complétion.</p>
         <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span><span class="p">,</span>
         <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            gallery_vm: ViewModel de la galerie.</span>
-<span class="sd">            autocomplete_vm: ViewModel de l&#39;auto-complétion.</span>
-<span class="sd">            sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">        gallery_vm: ViewModel de la galerie.</span>
+<span class="sd">        autocomplete_vm: ViewModel de l&#39;auto-complétion.</span>
+<span class="sd">        sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span> <span class="o">=</span> <span class="n">gallery_vm</span>
@@ -2645,74 +2645,16 @@ et gestion du batch d'auto-complétion.</p>
 
     <div class="doc doc-contents ">
 
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>gallery_vm</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="GalleryViewModel (viewmodels.gallery_vm.GalleryViewModel)" href="../../viewmodels/gallery_vm/#viewmodels.gallery_vm.GalleryViewModel">GalleryViewModel</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ViewModel de la galerie.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>autocomplete_vm</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="AutocompleteViewModel (viewmodels.autocomplete_vm.AutocompleteViewModel)" href="../../viewmodels/autocomplete_vm/#viewmodels.autocomplete_vm.AutocompleteViewModel">AutocompleteViewModel</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ViewModel de l'auto-complétion.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>sam3_vm</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="Sam3ViewModel (viewmodels.sam3_vm.Sam3ViewModel)" href="../../viewmodels/sam3_vm/#viewmodels.sam3_vm.Sam3ViewModel">Sam3ViewModel</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>ViewModel SAM3 partagé du workspace.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Args:
+gallery_vm: ViewModel de la galerie.
+autocomplete_vm: ViewModel de l'auto-complétion.
+sam3_vm: ViewModel SAM3 partagé du workspace.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/gallery_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">63</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
+<span class="normal">63</span>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
@@ -2733,8 +2675,7 @@ et gestion du batch d'auto-complétion.</p>
 <span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span>
     <span class="n">autocomplete_vm</span><span class="p">:</span> <span class="n">AutocompleteViewModel</span><span class="p">,</span>
@@ -2742,11 +2683,11 @@ et gestion du batch d'auto-complétion.</p>
     <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span><span class="p">,</span>
     <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        gallery_vm: ViewModel de la galerie.</span>
-<span class="sd">        autocomplete_vm: ViewModel de l&#39;auto-complétion.</span>
-<span class="sd">        sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">    gallery_vm: ViewModel de la galerie.</span>
+<span class="sd">    autocomplete_vm: ViewModel de l&#39;auto-complétion.</span>
+<span class="sd">    sam3_vm: ViewModel SAM3 partagé du workspace.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_gvm</span> <span class="o">=</span> <span class="n">gallery_vm</span>
@@ -2779,7 +2720,8 @@ et gestion du batch d'auto-complétion.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/gallery_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
+<span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
@@ -2800,8 +2742,7 @@ et gestion du batch d'auto-complétion.</p>
 <span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_right_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="n">QPoint</span><span class="p">):</span>
+<span class="normal">274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_right_click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="n">QPoint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ouvre Sam3Dialog pour l&#39;image cliquée.&quot;&quot;&quot;</span>
     <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_view</span><span class="o">.</span><span class="n">indexAt</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>

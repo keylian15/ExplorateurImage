@@ -3190,19 +3190,8 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 <span class="normal">573</span>
 <span class="normal">574</span>
 <span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OllamaWrapper</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Wrapper Python (simple, robuste, typé) autour de l&#39;API HTTP d&#39;Ollama.</span>
+<span class="normal">576</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">OllamaWrapper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper Python (simple, robuste, typé) autour de l&#39;API HTTP d&#39;Ollama.</span>
 
 <span class="sd">    Base URL par défaut : xxxx</span>
 <span class="sd">    Endpoints utilisés :</span>
@@ -3226,8 +3215,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
     <span class="c1"># --------------------------</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">is_server_running</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Retourne True si le serveur Ollama répond.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourne True si le serveur Ollama répond.</span>
 
 <span class="sd">        Stratégie : on essaie GET /api/version (léger et dédié à ça).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -3247,8 +3235,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="n">wait_timeout_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
         <span class="n">extra_env</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Lance `ollama serve` via subprocess.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance `ollama serve` via subprocess.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            wait: si True, attend que le port réponde avant de rendre la main.</span>
@@ -3260,6 +3247,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 
 <span class="sd">        Raises:</span>
 <span class="sd">            OllamaServerStartError: si ollama n&#39;est pas trouvé ou ne démarre pas.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Vérifie que l&#39;exécutable &quot;ollama&quot; est présent dans le PATH.</span>
         <span class="n">ollama_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;ollama&quot;</span><span class="p">)</span>
@@ -3298,8 +3286,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="k">raise</span> <span class="n">OllamaServerStartError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Le serveur Ollama ne répond pas après </span><span class="si">{</span><span class="n">wait_timeout_s</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">s.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_port_open</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Test rapide TCP du port du base_url (sans HTTP).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test rapide TCP du port du base_url (sans HTTP).</span>
 
 <span class="sd">        Utile pour savoir si quelque chose écoute déjà, sans dépendre d&#39;une réponse JSON.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -3330,9 +3317,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
     <span class="c1"># --------------------------</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}&quot;&quot;&quot;</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http_request_json</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;/api/version&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="c1"># La doc renvoie typiquement { &quot;version&quot;: &quot;x.y.z&quot; }.</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">)</span>
@@ -3341,9 +3326,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="k">return</span> <span class="n">version</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OllamaModelInfo</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}&quot;&quot;&quot;</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http_request_json</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;/api/tags&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
         <span class="n">raw_models</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;models&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_models</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -3395,8 +3378,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="n">system</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OllamaGenerateResult</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            model: nom du modèle (ex: &quot;llama3&quot;, &quot;mistral&quot;, etc.)</span>
@@ -3406,6 +3388,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 
 <span class="sd">        Returns:</span>
 <span class="sd">            OllamaGenerateResult : réponse texte + quelques métriques si présentes.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>  <span class="c1"># Modèle ciblé</span>
@@ -3448,8 +3431,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="n">system</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OllamaGenerateResult</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Appelle POST /api/generate avec une image (multimodal).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Appelle POST /api/generate avec une image (multimodal).</span>
 <span class="sd">        Ollama attend une liste &quot;images&quot; contenant des chaînes base64. :contentReference[oaicite:6]{index=6}</span>
 
 <span class="sd">        Args:</span>
@@ -3462,6 +3444,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 
 <span class="sd">        Returns:</span>
 <span class="sd">            OllamaGenerateResult</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Convertit l&#39;image en bytes.</span>
         <span class="n">image_bytes</span><span class="p">:</span> <span class="nb">bytes</span>
@@ -3521,8 +3504,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Génère un embedding.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Génère un embedding.</span>
 
 <span class="sd">        Note doc : l&#39;endpoint &quot;Generate Embedding&quot; a été supersédé par /api/embed</span>
 <span class="sd">        (selon docs/api.md). :contentReference[oaicite:7]{index=7}</span>
@@ -3557,8 +3539,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="o">*</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Exécute une requête HTTP et retourne un dict JSON.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Exécute une requête HTTP et retourne un dict JSON.</span>
 
 <span class="sd">        On utilise urllib (stdlib) pour éviter une dépendance à requests/httpx dans un contexte étudiant.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -3618,8 +3599,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
         <span class="k">return</span> <span class="n">payload</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">similarite_cosinus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec_a</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">vec_b</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calcule la similarité cosinus entre deux vecteurs numériques.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calcule la similarité cosinus entre deux vecteurs numériques.</span>
 <span class="sd">        Retourne un score entre -1 et 1, pour les embeddings c&#39;est entre 0 et 1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -3737,7 +3717,14 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">399</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span>
 <span class="normal">402</span>
@@ -3755,22 +3742,13 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 <span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">embed</span><span class="p">(</span>
+<span class="normal">417</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">embed</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Génère un embedding.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Génère un embedding.</span>
 
 <span class="sd">    Note doc : l&#39;endpoint &quot;Generate Embedding&quot; a été supersédé par /api/embed</span>
 <span class="sd">    (selon docs/api.md). :contentReference[oaicite:7]{index=7}</span>
@@ -3919,7 +3897,14 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
 <span class="normal">274</span>
@@ -3961,14 +3946,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
-<span class="normal">313</span>
-<span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_text</span><span class="p">(</span>
+<span class="normal">313</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_text</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -3976,8 +3954,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
     <span class="n">system</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OllamaGenerateResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model: nom du modèle (ex: &quot;llama3&quot;, &quot;mistral&quot;, etc.)</span>
@@ -3987,6 +3964,7 @@ La doc officielle liste aussi d'autres endpoints (chat, pull, delete, etc.). :co
 
 <span class="sd">    Returns:</span>
 <span class="sd">        OllamaGenerateResult : réponse texte + quelques métriques si présentes.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">body</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>  <span class="c1"># Modèle ciblé</span>
@@ -4180,7 +4158,14 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">322</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
@@ -4244,14 +4229,7 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 <span class="normal">383</span>
 <span class="normal">384</span>
 <span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_with_image</span><span class="p">(</span>
+<span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">generate_with_image</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -4261,8 +4239,7 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
     <span class="n">system</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OllamaGenerateResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Appelle POST /api/generate avec une image (multimodal).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Appelle POST /api/generate avec une image (multimodal).</span>
 <span class="sd">    Ollama attend une liste &quot;images&quot; contenant des chaînes base64. :contentReference[oaicite:6]{index=6}</span>
 
 <span class="sd">    Args:</span>
@@ -4275,6 +4252,7 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 
 <span class="sd">    Returns:</span>
 <span class="sd">        OllamaGenerateResult</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Convertit l&#39;image en bytes.</span>
     <span class="n">image_bytes</span><span class="p">:</span> <span class="nb">bytes</span>
@@ -4345,19 +4323,15 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}&quot;&quot;&quot;</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http_request_json</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;/api/version&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="c1"># La doc renvoie typiquement { &quot;version&quot;: &quot;x.y.z&quot; }.</span>
     <span class="n">version</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">)</span>
@@ -4387,7 +4361,8 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
+<span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
@@ -4398,11 +4373,8 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_server_running</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Retourne True si le serveur Ollama répond.</span>
+<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_server_running</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne True si le serveur Ollama répond.</span>
 
 <span class="sd">    Stratégie : on essaie GET /api/version (léger et dédié à ça).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -4436,7 +4408,12 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span>
@@ -4470,17 +4447,8 @@ Ollama attend une liste "images" contenant des chaînes base64. :contentReferenc
 <span class="normal">255</span>
 <span class="normal">256</span>
 <span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OllamaModelInfo</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="normal">258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">OllamaModelInfo</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}&quot;&quot;&quot;</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_http_request_json</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;/api/tags&quot;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="n">raw_models</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;models&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_models</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -4542,7 +4510,16 @@ Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">501</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
 <span class="normal">502</span>
 <span class="normal">503</span>
 <span class="normal">504</span>
@@ -4550,19 +4527,8 @@ Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.</p>
 <span class="normal">506</span>
 <span class="normal">507</span>
 <span class="normal">508</span>
-<span class="normal">509</span>
-<span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span>
-<span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span>
-<span class="normal">518</span>
-<span class="normal">519</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">similarite_cosinus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec_a</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">vec_b</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calcule la similarité cosinus entre deux vecteurs numériques.</span>
+<span class="normal">509</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">similarite_cosinus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec_a</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">vec_b</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calcule la similarité cosinus entre deux vecteurs numériques.</span>
 <span class="sd">    Retourne un score entre -1 et 1, pour les embeddings c&#39;est entre 0 et 1.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -4710,7 +4676,9 @@ Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/ollama_wrapper.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
@@ -4763,17 +4731,14 @@ Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.</p>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_server</span><span class="p">(</span>
+<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">start_server</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">wait_timeout_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
     <span class="n">extra_env</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Lance `ollama serve` via subprocess.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance `ollama serve` via subprocess.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        wait: si True, attend que le port réponde avant de rendre la main.</span>
@@ -4785,6 +4750,7 @@ Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.</p>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        OllamaServerStartError: si ollama n&#39;est pas trouvé ou ne démarre pas.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Vérifie que l&#39;exécutable &quot;ollama&quot; est présent dans le PATH.</span>
     <span class="n">ollama_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;ollama&quot;</span><span class="p">)</span>

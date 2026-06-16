@@ -2038,7 +2038,8 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>views/workspace_widget.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 51</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 50</span>
+<span class="normal"> 51</span>
 <span class="normal"> 52</span>
 <span class="normal"> 53</span>
 <span class="normal"> 54</span>
@@ -2186,8 +2187,7 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">WorkspaceWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">WorkspaceWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Espace de travail autonome : galerie + carte + thème + dock détail.&quot;&quot;&quot;</span>
 
     <span class="n">signal_folder_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (ws_id, folder_path)</span>
@@ -2206,16 +2206,16 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
         <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sam3_service</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            ws_id (str): Identifiant unique du workspace.</span>
-<span class="sd">            name (str): Nom affiché dans l&#39;onglet parent.</span>
-<span class="sd">            client (OllamaWrapper): Client Ollama partagé.</span>
-<span class="sd">            config (dict): Configuration globale.</span>
-<span class="sd">            main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
-<span class="sd">            folder (str | None): Dossier à restaurer, ou None.</span>
-<span class="sd">            ws_data (dict | None): Données complètes du workspace.</span>
-<span class="sd">            parent: Parent Qt.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">        ws_id (str): Identifiant unique du workspace.</span>
+<span class="sd">        name (str): Nom affiché dans l&#39;onglet parent.</span>
+<span class="sd">        client (OllamaWrapper): Client Ollama partagé.</span>
+<span class="sd">        config (dict): Configuration globale.</span>
+<span class="sd">        main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
+<span class="sd">        folder (str | None): Dossier à restaurer, ou None.</span>
+<span class="sd">        ws_data (dict | None): Données complètes du workspace.</span>
+<span class="sd">        parent: Parent Qt.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
@@ -2364,153 +2364,21 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
     <div class="doc doc-contents ">
 
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>ws_id</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Identifiant unique du workspace.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>name</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Nom affiché dans l'onglet parent.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>client</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="OllamaWrapper (services.ollama_wrapper.OllamaWrapper)" href="../../services/ollama_wrapper/#services.ollama_wrapper.OllamaWrapper">OllamaWrapper</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Client Ollama partagé.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>config</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Configuration globale.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>main_window</code>
-            </td>
-            <td>
-                  <code><span title="PyQt6.QtWidgets.QMainWindow">QMainWindow</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Fenêtre principale, nécessaire pour les docks.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>folder</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Dossier à restaurer, ou None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ws_data</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Données complètes du workspace.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>parent</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Parent Qt.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Args:
+ws_id (str): Identifiant unique du workspace.
+name (str): Nom affiché dans l'onglet parent.
+client (OllamaWrapper): Client Ollama partagé.
+config (dict): Configuration globale.
+main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
+folder (str | None): Dossier à restaurer, ou None.
+ws_data (dict | None): Données complètes du workspace.
+parent: Parent Qt.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/workspace_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 57</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 56</span>
+<span class="normal"> 57</span>
 <span class="normal"> 58</span>
 <span class="normal"> 59</span>
 <span class="normal"> 60</span>
@@ -2598,8 +2466,7 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 <span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2612,16 +2479,16 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
     <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sam3_service</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        ws_id (str): Identifiant unique du workspace.</span>
-<span class="sd">        name (str): Nom affiché dans l&#39;onglet parent.</span>
-<span class="sd">        client (OllamaWrapper): Client Ollama partagé.</span>
-<span class="sd">        config (dict): Configuration globale.</span>
-<span class="sd">        main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
-<span class="sd">        folder (str | None): Dossier à restaurer, ou None.</span>
-<span class="sd">        ws_data (dict | None): Données complètes du workspace.</span>
-<span class="sd">        parent: Parent Qt.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">    ws_id (str): Identifiant unique du workspace.</span>
+<span class="sd">    name (str): Nom affiché dans l&#39;onglet parent.</span>
+<span class="sd">    client (OllamaWrapper): Client Ollama partagé.</span>
+<span class="sd">    config (dict): Configuration globale.</span>
+<span class="sd">    main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
+<span class="sd">    folder (str | None): Dossier à restaurer, ou None.</span>
+<span class="sd">    ws_data (dict | None): Données complètes du workspace.</span>
+<span class="sd">    parent: Parent Qt.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
