@@ -45,6 +45,7 @@ nav:
 
       - Tools:
           - i18n_builder: tools/i18n_builder.md
+          - mkdocs_builder: tools/mkdocs_builder.md
 
       - ViewModels:
           - autocomplete_vm: viewmodels/autocomplete_vm.md
