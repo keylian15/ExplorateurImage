@@ -447,6 +447,11 @@ class SearchResultsPanel(QWidget):
         self._final_count = len(matched)
         self._search_done = True
 
+        if len(matched) == 0 and not self._pending_results:
+            self._flush_timer.stop()
+            self._lbl_title.setText("0 résultat")
+            return
+
         if self._wait_mode and self._pending_results:
             # Tri par score décroissant avant affichage
             self._pending_results.sort(key=lambda x: x[1], reverse=True)
@@ -561,7 +566,7 @@ class Sam3SidebarContent(QWidget):
     """
 
     signal_text_prompt = pyqtSignal(str)
-    signal_search_requested = pyqtSignal(str, float)  # (text, threshold) — recherche texte globale
+    signal_search_requested = pyqtSignal(str, float, float)  # (text, embed_threshold, sam3_threshold)
     signal_box_search_requested = pyqtSignal(float, float)  # (threshold, sam3_threshold) — recherche par box
     signal_search_cancel = pyqtSignal()
     signal_box_positive = pyqtSignal(bool)
@@ -727,7 +732,7 @@ class Sam3SidebarContent(QWidget):
         self.spin_embed_threshold.setRange(0.01, 1.0)
         self.spin_embed_threshold.setSingleStep(0.05)
         self.spin_embed_threshold.setDecimals(2)
-        self.spin_embed_threshold.setValue(0.30)
+        self.spin_embed_threshold.setValue(0.60)
         self.spin_embed_threshold.setFixedWidth(70)
         self.spin_embed_threshold.setToolTip("Score cosinus minimum (stratégies Embedding et Hybride).")
         embed_thresh_row.addStretch()
@@ -926,7 +931,7 @@ class Sam3SidebarContent(QWidget):
         if not text:
             self.lbl_status.setText("⚠️ Saisissez d'abord un prompt texte.")
             return
-        self.signal_search_requested.emit(text, self.current_sam3_threshold())
+        self.signal_search_requested.emit(text, self.current_embed_threshold(), self.current_sam3_threshold())
 
     def _on_search_box(self) -> None:
         """Recherche par box avec la stratégie sélectionnée."""
@@ -1131,10 +1136,11 @@ class Sam3Dialog(QMainWindow):
 
     # ── Slots recherche ───────────────────────────────────────────────────────
 
-    def _on_search_requested(self, text: str, threshold: float) -> None:
+    def _on_search_requested(self, text: str, embed_threshold: float, sam3_threshold: float) -> None:
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
         self._results_panel.set_wait_mode(self._sidebar_content.current_wait_mode())
         strategy = self._sidebar_content.current_strategy()
+        threshold = embed_threshold if strategy == "embedding" else sam3_threshold
         self._vm.search_objects(text, threshold, strategy_name=strategy)
 
     def _on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
