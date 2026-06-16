@@ -203,8 +203,8 @@
     "fr": "Calculer la carte",
     "en": "Calculate the card"
   },
-  "⚙ Paramètres": {
-    "fr": "⚙ Paramètres",
+  "⚙️ Paramètres": {
+    "fr": "⚙️ Paramètres",
     "en": "⚙ Settings"
   },
   "Réinitialiser le filtre": {
@@ -223,9 +223,9 @@
     "fr": "Clic : isoler et zoomer sur ce cluster",
     "en": "Click: Isolate and zoom on this cluster"
   },
-  "Éditeur de thème": {
-    "fr": "Éditeur de thème",
-    "en": "Theme Editor"
+  "Éditeur de paramètres": {
+    "fr": "Éditeur de paramètres",
+    "en": "Settings Editor"
   },
   "↺ Réinitialiser": {
     "fr": "↺ Réinitialiser",
@@ -274,10 +274,6 @@
   "🗺 Carte 2D": {
     "fr": "🗺 Carte 2D",
     "en": "🗺 Map 2D"
-  },
-  "🎨 Thème": {
-    "fr": "🎨 Thème",
-    "en": "🎨 Theme"
   },
   "0 / {total} - en attente…": {
     "fr": "0 / {total} - en attente…",

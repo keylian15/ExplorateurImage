@@ -11,8 +11,10 @@ Responsabilités :
  4. Instancier le client Ollama partagé
  5. Créer et afficher la MainWindow
  6. Lancer la boucle événementielle Qt
+ 7. Permettre le redémarrage complet de l'application (changement de langue)
 """
 
+import os
 import sys
 
 from PyQt6.QtWidgets import QApplication
@@ -26,14 +28,31 @@ from styles import get_stylesheet
 from views.main_window import MainWindow
 
 
+def restart_app():
+    """Redémarre complètement le processus de l'application.
+
+    Utilisé après un changement de langue : la configuration (incluant la
+    nouvelle langue) a déjà été sauvegardée dans config.json via
+    I18nManager.set_language(), donc le nouveau processus la rechargera
+    automatiquement au démarrage.
+
+    Remplace le processus courant via os.execv (même interpréteur, mêmes
+    arguments), ce qui évite de laisser un second processus tourner et
+    libère proprement les ressources (incluant SAM3) avant le redémarrage.
+    """
+    python = sys.executable
+    os.execv(python, [python] + sys.argv)
+
+
 def main():
     app = QApplication(sys.argv)
     app.setStyleSheet(get_stylesheet())
 
     client = OllamaWrapper()
     config = config_repository.load()
-    translator = I18nManager()
-    translator.set_language("en")
+
+    saved_lang = config.get("language", "fr")
+    translator = I18nManager(lang=saved_lang)
 
     sam3_service = Sam3Service()
 

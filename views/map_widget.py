@@ -363,7 +363,7 @@ class MapTab(QWidget):
         self._btn_compute.clicked.connect(self._vm.compute)
         bar.addWidget(self._btn_compute)
 
-        self._btn_settings = QPushButton(self.translator.tr("⚙ Paramètres"))
+        self._btn_settings = QPushButton(self.translator.tr("⚙️ Paramètres"))
         self._btn_settings.setCheckable(True)
         self._btn_settings.clicked.connect(lambda checked: self._settings_dock.setVisible(checked))
         bar.addWidget(self._btn_settings)

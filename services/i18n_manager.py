@@ -3,6 +3,25 @@ from pathlib import Path
 
 from models import config_repository
 
+# ── Métadonnées d'affichage pour les langues connues ──────────────────────────
+# Utilisé uniquement pour l'affichage (nom lisible + drapeau).
+# Si une langue présente dans i18n.json n'est pas dans ce dict, on affiche
+# simplement son code en majuscules avec un drapeau générique.
+_LANGUAGE_META: dict[str, tuple[str, str]] = {
+    "fr": ("Français", "🇫🇷"),
+    "en": ("English", "🇬🇧"),
+    "es": ("Español", "🇪🇸"),
+    "de": ("Deutsch", "🇩🇪"),
+    "it": ("Italiano", "🇮🇹"),
+    "pt": ("Português", "🇵🇹"),
+    "nl": ("Nederlands", "🇳🇱"),
+    "ja": ("日本語", "🇯🇵"),
+    "zh": ("中文", "🇨🇳"),
+    "ko": ("한국어", "🇰🇷"),
+    "ru": ("Русский", "🇷🇺"),
+    "ar": ("العربية", "🇸🇦"),
+}
+
 
 class I18nManager:
     def __init__(self, lang: str = "fr", file_path: str = "i18n.json"):
@@ -37,3 +56,40 @@ class I18nManager:
             return text
 
         return entry.get(self.lang, text)
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Langues disponibles
+    # ──────────────────────────────────────────────────────────────────────
+
+    def available_languages(self) -> list[str]:
+        """Renvoie la liste triée des codes de langue présents dans i18n.json.
+
+        Parcourt toutes les entrées de traduction et collecte l'union des clés
+        de langue rencontrées. "fr" est toujours inclus en premier (langue
+        source), suivi des autres langues triées alphabétiquement.
+
+        Returns:
+            list[str]: Liste des codes de langue (ex: ["fr", "en", "es"]).
+        """
+        codes: set[str] = set()
+        for entry in self.translations.values():
+            if isinstance(entry, dict):
+                codes.update(entry.keys())
+
+        codes.add("fr")
+
+        others = sorted(c for c in codes if c != "fr")
+        return ["fr", *others]
+
+    @staticmethod
+    def language_label(code: str) -> str:
+        """Retourne un libellé lisible (emoji + nom) pour un code de langue.
+
+        Args:
+            code (str): Code de langue (ex: "fr", "en").
+
+        Returns:
+            str: Libellé du type "🇫🇷 Français", ou "🌐 EN" si inconnu.
+        """
+        name, flag = _LANGUAGE_META.get(code, (code.upper(), "🌐"))
+        return f"{flag} {name}"

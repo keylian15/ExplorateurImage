@@ -115,7 +115,7 @@ class WorkspaceWidget(QWidget):
 
         self._tabs.addTab(self._gallery_widget, self.translator.tr("🖼 Galerie"))
         self._tabs.addTab(self._map_tab, self.translator.tr("🗺 Carte 2D"))
-        self._tabs.addTab(self._style_tab, self.translator.tr("🎨 Thème"))
+        self._tabs.addTab(self._style_tab, self.translator.tr("⚙️ Paramètres"))
 
         # ── Dock détail ───────────────────────────────────────────────────────
         self._dock = QDockWidget(self.translator.tr("Détails - {name}").format(name=name), main_window)

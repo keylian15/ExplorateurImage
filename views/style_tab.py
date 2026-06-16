@@ -50,6 +50,7 @@ from PyQt6.QtWidgets import (
 from models import color_repository
 from services.i18n_manager import I18nManager
 from styles import get_stylesheet, style_label_name_style, style_label_subname_style, style_presset_style, style_separator_style, style_tittle_style
+from views.components.language_selector import LanguageSelector
 
 # ── Labels lisibles en français ───────────────────────────────────────────────
 
@@ -336,7 +337,7 @@ class ColorRow(QWidget):
 
 
 class StyleTab(QWidget):
-    """Onglet éditeur de thème visuel."""
+    """Onglet Éditeur de paramètres visuel."""
 
     def __init__(self, translator: I18nManager = None, parent=None):
         super().__init__(parent)
@@ -356,7 +357,7 @@ class StyleTab(QWidget):
 
         # ── En-tête ───────────────────────────────────────────────────────────
         header = QHBoxLayout()
-        title = QLabel(self.translator.tr("Éditeur de thème"))
+        title = QLabel(self.translator.tr("Éditeur de paramètres"))
         title.setStyleSheet(style_tittle_style())
         header.addWidget(title)
         header.addStretch()
@@ -376,6 +377,15 @@ class StyleTab(QWidget):
         sep0 = QFrame()
         sep0.setFrameShape(QFrame.Shape.HLine)
         root.addWidget(sep0)
+
+        # ── Section langue ────────────────────────────────────────────────────
+        self._lang_selector = LanguageSelector(self.translator)
+        self._lang_selector.signal_language_chosen.connect(self.on_language_chosen)
+        root.addWidget(self._lang_selector)
+
+        sep_lang = QFrame()
+        sep_lang.setFrameShape(QFrame.Shape.HLine)
+        root.addWidget(sep_lang)
 
         # ── Section thèmes prédéfinis ─────────────────────────────────────────
         lbl_presets = QLabel(self.translator.tr("Thèmes prédéfinis"))
@@ -520,3 +530,19 @@ class StyleTab(QWidget):
         """Charge le thème par défaut (Bleu nuit) sans sauvegarder."""
         self.load_preset("Bleu nuit")
         self._lbl_status.setText(self.translator.tr("Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer."))
+
+    def on_language_chosen(self, lang_code: str):
+        """Change la langue active, persiste le choix et redémarre l'application.
+
+        Args:
+            lang_code (str): Nouveau code de langue (ex: "en", "fr").
+        """
+        self.translator.set_language(lang_code)
+        self._lbl_status.setText(self.translator.tr("🌐 Langue changée — redémarrage…"))
+
+        from PyQt6.QtCore import QTimer
+
+        from main import restart_app
+
+        # Petit délai pour laisser le label s'afficher avant le redémarrage.
+        QTimer.singleShot(150, restart_app)

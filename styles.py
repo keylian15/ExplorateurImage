@@ -482,7 +482,7 @@ def style_tittle_style() -> str:
     """Retourne le style QSS pour le titre principal de l'onglet Thème.
 
     Applique une grande taille de police et une graisse élevée pour mettre
-    en valeur le titre « Éditeur de thème » en haut de l'onglet.
+    en valeur le titre « Éditeur de paramètres » en haut de l'onglet.
 
     Returns:
         str: Chaîne de style QSS inline.
@@ -525,3 +525,74 @@ def no_border_style() -> str:
         str: Chaîne de style QSS inline (``"border: none;"``).
     """
     return "border: none;"
+
+
+# ── Sélecteur de langue ───────────────────────────────────────────────────────
+
+
+def lang_card_style(selected: bool = False) -> str:
+    """Retourne le style QSS pour une carte de langue cliquable.
+
+    Affiche une bordure accentuée si la langue est actuellement sélectionnée,
+    une bordure neutre sinon. Coins arrondis et fond « carte » dans les deux cas.
+
+    Args:
+        selected (bool): True si cette langue est la langue active.
+
+    Returns:
+        str: Chaîne de style QSS.
+    """
+    border = COLORS["accent"] if selected else COLORS["border"]
+    bg = COLORS["bg_hover"] if selected else COLORS["bg_card"]
+    width = 2 if selected else 1
+    return (
+        f'QWidget[class="lang-card"] {{'
+        f"background-color: {bg};"
+        f"border: {width}px solid {border};"
+        f"border-radius: {METRICS['border_radius_lg']};"
+        f"}}"
+        f'QWidget[class="lang-card"]:hover {{'
+        f"border: 2px solid {COLORS['accent_hover']};"
+        f"}}"
+    )
+
+
+def lang_flag_style() -> str:
+    """Retourne le style QSS pour l'emoji drapeau d'une carte de langue.
+
+    Applique une grande taille de police pour que le drapeau soit
+    immédiatement reconnaissable dans la grille de sélection.
+
+    Returns:
+        str: Chaîne de style QSS inline.
+    """
+    return "font-size: 28px; border: none; background: transparent;"
+
+
+def lang_name_style(selected: bool = False) -> str:
+    """Retourne le style QSS pour le nom d'une langue dans sa carte.
+
+    Le texte est en accent et en gras si la langue est sélectionnée,
+    en texte secondaire sinon.
+
+    Args:
+        selected (bool): True si cette langue est la langue active.
+
+    Returns:
+        str: Chaîne de style QSS inline.
+    """
+    color = COLORS["accent"] if selected else COLORS["text_secondary"]
+    weight = FONTS["weight_bold"] if selected else FONTS["weight_normal"]
+    return f"font-size: {FONTS['size_small']}; color: {color}; font-weight: {weight}; border: none; background: transparent;"
+
+
+def lang_check_style() -> str:
+    """Retourne le style QSS pour la coche affichée sur la langue active.
+
+    Applique la couleur de succès et une taille de police adaptée pour
+    indiquer clairement la langue actuellement sélectionnée.
+
+    Returns:
+        str: Chaîne de style QSS inline.
+    """
+    return f"color: {COLORS['success']}; font-size: 14px; font-weight: {FONTS['weight_bold']}; border: none; background: transparent;"
