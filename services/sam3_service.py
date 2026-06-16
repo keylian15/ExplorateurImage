@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PyQt6.QtCore import QObject
+from PyQt6.QtCore import QObject, pyqtSignal
 
 # ── Résultat de segmentation ──────────────────────────────────────────────────
 
@@ -60,6 +60,8 @@ class Sam3Service(QObject):
         result  = service.extract_result(state)
         state   = service.reset_prompts(state)
     """
+
+    signal_loaded = pyqtSignal()
 
     def __init__(self):
         super().__init__()

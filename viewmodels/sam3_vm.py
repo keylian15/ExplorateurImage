@@ -136,6 +136,7 @@ class Sam3ViewModel(QObject):
         self.translator = translator
 
         self._service = sam3_service
+        self._service.signal_loaded.connect(self._on_model_loaded)
         self._state: dict | None = None
         self._confidence: float = 0.5
 
@@ -172,6 +173,7 @@ class Sam3ViewModel(QObject):
     def load_model(self) -> None:
         """Lance le chargement du modèle en arrière-plan (si pas déjà fait/en cours)."""
         if self._service.is_loaded:
+            self.signal_model_ready.emit()
             return
 
         if self._service.is_loading or self.is_busy:
@@ -180,7 +182,6 @@ class Sam3ViewModel(QObject):
 
         self.signal_model_loading.emit()
         self._load_worker = Sam3LoadWorker(self._service, self)
-        self._load_worker.signal_finished.connect(self._on_model_loaded)
         self._load_worker.signal_error.connect(self.signal_model_error)
         self._load_worker.start()
 
