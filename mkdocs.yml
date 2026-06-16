@@ -17,29 +17,34 @@ plugins:
             show_root_heading: true
 
 nav:
-  - Accueil: index.md
-  - Main: main.md
-  - Style: styles.md
-  - Models:
-    - color_repository: models/color_repository.md
-    - config_repository: models/config_repository.md
-    - image_model: models/image_model.md
-    - index_repository: models/index_repository.md
-  - Services:
-    - ollama_wrapper: services/ollama_wrapper.md
-    - thumbnail_cache: services/thumbnail_cache.md
-    - workers: services/workers.md
-  - ViewModels:
-    - autocomplete_vm: viewmodels/autocomplete_vm.md
-    - detail_vm: viewmodels/detail_vm.md
-    - gallery_vm: viewmodels/gallery_vm.md
-    - map_vm: viewmodels/map_vm.md
-  - Views:
-    - components:
-      - clickable_label: views/components/clickable_label.md
-      - fullscreen_dialog: views/components/fullscreen_dialog.md
-    - detail_widget: views/detail_widget.md
-    - gallery_widget: views/gallery_widget.md
-    - main_window: views/main_window.md
-    - map_widget: views/map_widget.md
-    - style_tab: views/style_tab.md
+  - Développeurs:
+    - Accueil: index.md
+    - Main: main.md
+    - Style: styles.md
+    - Models:
+      - color_repository: models/color_repository.md
+      - config_repository: models/config_repository.md
+      - image_model: models/image_model.md
+      - index_repository: models/index_repository.md
+    - Services:
+      - ollama_wrapper: services/ollama_wrapper.md
+      - thumbnail_cache: services/thumbnail_cache.md
+      - workers: services/workers.md
+    - ViewModels:
+      - autocomplete_vm: viewmodels/autocomplete_vm.md
+      - detail_vm: viewmodels/detail_vm.md
+      - gallery_vm: viewmodels/gallery_vm.md
+      - map_vm: viewmodels/map_vm.md
+    - Views:
+      - components:
+        - clickable_label: views/components/clickable_label.md
+        - fullscreen_dialog: views/components/fullscreen_dialog.md
+      - detail_widget: views/detail_widget.md
+      - gallery_widget: views/gallery_widget.md
+      - main_window: views/main_window.md
+      - map_widget: views/map_widget.md
+      - style_tab: views/style_tab.md
+  - Utilisateur : 
+    - Introduction: user/main.md
+    - Guide d'installation: user/install.md
+    - Guide d'utilisation: user/demo.md
