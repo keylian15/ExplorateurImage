@@ -987,3 +987,55 @@ class HybridBoxSearchWorker(QThread):
 
         except Exception as exc:
             self.signal_error.emit(str(exc))
+
+
+class EmbeddingTextSearchWorker(QThread):
+    """
+    Recherche par texte via embedding cosinus (sans SAM3).
+
+    Workflow :
+     1. Embedding du texte via nomic-embed-text.
+     2. Similarité cosinus contre tous les embeddings de l'index.
+     3. Émet signal_match pour chaque image au-dessus du seuil.
+    """
+
+    signal_progress = pyqtSignal(int, int, str)
+    signal_match = pyqtSignal(str, float)
+    signal_finished = pyqtSignal(list)
+    signal_error = pyqtSignal(str)
+
+    def __init__(self, text: str, folder: str, images: list, index: dict, client: OllamaWrapper, threshold: float = 0.3, parent=None):
+        super().__init__(parent)
+        self._text = text
+        self._folder = folder
+        self._images = images
+        self._index = index
+        self._client = client
+        self._threshold = threshold
+        self._cancelled = False
+
+    def cancel(self) -> None:
+        self._cancelled = True
+
+    def run(self) -> None:
+        try:
+            query_emb = self._client.embed(model=MODEL_EMBED, text=self._text)
+            matched: list[str] = []
+            total = len(self._index)
+
+            for i, (img_name, data) in enumerate(self._index.items()):
+                if self._cancelled:
+                    break
+                self.signal_progress.emit(i, total, img_name)
+                emb = data.get("embedding")
+                if not emb:
+                    continue
+                score = self._client.similarite_cosinus(query_emb, emb)
+                if score >= self._threshold:
+                    matched.append(img_name)
+                    self.signal_match.emit(img_name, float(score))
+
+            self.signal_progress.emit(total, total, "")
+            self.signal_finished.emit(matched)
+        except Exception as exc:
+            self.signal_error.emit(str(exc))

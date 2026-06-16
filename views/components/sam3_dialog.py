@@ -1134,7 +1134,8 @@ class Sam3Dialog(QMainWindow):
     def _on_search_requested(self, text: str, threshold: float) -> None:
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
         self._results_panel.set_wait_mode(self._sidebar_content.current_wait_mode())
-        self._vm.search_objects(text, threshold)
+        strategy = self._sidebar_content.current_strategy()
+        self._vm.search_objects(text, threshold, strategy_name=strategy)
 
     def _on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
         box = self._sidebar_content.get_last_box()

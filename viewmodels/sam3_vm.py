@@ -277,7 +277,7 @@ class Sam3ViewModel(QObject):
 
     # ── Recherche globale (texte direct) ──────────────────────────────────────
 
-    def search_objects(self, text: str, threshold: float = 0.75) -> None:
+    def search_objects(self, text: str, threshold: float = 0.75, strategy_name: str = "sam3") -> None:
         """
         Lance la recherche de l'objet `text` sur toutes les images du dossier.
 
@@ -305,16 +305,59 @@ class Sam3ViewModel(QObject):
             self.signal_search_error.emit(self.translator.tr("Aucune image dans le dossier."))
             return
 
-        self.signal_search_started.emit(len(images))
+        strategy_name = strategy_name.lower()
+        self.signal_box_search_strategy.emit(strategy_name)
 
-        self._search_worker = ObjectSearchAllWorker(
-            folder=folder,
-            images=images,
-            service=self._service,
-            text=text,
-            threshold=threshold,
-            parent=self,
-        )
+        if strategy_name == "sam3":
+            if not self._service.is_loaded:
+                self.signal_search_error.emit(self.translator.tr("Le modèle SAM3 n'est pas encore chargé."))
+                return
+            self.signal_search_started.emit(len(images))
+            worker = ObjectSearchAllWorker(
+                folder=folder,
+                images=images,
+                service=self._service,
+                text=text,
+                threshold=threshold,
+                parent=self,
+            )
+        elif strategy_name == "embedding":
+            # Recherche texte via embedding : on crée un crop fictif (None)
+            # et on passe directement par EmbeddingBoxSearchWorker avec le texte comme description
+            index = self._gallery_vm.index
+            if not index:
+                self.signal_search_error.emit(self.translator.tr("Aucune image indexée dans ce dossier."))
+                return
+            self.signal_search_started.emit(len(index))
+            from services.workers import EmbeddingTextSearchWorker
+
+            worker = EmbeddingTextSearchWorker(
+                text=text,
+                folder=folder,
+                images=images,
+                index=index,
+                client=self._client,
+                threshold=threshold,
+                parent=self,
+            )
+        elif strategy_name == "hybrid":
+            if not self._service.is_loaded:
+                self.signal_search_error.emit(self.translator.tr("Le modèle SAM3 n'est pas encore chargé."))
+                return
+            self.signal_search_started.emit(len(images))
+            worker = ObjectSearchAllWorker(
+                folder=folder,
+                images=images,
+                service=self._service,
+                text=text,
+                threshold=threshold,
+                parent=self,
+            )
+        else:
+            self.signal_search_error.emit(self.translator.tr("Stratégie inconnue : {name}.").format(name=strategy_name))
+            return
+
+        self._search_worker = worker
         self._search_worker.signal_progress.connect(self.signal_search_progress)
         self._search_worker.signal_match.connect(self.signal_search_match)
         self._search_worker.signal_finished.connect(self._on_search_finished)
