@@ -146,20 +146,14 @@ class ImageCanvas(QLabel):
             self.clear()
             return
 
-        dpr = self.devicePixelRatioF()
-
-        w = int(self._base_pixmap.width() * self._zoom * dpr)
-        h = int(self._base_pixmap.height() * self._zoom * dpr)
-
+        w = int(self._base_pixmap.width() * self._zoom)
+        h = int(self._base_pixmap.height() * self._zoom)
         scaled = self._base_pixmap.scaled(
             w,
             h,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation,
         )
-
-        scaled.setDevicePixelRatio(dpr)
-
         if self._overlay and self._overlay.masks:
             scaled = self._draw_overlay(scaled)
 
@@ -311,6 +305,7 @@ class SearchResultsPanel(QWidget):
     """
 
     signal_image_clicked = pyqtSignal(str)
+    signal_image_right_clicked = pyqtSignal(str)
 
     THUMB = 80
     COLS = 3
@@ -537,9 +532,9 @@ class SearchResultsPanel(QWidget):
         thumb.setAlignment(Qt.AlignmentFlag.AlignCenter)
         thumb.setStyleSheet(neighbor_thumb_style())
         thumb.setCursor(Qt.CursorShape.PointingHandCursor)
-        thumb.setToolTip(f"{img_name}\nScore : {score:.2f}")
+        thumb.setToolTip(f"{img_name}\nScore : {score:.2f}\nClic gauche : sélectionner | Clic droit : SAM3")
         thumb.leftClicked = lambda n=img_name: self.signal_image_clicked.emit(n)
-
+        thumb.rightClicked = lambda n=img_name: self.signal_image_right_clicked.emit(n)
         score_lbl = QLabel(f"{score:.2f}")
         score_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         score_lbl.setStyleSheet(score_label_style())
@@ -1026,6 +1021,7 @@ class Sam3Dialog(QMainWindow):
         self._sidebar_content.signal_search_cancel.connect(self._vm.cancel_search)
 
         self._results_panel.signal_image_clicked.connect(self._on_result_clicked)
+        self._results_panel.signal_image_right_clicked.connect(self._on_result_right_clicked)
 
         scroll_dock = QScrollArea()
         scroll_dock.setWidget(self._sidebar_content)
@@ -1203,6 +1199,33 @@ class Sam3Dialog(QMainWindow):
         if self._vm.is_model_loaded and not self._vm.is_busy:
             self._vm.encode_image(pixmap, img_path)
             self._sidebar_content.set_status(self.translator.tr("⏳ Encodage de {img_name}…").format(img_name=img_name))
+
+    def _on_result_right_clicked(self, img_name: str) -> None:
+        """Ouvre l'image cliquée (clic droit) dans une nouvelle fenêtre Sam3Dialog,
+        en gardant la fenêtre courante intacte (même comportement que la
+        galerie et les voisins dans DetailWidget).
+
+        Args:
+            img_name: Nom du fichier image résultat sur lequel le clic droit
+                a été effectué.
+        """
+        folder = self._vm._gallery_vm.current_folder
+        if not folder:
+            return
+        img_path = os.path.join(folder, img_name)
+        pixmap = QPixmap(img_path)
+        if pixmap.isNull():
+            return
+
+        dlg = Sam3Dialog(
+            pixmap=pixmap,
+            sam3_vm=self._vm,
+            title=img_name,
+            img_path=img_path,
+            translator=self.translator,
+            parent=self,
+        )
+        dlg.show()
 
     # ── Slots UI → ViewModel ──────────────────────────────────────────────────
 
