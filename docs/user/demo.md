@@ -1,6 +1,7 @@
 # Guide de démonstration — Explorateur Image Sémantique
 
-> **Contexte :** Vous êtes photographe. Votre disque dur contient 41 000 images non classées, sans noms significatifs. Vous devez retrouver une photo précise — une scène hivernale en montagne avec des personnages — puis trouver toutes les images visuellement et sémantiquement proches.
+> **Contexte :** Vous êtes photographe. Votre disque dur contient 41 000 images non classées, sans noms significatifs. Vous devez retrouver une photo précise  puis trouver toutes les images visuellement et sémantiquement proches.
+![Image de référence a retrouver](../Images/demo/00_image_de_reference.jpg)
 
 ---
 

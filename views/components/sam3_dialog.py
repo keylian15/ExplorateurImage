@@ -634,7 +634,7 @@ class Sam3SidebarContent(QWidget):
         z1l.addWidget(self._section_label("Prompt texte"))
 
         self.text_input = QLineEdit()
-        self.text_input.setPlaceholderText("ex: shoe, dog, person…")
+        self.text_input.setPlaceholderText("ex: shoe, dog, person… en anglais")
         self.text_input.setEnabled(False)
         self.text_input.returnPressed.connect(self._on_text_submit)
         z1l.addWidget(self.text_input)
