@@ -2271,6 +2271,8 @@
 
 L'application génère des thumbnails à la volée et les met en cache à deux niveaux : un cache mémoire LRU (600 entrées) et un cache disque JPEG dans `.thumbnails/`. Seules les images visibles à l'écran sont chargées (prefetch de 3 lignes), ce qui permet d'afficher des milliers d'images sans saturer la mémoire.
 
+![Fonction Get du fichier service/thumbnail_cache.py](../Images/code/thumbnail_cache_f_get.png)
+
 </details>
 
 <hr />
@@ -2285,6 +2287,10 @@ L'application génère des thumbnails à la volée et les met en cache à deux n
 <summary>🔧 Détail technique — Pipeline d'indexation</summary>
 
 Pour chaque image, l'application appelle **Qwen2.5-VL** (modèle vision-langage via Ollama) avec un prompt structuré qui demande une description en 2 à 4 phrases et exactement 5 mots-clés. Le texte obtenu est ensuite envoyé au modèle **nomic-embed-text** pour produire un vecteur de 768 dimensions. L'ensemble (description, mots-clés, embedding) est sauvegardé dans un fichier `index.json` local au dossier — il n'y a donc aucun recalcul au prochain démarrage.
+
+![Fonction get description and keywords from image de services/ollama_wrapper.py](../Images/code/ollama_wrapper_f_get_description_and_keyword_from_image.png)
+
+![Fonction on signal image done de viewmodels/autocomplete_vm.py ](../Images/code/autocomplete_vm_f_on_signal_image_done.png)
 
 </details>
 
@@ -2305,6 +2311,8 @@ Pour chaque image, l'application appelle **Qwen2.5-VL** (modèle vision-langage 
 
 Les k voisins sont calculés par **similarité cosinus** entre l'embedding de l'image sélectionnée et ceux de toutes les images indexées. Le nombre k est réglable via le compteur dans le panneau. Le calcul est effectué à la sélection..
 
+![Fonction compute neighbors de viewmodels/detail_vm.py](../Images/code/detail_vm_f_compute_neighbors.png)
+
 </details>
 
 <hr />
@@ -2319,6 +2327,8 @@ Les k voisins sont calculés par **similarité cosinus** entre l'embedding de l'
 <summary>🔧 Détail technique — Recherche sémantique</summary>
 
 La requête est convertie en embedding par **nomic-embed-text**, puis comparée à tous les embeddings de l'index par similarité cosinus. Un bonus de score est accordé si le texte de la requête apparaît littéralement dans la description ou les mots-clés (`+0.3`), et un bonus supplémentaire si la similarité cosinus dépasse 0.5 ET qu'il y a correspondance textuelle (`+0.5`). Les 100 meilleurs résultats sont retournés.
+
+![Fonction filtered images de viewmodels/gallery_vm.py](../Images/code/gallery_vm_f_filtered_images.png)
 
 </details>
 
@@ -2345,6 +2355,11 @@ La requête est convertie en embedding par **nomic-embed-text**, puis comparée 
 
 L'historique est implémenté comme un arbre d'objets `SearchNode`, chacun portant la requête et la liste des noms d'images résultantes. Cet arbre est sérialisé dans `config.json` (clé `history_search`) et restauré à l'ouverture du workspace. L'affinage utilise la liste de résultats du nœud courant comme contexte de la prochaine recherche (paramètre `context` de `filtered_images`).
 
+![Class SearchNode de models/tree/search_node.py](../Images/code/searchnode_c.png)
+
+
+![Fonction do search de viewmodels/gallery_vm.py](../Images/code/gallery_vm_f_do_search.png)
+
 </details>
 
 <hr />
@@ -2360,6 +2375,9 @@ L'historique est implémenté comme un arbre d'objets `SearchNode`, chacun porta
 
 Les embeddings de 768 dimensions sont réduits à 2 dimensions via **UMAP** (`n_neighbors=30`, `min_dist=0.3`, métrique cosinus). Les clusters sont ensuite détectés par **HDBSCAN** (`min_cluster_size=15`). Chaque cluster est nommé par un appel à `qwen2.5vl:7b` sur un échantillon aléatoire de 8 descriptions. La carte est mise en cache dans `.semantic_map/map_cache.pkl` pour éviter les recalculs. Les paramètres sont modifiables dans le dock **⚙️ Paramètres** (accessible depuis l'onglet Carte 2D).
 
+![Fonction compute de services/workers.py](../Images/code/worker_f_compute.png)
+
+![Fonction name cluster async de services/workers.py](../Images/code/worker_f_name_cluster_async.png)
 ![Parametres de la carte](../Images/demo/11_2_parametres.png)
 
 </details>
@@ -2418,11 +2436,19 @@ Les embeddings de 768 dimensions sont réduits à 2 dimensions via **UMAP** (`n_
 
 **Embedding** : le contenu de la boîte est décrit par Qwen2.5-VL en français, puis converti en embedding. La similarité cosinus est calculée sur l'index.
 
+![Fonction search de la classe EmbeddingBoxSearch deservices/box_search_strategies.py](../Images/code/embeddingboxsearch_f_search.png)
+
 **SAM3** : Qwen2.5-VL nomme l'objet en 1-2 mots anglais. SAM3 analyse ensuite chaque image du dossier avec ce prompt texte. Score = meilleur score SAM3 obtenu.
+
+![Fonction search de la classe Sam3BoxSearch de services/box_search_strategies.py](../Images/code/Sam3BoxSearch_f_search.png)
 
 **Hybride** : deux appels VLM (description FR pour l'embedding, nom EN pour SAM3). L'embedding présélectionne les candidats au-dessus du seuil. SAM3 valide chaque candidat. Score final = score_embedding × score_SAM3.
 
+![Fonction search de la classe HybridBoxSearch de services/box_search_strategies.py](../Images/code/HybridBoxSearch_f_search.png)
+
 L'affichage des résultats est progressif (par lots de 50 via QTimer) pour ne jamais bloquer l'interface. La case **⏳ Attendre la fin** accumule tous les résultats avant de les afficher, triés par score décroissant.
+
+![Fonction flush_batch de la classe SearchResultsPanel de views/components/sam3_dialog.py](../Images/code/SearchResultsPanel_f_flush_batch.png)
 
 </details>
 
