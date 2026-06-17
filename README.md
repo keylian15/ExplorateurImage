@@ -10,7 +10,7 @@ Elle s'appuie sur des modèles d'intelligence artificielle exécutés sur la mac
 ## 📚 Documentation
 
 ### Guide utilisateur & installation
-https://keylian15.github.io/ExplorateurImage/user/main/
+[Lien vers la documentation user](https://keylian15.github.io/ExplorateurImage/user/main/)
 
 ### Documentation technique
-https://keylian15.github.io/ExplorateurImage/
+[Lien vers la documetation technique](https://keylian15.github.io/ExplorateurImage/)
