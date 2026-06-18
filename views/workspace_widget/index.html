@@ -1688,10 +1688,109 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_k_neighbors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_k_neighbors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_map_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_map_params
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_pinned_images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_pinned_images
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_search_trees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_search_trees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#views.workspace_widget.WorkspaceWidget.__init__" class="md-nav__link">
     <span class="md-ellipsis">
       
         __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.hide_dock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hide_dock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.open_folder_dialog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        open_folder_dialog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.rename" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rename
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.show_dock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        show_dock
       
     </span>
   </a>
@@ -1919,10 +2018,109 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_k_neighbors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_k_neighbors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_map_params" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_map_params
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_pinned_images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_pinned_images
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.current_search_trees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        current_search_trees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#views.workspace_widget.WorkspaceWidget.__init__" class="md-nav__link">
     <span class="md-ellipsis">
       
         __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.hide_dock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        hide_dock
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.open_folder_dialog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        open_folder_dialog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.rename" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rename
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#views.workspace_widget.WorkspaceWidget.show_dock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        show_dock
       
     </span>
   </a>
@@ -1970,25 +2168,21 @@
 
     <div class="doc doc-contents first">
 
-        <p>Widget représentant un espace de travail complet.</p>
-<p>Chaque workspace est autonome : il possède ses propres instances de ViewModels
-(GalleryViewModel, DetailViewModel, AutocompleteViewModel, MapViewModel, Sam3ViewModel)
-et ses propres vues (GalleryWidget, DetailWidget, MapTab, StyleTab).</p>
-<p>Le Sam3ViewModel est partagé au sein du workspace : le modèle SAM3 est chargé
-une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
-écran (clic droit sur une image) réutilise le modèle déjà chargé.</p>
+        <p>Widget représentant un espace de travail complet (galerie, carte 2D, thème, détail).</p>
+<p>Chaque workspace est autonome et instancie ses propres ViewModels et vues.
+Le Sam3Service est partagé au niveau application et injecté au démarrage.</p>
 
 
 <details class="responsabilités-" open>
   <summary>Responsabilités</summary>
   <ol>
 <li>Instancier les ViewModels dans le bon ordre de dépendance</li>
-<li>Transmettre les données du workspace (k_neighbors, map_params, pinned_images) aux ViewModels</li>
-<li>Assembler les 3 onglets (Galerie, Carte 2D, Thème)</li>
-<li>Gérer le dock de détail en interne</li>
-<li>Ouvrir automatiquement le dossier restauré depuis la config</li>
-<li>Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres, épingles, arbres)</li>
-<li>Partager le Sam3ViewModel et lancer le chargement du modèle en fond au démarrage</li>
+<li>Assembler les trois onglets : Galerie, Carte 2D, Paramètres</li>
+<li>Gérer les docks (détail, recherche galerie, recherche carte)</li>
+<li>Restaurer automatiquement le dossier depuis la configuration</li>
+<li>Exposer les métadonnées du workspace (dossier, k_neighbors, map_params, épingles, arbres)</li>
+<li>Propager les événements internes (sélection d'image, changement de dossier) vers la fenêtre principale</li>
+<li>Masquer tous les docks lors du changement d'onglet workspace</li>
 </ol>
 </details>
 
@@ -2038,7 +2232,11 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>views/workspace_widget.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 50</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
 <span class="normal"> 51</span>
 <span class="normal"> 52</span>
 <span class="normal"> 53</span>
@@ -2187,13 +2385,67 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">WorkspaceWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">WorkspaceWidget</span><span class="p">(</span><span class="n">QWidget</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Espace de travail autonome : galerie + carte + thème + dock détail.&quot;&quot;&quot;</span>
 
     <span class="n">signal_folder_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>  <span class="c1"># (ws_id, folder_path)</span>
     <span class="n">signal_closed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="c1"># ws_id</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913 pour ignorer le nombre d&#39;arguments dans le constructeur</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2202,22 +2454,24 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
         <span class="n">main_window</span><span class="p">:</span> <span class="n">QMainWindow</span><span class="p">,</span>
         <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sam3_service</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
-<span class="sd">        ws_id (str): Identifiant unique du workspace.</span>
-<span class="sd">        name (str): Nom affiché dans l&#39;onglet parent.</span>
-<span class="sd">        client (OllamaWrapper): Client Ollama partagé.</span>
-<span class="sd">        config (dict): Configuration globale.</span>
-<span class="sd">        main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
-<span class="sd">        folder (str | None): Dossier à restaurer, ou None.</span>
-<span class="sd">        ws_data (dict | None): Données complètes du workspace.</span>
-<span class="sd">        parent: Parent Qt.</span>
+        <span class="n">sam3_service</span><span class="p">:</span> <span class="n">Sam3Service</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise le workspace.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ws_id (str): Identifiant unique du workspace.</span>
+<span class="sd">            name (str): Nom affiché dans l&#39;onglet parent.</span>
+<span class="sd">            client (OllamaWrapper): Client Ollama partagé.</span>
+<span class="sd">            config (dict): Configuration globale.</span>
+<span class="sd">            main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
+<span class="sd">            folder (str | None): Dossier à restaurer, ou None.</span>
+<span class="sd">            ws_data (dict | None): Données complètes du workspace.</span>
+<span class="sd">            translator (I18nManager): Gestionnaire de traduction.</span>
+<span class="sd">            sam3_service (Sam3Service): Service SAM3 partagé pour le workspace.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ws_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_main_window</span> <span class="o">=</span> <span class="n">main_window</span>
@@ -2233,16 +2487,16 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
         <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span> <span class="o">=</span> <span class="n">Sam3ViewModel</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">,</span> <span class="n">_ws_data</span><span class="p">,</span> <span class="n">sam3_service</span><span class="p">,</span> <span class="n">translator</span><span class="o">=</span><span class="n">translator</span><span class="p">)</span>
 
         <span class="c1"># ── Vues ──────────────────────────────────────────────────────────────</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_widget</span> <span class="o">=</span> <span class="n">GalleryWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_detail_widget</span> <span class="o">=</span> <span class="n">DetailWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detail_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_map_tab</span> <span class="o">=</span> <span class="n">MapTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_vm</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_style_tab</span> <span class="o">=</span> <span class="n">StyleTab</span><span class="p">(</span><span class="n">translator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_widget</span> <span class="o">=</span> <span class="n">GalleryWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detail_widget</span> <span class="o">=</span> <span class="n">DetailWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detail_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map_tab</span> <span class="o">=</span> <span class="n">MapTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_vm</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style_tab</span> <span class="o">=</span> <span class="n">StyleTab</span><span class="p">(</span><span class="n">translator</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_widget</span><span class="o">.</span><span class="n">btn_open</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_folder_dialog</span><span class="p">)</span>
 
         <span class="n">action_open_workspace</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Open Workspace&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="n">action_open_workspace</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+O&quot;</span><span class="p">))</span>
-        <span class="n">action_open_workspace</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_folder_dialog</span><span class="p">())</span>
+        <span class="n">action_open_workspace</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_folder_dialog</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action_open_workspace</span><span class="p">)</span>
 
         <span class="c1"># ── Onglets internes ──────────────────────────────────────────────────</span>
@@ -2288,22 +2542,52 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">current_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourner le chemin du dossier actuellement ouvert dans la galerie.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str | None: Chemin du dossier ouvert, ou None si aucun dossier n&#39;est ouvert.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">current_folder</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">current_k_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourner le nombre de voisins k actuellement configuré dans le workspace.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Nombre de voisins k.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">detail_vm</span><span class="o">.</span><span class="n">k_neighbors</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">current_map_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourner les paramètres de la carte actuelle.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Paramètres de la carte (zoom, centre, etc.).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_vm</span><span class="o">.</span><span class="n">params</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">current_pinned_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourner la liste des images épinglées dans le workspace.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: Liste des noms d&#39;images épinglées.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">pinned_images</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">current_search_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourner les arbres de recherche actuels pour la galerie et la carte.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionnaire contenant les arbres de recherche pour la galerie et la carte.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;gallery&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">search_tree</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
             <span class="s2">&quot;map&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_vm</span><span class="o">.</span><span class="n">search_tree</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
@@ -2311,30 +2595,56 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
     <span class="c1"># ── Slots internes ────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_image_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_image_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Afficher le dock de détail et notifier le DetailViewModel de l&#39;image sélectionnée.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            img_name (str): Nom de l&#39;image sélectionnée.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">detail_vm</span><span class="o">.</span><span class="n">on_image_selected</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_on_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_folder_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Émettre un signal pour notifier le changement de dossier du workspace.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            folder (str): Nouveau chemin du dossier ouvert.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_folder_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ws_id</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
 
     <span class="c1"># ── API publique ──────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">open_folder_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_folder_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ouvrir un dialog pour choisir un dossier et l&#39;ouvrir dans la galerie.&quot;&quot;&quot;</span>
         <span class="n">folder</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Choisir un dossier&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">folder</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">open_folder</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">show_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">show_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Afficher ou cacher le dock de détail.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            visible (bool): Indique si le dock doit être affiché ou caché.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">hide_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hide_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cacher tous les docks du workspace.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_search_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_map_search_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Renommer le workspace et mettre à jour le titre du dock.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_name (str): Nouveau nom du workspace.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ws_name</span> <span class="o">=</span> <span class="n">new_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s2">&quot;Détails - </span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">new_name</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
@@ -2350,6 +2660,231 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.current_folder" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">current_folder</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourner le chemin du dossier actuellement ouvert dans la galerie.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>str | None: Chemin du dossier ouvert, ou None si aucun dossier n'est ouvert.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.current_k_neighbors" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">current_k_neighbors</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourner le nombre de voisins k actuellement configuré dans le workspace.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nombre de voisins k.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.current_map_params" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">current_map_params</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourner les paramètres de la carte actuelle.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>dict</code></td>            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Paramètres de la carte (zoom, centre, etc.).</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.current_pinned_images" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">current_pinned_images</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourner la liste des images épinglées dans le workspace.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list[str]: Liste des noms d'images épinglées.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.current_search_trees" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">current_search_trees</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourner les arbres de recherche actuels pour la galerie et la carte.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>dict</code></td>            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionnaire contenant les arbres de recherche pour la galerie et la carte.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
 
 
 
@@ -2357,27 +2892,182 @@ une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
 
 
 <h4 id="views.workspace_widget.WorkspaceWidget.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">ws_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ws_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">translator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sam3_service</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">ws_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ws_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">translator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sam3_service</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
 
     <div class="doc doc-contents ">
 
-        <p>Args:
-ws_id (str): Identifiant unique du workspace.
-name (str): Nom affiché dans l'onglet parent.
-client (OllamaWrapper): Client Ollama partagé.
-config (dict): Configuration globale.
-main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
-folder (str | None): Dossier à restaurer, ou None.
-ws_data (dict | None): Données complètes du workspace.
-parent: Parent Qt.</p>
+        <p>Initialise le workspace.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>ws_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Identifiant unique du workspace.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nom affiché dans l'onglet parent.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>client</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="OllamaWrapper (services.ollama_wrapper.OllamaWrapper)" href="../../services/ollama_wrapper/#services.ollama_wrapper.OllamaWrapper">OllamaWrapper</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Client Ollama partagé.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Configuration globale.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>main_window</code>
+            </td>
+            <td>
+                  <code><span title="PyQt6.QtWidgets.QMainWindow">QMainWindow</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Fenêtre principale, nécessaire pour les docks.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>folder</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dossier à restaurer, ou None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ws_data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Données complètes du workspace.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>translator</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="I18nManager (services.i18n_manager.I18nManager)" href="../../services/i18n_manager/#services.i18n_manager.I18nManager">I18nManager</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Gestionnaire de traduction.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sam3_service</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Sam3Service (services.sam3_service.Sam3Service)" href="../../services/sam3_service/#services.sam3_service.Sam3Service">Sam3Service</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Service SAM3 partagé pour le workspace.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>views/workspace_widget.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 56</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
 <span class="normal"> 57</span>
 <span class="normal"> 58</span>
 <span class="normal"> 59</span>
@@ -2464,9 +3154,7 @@ parent: Parent Qt.</p>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913 pour ignorer le nombre d&#39;arguments dans le constructeur</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2475,22 +3163,24 @@ parent: Parent Qt.</p>
     <span class="n">main_window</span><span class="p">:</span> <span class="n">QMainWindow</span><span class="p">,</span>
     <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sam3_service</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
-<span class="sd">    ws_id (str): Identifiant unique du workspace.</span>
-<span class="sd">    name (str): Nom affiché dans l&#39;onglet parent.</span>
-<span class="sd">    client (OllamaWrapper): Client Ollama partagé.</span>
-<span class="sd">    config (dict): Configuration globale.</span>
-<span class="sd">    main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
-<span class="sd">    folder (str | None): Dossier à restaurer, ou None.</span>
-<span class="sd">    ws_data (dict | None): Données complètes du workspace.</span>
-<span class="sd">    parent: Parent Qt.</span>
+    <span class="n">sam3_service</span><span class="p">:</span> <span class="n">Sam3Service</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise le workspace.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ws_id (str): Identifiant unique du workspace.</span>
+<span class="sd">        name (str): Nom affiché dans l&#39;onglet parent.</span>
+<span class="sd">        client (OllamaWrapper): Client Ollama partagé.</span>
+<span class="sd">        config (dict): Configuration globale.</span>
+<span class="sd">        main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.</span>
+<span class="sd">        folder (str | None): Dossier à restaurer, ou None.</span>
+<span class="sd">        ws_data (dict | None): Données complètes du workspace.</span>
+<span class="sd">        translator (I18nManager): Gestionnaire de traduction.</span>
+<span class="sd">        sam3_service (Sam3Service): Service SAM3 partagé pour le workspace.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ws_name</span> <span class="o">=</span> <span class="n">name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_main_window</span> <span class="o">=</span> <span class="n">main_window</span>
@@ -2506,16 +3196,16 @@ parent: Parent Qt.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span> <span class="o">=</span> <span class="n">Sam3ViewModel</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">,</span> <span class="n">_ws_data</span><span class="p">,</span> <span class="n">sam3_service</span><span class="p">,</span> <span class="n">translator</span><span class="o">=</span><span class="n">translator</span><span class="p">)</span>
 
     <span class="c1"># ── Vues ──────────────────────────────────────────────────────────────</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_widget</span> <span class="o">=</span> <span class="n">GalleryWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_detail_widget</span> <span class="o">=</span> <span class="n">DetailWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detail_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_map_tab</span> <span class="o">=</span> <span class="n">MapTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_vm</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_style_tab</span> <span class="o">=</span> <span class="n">StyleTab</span><span class="p">(</span><span class="n">translator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_widget</span> <span class="o">=</span> <span class="n">GalleryWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autocomplete_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_detail_widget</span> <span class="o">=</span> <span class="n">DetailWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detail_vm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sam3_vm</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_map_tab</span> <span class="o">=</span> <span class="n">MapTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_vm</span><span class="p">,</span> <span class="n">main_window</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_style_tab</span> <span class="o">=</span> <span class="n">StyleTab</span><span class="p">(</span><span class="n">translator</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_widget</span><span class="o">.</span><span class="n">btn_open</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_folder_dialog</span><span class="p">)</span>
 
     <span class="n">action_open_workspace</span> <span class="o">=</span> <span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Open Workspace&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
     <span class="n">action_open_workspace</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">QKeySequence</span><span class="p">(</span><span class="s2">&quot;Ctrl+O&quot;</span><span class="p">))</span>
-    <span class="n">action_open_workspace</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_folder_dialog</span><span class="p">())</span>
+    <span class="n">action_open_workspace</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_folder_dialog</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action_open_workspace</span><span class="p">)</span>
 
     <span class="c1"># ── Onglets internes ──────────────────────────────────────────────────</span>
@@ -2556,6 +3246,206 @@ parent: Parent Qt.</p>
     <span class="c1"># ── Restauration du dossier ───────────────────────────────────────────</span>
     <span class="k">if</span> <span class="n">folder</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">open_folder</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.hide_dock" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">hide_dock</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Cacher tous les docks du workspace.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/workspace_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">hide_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cacher tous les docks du workspace.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_search_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_map_search_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.open_folder_dialog" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">open_folder_dialog</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ouvrir un dialog pour choisir un dossier et l'ouvrir dans la galerie.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/workspace_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_folder_dialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ouvrir un dialog pour choisir un dossier et l&#39;ouvrir dans la galerie.&quot;&quot;&quot;</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Choisir un dossier&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">folder</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gallery_vm</span><span class="o">.</span><span class="n">open_folder</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.rename" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">rename</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Renommer le workspace et mettre à jour le titre du dock.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>new_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Nouveau nom du workspace.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/workspace_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Renommer le workspace et mettre à jour le titre du dock.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        new_name (str): Nouveau nom du workspace.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ws_name</span> <span class="o">=</span> <span class="n">new_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translator</span><span class="o">.</span><span class="n">tr</span><span class="p">(</span><span class="s2">&quot;Détails - </span><span class="si">{name}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">new_name</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="views.workspace_widget.WorkspaceWidget.show_dock" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">show_dock</span><span class="p">(</span><span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Afficher ou cacher le dock de détail.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>visible</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Indique si le dock doit être affiché ou caché.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>views/workspace_widget.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Afficher ou cacher le dock de détail.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        visible (bool): Indique si le dock doit être affiché ou caché.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dock</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">visible</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
