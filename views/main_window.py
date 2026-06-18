@@ -1,26 +1,13 @@
-"""views/main_window.py
-
-Fenêtre principale de l'application — architecture multi-workspace.
-
-La fenêtre principale centralise la gestion des workspaces affichés sous forme
-d'onglets dans un QTabWidget. Chaque onglet correspond à une instance autonome
-de WorkspaceWidget contenant sa propre galerie, carte et état utilisateur.
-
-L'objectif de cette classe est uniquement d'orchestrer l'interface et la
-persistance des workspaces. Aucune logique métier liée au traitement des images
-ou à l'IA n'est implémentée ici.
-
+"""Fenêtre principale de l'application — architecture multi-workspace.
 
 Responsabilités :
-    1. Restaurer les workspaces depuis la configuration au démarrage
-    2. Créer un workspace vide par défaut si aucun n'est sauvegardé
-    3. Ajouter de nouveaux workspaces via l'onglet « + »
-    4. Supprimer dynamiquement des workspaces
-    5. Renommer un workspace par double-clic sur son onglet
-    6. Persister automatiquement tous les changements
-       (y compris k_neighbors, map_params, pinned_images et history_search)
-    7. Synchroniser la visibilité des docks entre workspaces
-    8. Garantir qu'au moins un workspace reste ouvert
+ 1. Restaurer les workspaces depuis la configuration au démarrage
+ 2. Créer un workspace vide par défaut si aucun n'est sauvegardé
+ 3. Ajouter de nouveaux workspaces via l'onglet « + »
+ 4. Supprimer dynamiquement des workspaces en garantissant qu'il en reste au moins un
+ 5. Renommer un workspace par double-clic sur son onglet
+ 6. Persister automatiquement tous les changements dans config.json
+ 7. Masquer les docks des workspaces inactifs lors du changement d'onglet
 """
 
 from __future__ import annotations
@@ -28,7 +15,7 @@ from __future__ import annotations
 import os
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtGui import QAction, QKeySequence, QMouseEvent
 from PyQt6.QtWidgets import (
     QApplication,
     QInputDialog,
@@ -42,6 +29,7 @@ from models import config_repository
 from models import workspace_repository as ws_repo
 from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
+from services.sam3_service import Sam3Service
 from views.workspace_widget import WorkspaceWidget
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -59,11 +47,11 @@ class RenamableTabBar(QTabBar):
 
     signal_tab_double_clicked = pyqtSignal(int)
 
-    def mouseDoubleClickEvent(self, event):
-        """Intercepte le double-clic sur un onglet.
+    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
+        """Capture le double-clic sur un onglet.
 
         Args:
-            event: Événement Qt de double-clic souris.
+            event (QMouseEvent): Événement Qt de double-clic souris.
 
         """
         index = self.tabAt(event.pos())
@@ -95,26 +83,18 @@ class PlusPlaceholder(QWidget):
 
 
 class MainWindow(QMainWindow):
-    """Fenêtre principale multi-workspace de l'application.
+    """Fenêtre principale multi-workspace de l'application."""
 
-    Chaque workspace est affiché sous forme d'onglet indépendant.
-    La fenêtre gère leur cycle de vie complet :
-        - création
-        - suppression
-        - renommage
-        - restauration
-        - persistance (dossier, k_neighbors, map_params, pinned_images, history_search)
+    def __init__(self, client: OllamaWrapper, config: dict, translator: I18nManager, sam3_service: Sam3Service) -> None:
+        """Initialise la fenetre principale.
 
-    Args:
-        client (OllamaWrapper):
-            Client Ollama partagé entre tous les workspaces.
+        Args:
+            client (OllamaWrapper): Le client Ollama partagé entre tous les workspaces.
+            config (dict): Configuration globale chargée au démarrage.
+            translator (I18nManager): Gestionnaire de traduction pour l'interface.
+            sam3_service (Sam3Service): Service pour la gestion des fonctionnalités SAM3.
 
-        config (dict):
-            Configuration globale chargée au démarrage.
-
-    """
-
-    def __init__(self, client: OllamaWrapper, config: dict, translator: I18nManager, sam3_service):
+        """
         super().__init__()
 
         self.client = client
@@ -138,12 +118,12 @@ class MainWindow(QMainWindow):
     # Raccourcis
     # ──────────────────────────────────────────────────────────────────────
 
-    def create_shortcuts(self):
+    def create_shortcuts(self) -> None:
         """Créer tous les raccourcis clavier."""
         # Nouvel onglet
         action_new_workspace = QAction("New Workspace", self)
         action_new_workspace.setShortcut(QKeySequence("Ctrl+T"))
-        action_new_workspace.triggered.connect(lambda: self.create_workspace())
+        action_new_workspace.triggered.connect(self.create_workspace)
 
         self.addAction(action_new_workspace)
 
@@ -161,7 +141,7 @@ class MainWindow(QMainWindow):
 
         self.addAction(action_flip_tab)
 
-    def flip_flop_tab(self):
+    def flip_flop_tab(self) -> None:
         """Alterne entre onglets en inversant la direction à chaque appel."""
         count = self.tabs.count() - 1
 
@@ -180,7 +160,7 @@ class MainWindow(QMainWindow):
     # Construction
     # ──────────────────────────────────────────────────────────────────────
 
-    def build_ui(self):
+    def build_ui(self) -> None:
         """Construit l'interface principale.
 
         Initialise :
@@ -223,7 +203,7 @@ class MainWindow(QMainWindow):
     # Restauration
     # ──────────────────────────────────────────────────────────────────────
 
-    def restore_workspaces(self):
+    def restore_workspaces(self) -> None:
         """Recharge les workspaces sauvegardés dans la configuration.
 
         Si aucun workspace n'existe, un workspace vide est créé
@@ -339,7 +319,7 @@ class MainWindow(QMainWindow):
     # Suppression
     # ──────────────────────────────────────────────────────────────────────
 
-    def remove_workspace(self, tab_index: int):
+    def remove_workspace(self, tab_index: int) -> None:
         """Supprime un workspace à partir de son index d'onglet.
 
         La sélection est automatiquement déplacée vers
@@ -347,8 +327,7 @@ class MainWindow(QMainWindow):
         de l'onglet « + ».
 
         Args:
-            tab_index (int):
-                Index de l'onglet à supprimer.
+            tab_index (int): Index de l'onglet à supprimer.
 
         """
         widget = self.tabs.widget(tab_index)
@@ -381,7 +360,7 @@ class MainWindow(QMainWindow):
     # Persistance
     # ──────────────────────────────────────────────────────────────────────
 
-    def save_workspaces(self):
+    def save_workspaces(self) -> None:
         """Sauvegarde tous les workspaces dans la configuration.
 
         Les workspaces sont sauvegardés dans l'ordre actuel des onglets,
@@ -414,7 +393,7 @@ class MainWindow(QMainWindow):
     # Slots Qt
     # ──────────────────────────────────────────────────────────────────────
 
-    def on_tab_close_requested(self, index: int):
+    def on_tab_close_requested(self, index: int) -> None:
         """Déclenché lorsqu'un utilisateur ferme un onglet.
 
         Garantit qu'au moins un workspace reste ouvert.
@@ -436,7 +415,7 @@ class MainWindow(QMainWindow):
 
         self.remove_workspace(index)
 
-    def on_tab_changed(self, index: int):
+    def on_tab_changed(self, index: int) -> None:
         """Déclenché lorsqu'un onglet devient actif.
 
         Fonctionnalités :
@@ -458,7 +437,7 @@ class MainWindow(QMainWindow):
             if ws_widget is not widget:
                 ws_widget.hide_dock()
 
-    def on_signal_tab_double_clicked(self, index: int):
+    def on_signal_tab_double_clicked(self, index: int) -> None:
         """Ouvre une boîte de dialogue de renommage d'onglet.
 
         Args:
@@ -487,7 +466,7 @@ class MainWindow(QMainWindow):
 
             self.save_workspaces()
 
-    def on_workspace_folder_changed(self, ws_id: str, folder: str):
+    def on_workspace_folder_changed(self, ws_id: str, folder: str) -> None:
         """Déclenché lorsqu'un workspace change de dossier.
 
         Si le workspace possède encore son nom automatique,
@@ -521,7 +500,7 @@ class MainWindow(QMainWindow):
     # Helpers
     # ──────────────────────────────────────────────────────────────────────
 
-    def update_close_buttons(self):
+    def update_close_buttons(self) -> None:
         """Met à jour la visibilité des boutons de fermeture.
 
         Le dernier workspace restant ne peut pas être fermé.

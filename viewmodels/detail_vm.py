@@ -268,7 +268,7 @@ class DetailViewModel(QObject):
 
     # ── Voisins ───────────────────────────────────────────────────────────────
 
-    def compute_neighbors(self, img_name: str):
+    def compute_neighbors(self, img_name: str) -> None:
         """Calcule les voisins de l'image.
 
         Args:

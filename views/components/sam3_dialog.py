@@ -37,6 +37,7 @@ from PyQt6.QtGui import (
     QPainter,
     QPen,
     QPixmap,
+    QWheelEvent,
 )
 from PyQt6.QtWidgets import (
     QApplication,
@@ -967,9 +968,18 @@ class Sam3Dialog(QMainWindow):
         title: str = "",
         img_path: str | None = None,
         translator: I18nManager = None,
-        parent=None,
-    ):
-        super().__init__(parent)
+    ) -> None:
+        """Initialise le dialog avec Sam3.
+
+        Args:
+            pixmap (QPixmap): L'image.
+            sam3_vm (Sam3ViewModel): Le view model.
+            title (str, optional): Le titre. Defaults to "".
+            img_path (str | None, optional): Le nom de l'image. Defaults to None.
+            translator (I18nManager, optional): Le traducteur. Defaults to None.
+
+        """
+        super().__init__()
         self._pixmap = pixmap
         self._vm = sam3_vm
         self._img_path = img_path
@@ -1027,7 +1037,7 @@ class Sam3Dialog(QMainWindow):
         self._sidebar_content.signal_search_cancel.connect(self._vm.cancel_search)
 
         self._results_panel.signal_image_clicked.connect(self._on_result_clicked)
-        self._results_panel.signal_image_right_clicked.connect(self._on_result_right_clicked)
+        self._results_panel.signal_image_right_clicked.connect(self.on_result_right_clicked)
 
         scroll_dock = QScrollArea()
         scroll_dock.setWidget(self._sidebar_content)
@@ -1208,14 +1218,11 @@ class Sam3Dialog(QMainWindow):
             self._vm.encode_image(pixmap, img_path)
             self._sidebar_content.set_status(self.translator.tr("⏳ Encodage de {img_name}…").format(img_name=img_name))
 
-    def _on_result_right_clicked(self, img_name: str) -> None:
-        """Ouvre l'image cliquée (clic droit) dans une nouvelle fenêtre Sam3Dialog,
-        en gardant la fenêtre courante intacte (même comportement que la
-        galerie et les voisins dans DetailWidget).
+    def on_result_right_clicked(self, img_name: str) -> None:
+        """Ouvre l'image cliquée (clic droit) dans une nouvelle fenêtre Sam3Dialog.
 
         Args:
-            img_name: Nom du fichier image résultat sur lequel le clic droit
-                a été effectué.
+            img_name (str): Nom du fichier image.
 
         """
         folder = self._vm._gallery_vm.current_folder
@@ -1232,13 +1239,21 @@ class Sam3Dialog(QMainWindow):
             title=img_name,
             img_path=img_path,
             translator=self.translator,
-            parent=self,
         )
         dlg.show()
 
     # ── Slots UI → ViewModel ──────────────────────────────────────────────────
 
     def _on_box_drawn(self, x0: float, y0: float, x1: float, y1: float) -> None:
+        """Dessine une box sur l'image.
+
+        Args:
+            x0 (float): Coordonnée x du point de l'origine.
+            y0 (float): Coordonnée y du point de l'origine.
+            x1 (float): Coordonnée x du point de fin.
+            y1 (float): Coordonneé y du point de fin.
+
+        """
         positive = self._sidebar_content.is_positive_mode()
         self._vm.apply_box_prompt(x0, y0, x1, y1, self._img_w, self._img_h, positive)
         self._sidebar_content.set_last_box(x0, y0, x1, y1)
@@ -1246,10 +1261,22 @@ class Sam3Dialog(QMainWindow):
     # ── Zoom ──────────────────────────────────────────────────────────────────
 
     def _apply_zoom(self, zoom: float) -> None:
+        """Applique le zoom sur l'image.
+
+        Args:
+            zoom (float): Le niveau de zoom.
+
+        """
         self._zoom = max(0.05, min(10.0, zoom))
         self._canvas.set_zoom(self._zoom)
         self._lbl_zoom.setText(f"{int(self._zoom * 100)}%")
 
-    def _on_scroll_wheel(self, event) -> None:
+    def _on_scroll_wheel(self, event: QWheelEvent) -> None:
+        """Ajuste le zoom sur l'image.
+
+        Args:
+            event (QWheelEvent): L'event de zoom avec la molette.
+
+        """
         delta = 0.1 if event.angleDelta().y() > 0 else -0.1
         self._apply_zoom(self._zoom + delta)

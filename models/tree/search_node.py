@@ -14,15 +14,27 @@ class SearchNode(TreeNode):
         query: str,
         results: list[str] | None = None,
         node_id: str | None = None,
-        parent=None,
-    ):
-        super().__init__(node_id=node_id, parent=parent)
+    ) -> None:
+        """Initialise un noeud de l'arbre de recherche.
+
+        Args:
+            query (str): La recherche.
+            results (list[str] | None, optional): Les noms d'images trouvés. Defaults to None.
+            node_id (str | None, optional): L'id du node. Defaults to None.
+
+        """
+        super().__init__(node_id=node_id)
 
         self.query: str = query
         self.results: list[str] = results or []
 
     def to_dict(self) -> dict:
-        """Sérialise le noeud de recherche."""
+        """Sérialise le noeud de recherche.
+
+        Returns:
+            dict: Le dictionnaire correspondant au noeud
+
+        """
         base = super().to_dict()
 
         base.update(

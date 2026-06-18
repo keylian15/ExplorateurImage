@@ -1,35 +1,18 @@
-"""Onglet d'édition et de personnalisation du thème visuel de l'application.
-
-Ce widget permet de modifier dynamiquement la palette de couleurs globale utilisée par
-l'interface. Il agit comme un éditeur visuel de thème, offrant à l'utilisateur un contrôle
-fin sur l'apparence de l'application via des champs hexadécimaux, des sélecteurs de couleur
-et des thèmes prédéfinis.
-
-Les couleurs sont chargées depuis le color_repository et peuvent être sauvegardées dans
-colors.json, puis appliquées en temps réel via la mise à jour du stylesheet global Qt.
-
-Contenu :
- - Sélecteur de thèmes prédéfinis sous forme de cartes visuelles (PresetCard)
- - Section de personnalisation fine des couleurs par catégories
- - Éditeur de couleur avec swatch cliquable et champ hexadécimal (ColorRow)
- - Dialog QColorDialog pour sélection graphique des couleurs
- - Aperçu instantané des changements de thème
- - Boutons d'application et de réinitialisation du thème
- - Persistance des couleurs dans un fichier JSON
+"""Onglet de personnalisation du thème visuel de l'application.
 
 Responsabilités :
- 1. Afficher et organiser la palette de couleurs de l'application
- 2. Permettre l'édition visuelle et textuelle des couleurs du thème
- 3. Proposer des thèmes prédéfinis applicables en un clic
- 4. Synchroniser les modifications avec le color_repository
- 5. Appliquer dynamiquement le stylesheet Qt global
- 6. Fournir un retour visuel immédiat des changements de couleurs
- 7. Gérer la réinitialisation du thème vers un preset par défaut
+ 1. Afficher les thèmes prédéfinis sous forme de cartes cliquables
+ 2. Permettre l'édition couleur par couleur via swatch et champ hexadécimal
+ 3. Charger un preset sans sauvegarder (prévisualisation)
+ 4. Sauvegarder les couleurs dans colors.json et appliquer le stylesheet Qt en live
+ 5. Réinitialiser le thème vers le preset par défaut
+ 6. Permettre le changement de langue et déclencher le redémarrage de l'application
 """
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6 import QtGui
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QApplication,
@@ -46,6 +29,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+import styles
 from models import color_repository
 from services.i18n_manager import I18nManager
 from styles import get_stylesheet, style_label_name_style, style_label_subname_style, style_presset_style, style_separator_style, style_tittle_style
@@ -174,6 +158,7 @@ _PRESET_META: dict[str, tuple[str, str]] = {
     "Blanc givré": ("☀️", "Clair  · Teal"),
 }
 
+_MAX_LIGHTNESS = 128  # seuil pour déterminer si une couleur est "sombre" ou "claire" (0-255)
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  Carte de preset cliquable
@@ -185,8 +170,15 @@ class PresetCard(QWidget):
 
     signal_clicked = pyqtSignal(str)  # nom du preset
 
-    def __init__(self, name: str, colors: dict[str, str], parent=None):
-        super().__init__(parent)
+    def __init__(self, name: str, colors: dict[str, str]) -> None:
+        """Initialise la carte de preset.
+
+        Args:
+            name (str): Nom du preset.
+            colors (dict[str, str]): Dictionnaire des couleurs du preset.
+
+        """
+        super().__init__()
         self._name = name
         emoji, subtitle = _PRESET_META.get(name, ("🎨", ""))
 
@@ -206,7 +198,7 @@ class PresetCard(QWidget):
             hex_val = colors.get(key, "#888888")
             dot = QLabel()
             dot.setFixedSize(20, 20)
-            is_dark = QColor(hex_val).lightness() < 128
+            is_dark = QColor(hex_val).lightness() < _MAX_LIGHTNESS
             border = "#444" if is_dark else "#ccc"
             dot.setStyleSheet(f"background-color: {hex_val}; border-radius: 10px;border: 1px solid {border};")
             swatch_row.addWidget(dot)
@@ -240,7 +232,13 @@ class PresetCard(QWidget):
             """
         )
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Émet le signal de clic si le bouton gauche est pressé.
+
+        Args:
+            event (QtGui.QMouseEvent): Événement de souris.
+
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self.signal_clicked.emit(self._name)
         super().mousePressEvent(event)
@@ -256,8 +254,15 @@ class ColorRow(QWidget):
 
     signal_changed = pyqtSignal(str, str)  # (key, new_hex)
 
-    def __init__(self, key: str, hex_color: str, parent=None):
-        super().__init__(parent)
+    def __init__(self, key: str, hex_color: str) -> None:
+        """Initialise le widget.
+
+        Args:
+            key (str): Clé de la couleur (ex: "bg_primary").
+            hex_color (str): Valeur hexadécimale initiale (ex: "#1f2937").
+
+        """
+        super().__init__()
         self._key = key
         self._hex = hex_color.strip()
 
@@ -282,7 +287,7 @@ class ColorRow(QWidget):
         self._edit.textChanged.connect(self.on_text_changed)
         layout.addWidget(self._edit)
 
-    def update_swatch(self, hex_color: str):
+    def update_swatch(self, hex_color: str) -> None:
         """Met à jour la couleur du swatch.
 
         Args:
@@ -292,10 +297,10 @@ class ColorRow(QWidget):
         color = QColor(hex_color)
         if color.isValid():
             # Bordure contrastée pour les couleurs sombres
-            border_col = "#555" if color.lightness() < 128 else "#999"
+            border_col = "#555" if color.lightness() < _MAX_LIGHTNESS else "#999"
             self._swatch.setStyleSheet(f"background-color: {hex_color};border: 1px solid {border_col};border-radius: 4px;")
 
-    def on_text_changed(self, text: str):
+    def on_text_changed(self, text: str) -> None:
         """Déclenche le signal si la valeur hex est valide.
 
         Args:
@@ -307,14 +312,14 @@ class ColorRow(QWidget):
             self.update_swatch(text)
             self.signal_changed.emit(self._key, text)
 
-    def open_picker(self):
+    def open_picker(self) -> None:
         """Ouvre le QColorDialog."""
         initial = QColor(self._hex) if QColor(self._hex).isValid() else QColor("#ffffff")
         color = QColorDialog.getColor(initial, self, "Choisir une couleur")
         if color.isValid():
             self._edit.setText(color.name())
 
-    def set_color(self, hex_color: str):
+    def set_color(self, hex_color: str) -> None:
         """Met à jour la couleur depuis l'extérieur.
 
         Args:
@@ -346,8 +351,14 @@ class ColorRow(QWidget):
 class StyleTab(QWidget):
     """Onglet Éditeur de paramètres visuel."""
 
-    def __init__(self, translator: I18nManager = None, parent=None):
-        super().__init__(parent)
+    def __init__(self, translator: I18nManager) -> None:
+        """Initialise le widget.
+
+        Args:
+            translator (I18nManager): Gestionnaire de traduction.
+
+        """
+        super().__init__()
         self.translator = translator
         self._colors: dict[str, str] = color_repository.load()
         self._rows: dict[str, ColorRow] = {}
@@ -356,7 +367,7 @@ class StyleTab(QWidget):
 
     # ── Construction ──────────────────────────────────────────────────────────
 
-    def build_ui(self):
+    def build_ui(self) -> None:
         """Construit le widget."""
         root = QVBoxLayout(self)
         root.setContentsMargins(16, 12, 16, 12)
@@ -500,7 +511,7 @@ class StyleTab(QWidget):
 
     # ── Logique ───────────────────────────────────────────────────────────────
 
-    def on_color_changed(self, key: str, hex_val: str):
+    def on_color_changed(self, key: str, hex_val: str) -> None:
         """Met à jour le dict interne quand une couleur change.
 
         Args:
@@ -511,8 +522,13 @@ class StyleTab(QWidget):
         self._colors[key] = hex_val
         self._lbl_status.setText(self.translator.tr("Modifié : {label} → {hex_val} (non sauvegardé)").format(label=_LABELS.get(key, (key,))[0], hex_val=hex_val))
 
-    def load_preset(self, name: str):
-        """Charge un thème prédéfini dans tous les champs sans sauvegarder."""
+    def load_preset(self, name: str) -> None:
+        """Charge un thème prédéfini dans tous les champs sans sauvegarder.
+
+        Args:
+            name (str): Nom du preset à charger.
+
+        """
         preset = PRESETS.get(name, {})
         for key, row in self._rows.items():
             if key in preset:
@@ -520,13 +536,11 @@ class StyleTab(QWidget):
         self._colors.update(preset)
         self._lbl_status.setText(self.translator.tr("Thème « {name} » chargé — cliquez « ✓ Appliquer » pour confirmer.").format(name=name))
 
-    def apply(self):
+    def apply(self) -> None:
         """Sauvegarde colors.json et applique le stylesheet Qt en live."""
         color_repository.save(self._colors)
 
         # Recharge le module styles avec les nouvelles couleurs
-        import styles
-
         styles.COLORS.update(self._colors)
 
         # Applique le stylesheet Qt global
@@ -536,12 +550,12 @@ class StyleTab(QWidget):
 
         self._lbl_status.setText(self.translator.tr("✅ Thème sauvegardé et appliqué."))
 
-    def reset_defaults(self):
+    def reset_defaults(self) -> None:
         """Charge le thème par défaut (Bleu nuit) sans sauvegarder."""
         self.load_preset("Bleu nuit")
         self._lbl_status.setText(self.translator.tr("Thème « Bleu nuit » restauré — cliquez « ✓ Appliquer » pour confirmer."))
 
-    def on_language_chosen(self, lang_code: str):
+    def on_language_chosen(self, lang_code: str) -> None:
         """Change la langue active, persiste le choix et redémarre l'application.
 
         Args:
@@ -551,9 +565,7 @@ class StyleTab(QWidget):
         self.translator.set_language(lang_code)
         self._lbl_status.setText(self.translator.tr("🌐 Langue changée — redémarrage…"))
 
-        from PyQt6.QtCore import QTimer
-
-        from main import restart_app
+        from main import restart_app  # noqa: PLC0415 Pour éviter les imports circulaires.
 
         # Petit délai pour laisser le label s'afficher avant le redémarrage.
         QTimer.singleShot(150, restart_app)

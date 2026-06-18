@@ -82,7 +82,7 @@ class AutocompleteViewModel(QObject):
         """Test si l'auto-complétion est en cours."""
         return bool(self._worker and self._worker.isRunning())
 
-    def on_signal_image_done(self, idx: int, img_name: str, result: dict):
+    def on_signal_image_done(self, idx: int, img_name: str, result: dict) -> None:
         """Callback quand une image est traitée.
 
         Args:

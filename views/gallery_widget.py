@@ -40,6 +40,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListView,
+    QMainWindow,
     QProgressBar,
     QPushButton,
     QVBoxLayout,
@@ -59,21 +60,25 @@ PREFETCH_ROWS = THUMB["prefetch_rows"]
 
 
 class GalleryWidget(QWidget):
+    """Widget représentant la gallerie."""
+
     def __init__(
         self,
         gallery_vm: GalleryViewModel,
         autocomplete_vm: AutocompleteViewModel,
         sam3_vm: Sam3ViewModel,
         translator: I18nManager,
-        parent=None,
-    ):
-        """Args:
-        gallery_vm: ViewModel de la galerie.
-        autocomplete_vm: ViewModel de l'auto-complétion.
-        sam3_vm: ViewModel SAM3 partagé du workspace.
+    ) -> None:
+        """Créer la gallerie d'image.
+
+        Args:
+            gallery_vm (GalleryViewModel): ViewModel de la galerie.
+            autocomplete_vm (AutocompleteViewModel): ViewModel de l'auto-complétion
+            sam3_vm (Sam3ViewModel): ViewModel SAM3 partagé du workspace.
+            translator (I18nManager): Le manager de la traduction.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._gvm = gallery_vm
         self._avm = autocomplete_vm
         self._sam3_vm = sam3_vm
@@ -85,7 +90,8 @@ class GalleryWidget(QWidget):
 
     # ── Construction ─────────────────────────────────────────────────────────
 
-    def build_ui(self):
+    def build_ui(self) -> None:
+        """Construit l'ui."""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 4)
         layout.setSpacing(6)
@@ -146,7 +152,16 @@ class GalleryWidget(QWidget):
         self._prefetch_timer.setSingleShot(True)
         self._prefetch_timer.timeout.connect(self.prefetch_visible)
 
-    def build_search_dock(self, main_window) -> QDockWidget:
+    def build_search_dock(self, main_window: QMainWindow) -> QDockWidget:
+        """Construit le dock de recherche.
+
+        Args:
+            main_window (QMainWindow): La fenetre principale.
+
+        Returns:
+            QDockWidget: Le dock.
+
+        """
         dock = QDockWidget(self.translator.tr("Recherche dans la Galerie"), main_window)
         dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.TopDockWidgetArea)
         dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetClosable)
@@ -213,12 +228,13 @@ class GalleryWidget(QWidget):
         self._search_dock = dock
         return dock
 
-    def connect_vm(self):
+    def connect_vm(self) -> None:
+        """Fait le lien entre toutes les vm."""
         self.btn_batch.clicked.connect(self._avm.start)
         self.btn_cancel.clicked.connect(self.on_cancel)
         self.list_view.clicked.connect(self.on_item_clicked)
         self.list_view.customContextMenuRequested.connect(self.on_right_click)
-        self.list_view.verticalScrollBar().valueChanged.connect(lambda: self._prefetch_timer.start())
+        self.list_view.verticalScrollBar().valueChanged.connect(self._prefetch_timer.start)
 
         self._gvm.signal_cell_size_changed.connect(self.on_signal_cell_size_changed)
         self._gvm.signal_saved_search.connect(self.on_signal_search_saved)
@@ -229,11 +245,18 @@ class GalleryWidget(QWidget):
 
     # ── Slots internes ────────────────────────────────────────────────────────
 
-    def on_signal_search_saved(self):
+    def on_signal_search_saved(self) -> None:
+        """Gère le rafraichissement de l'arbre après une save."""
         if hasattr(self, "tree_widget"):
             self.tree_widget.refresh()
 
-    def on_signal_tree_node_clicked(self, node_id: str):
+    def on_signal_tree_node_clicked(self, node_id: str) -> None:
+        """Gère la sélection d'un nœud dans l'arbre de recherche.
+
+        Args:
+            node_id (str): Identifiant du nœud sélectionné.
+
+        """
         node = self._gvm.search_tree.get_node(node_id)
         if node is None:
             return
@@ -244,13 +267,24 @@ class GalleryWidget(QWidget):
 
     # ── Slots View → ViewModel ────────────────────────────────────────────────
 
-    def on_item_clicked(self, index: QModelIndex):
+    def on_item_clicked(self, index: QModelIndex) -> None:
+        """Selectionne l'image au clic.
+
+        Args:
+            index (QModelIndex): L'index de l'image dans la gallerie.
+
+        """
         img_name = index.data(IMG_NAME_ROLE)
         if img_name:
             self._gvm.select_image(img_name)
 
-    def on_right_click(self, pos: QPoint):
-        """Ouvre Sam3Dialog pour l'image cliquée."""
+    def on_right_click(self, pos: QPoint) -> None:
+        """Ouvre Sam3Dialog pour l'image cliquée.
+
+        Args:
+            pos (QPoint): Le clic de la souris.
+
+        """
         index = self.list_view.indexAt(pos)
         if not index.isValid():
             return
@@ -269,23 +303,35 @@ class GalleryWidget(QWidget):
             title=img_name,
             img_path=img_path,
             translator=self.translator,
-            parent=self,
         )
         dlg.show()
 
-    def on_cancel(self):
+    def on_cancel(self) -> None:
+        """Annule l'auto complétion."""
         self._avm.cancel()
         self.btn_cancel.setEnabled(False)
         self.progress_label.setText(self.translator.tr("⛔ Annulation…"))
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
-    def on_signal_cell_size_changed(self, size: int):
+    def on_signal_cell_size_changed(self, size: int) -> None:
+        """Met à jour la taille des cellules de la liste.
+
+        Args:
+            size (int): Nouvelle taille des cellules en pixels.
+
+        """
         self.list_view.setGridSize(QSize(size + 8, size + 8))
         self.list_view.doItemsLayout()
         QTimer.singleShot(50, self.prefetch_visible)
 
-    def on_batch_started(self, total: int):
+    def on_batch_started(self, total: int) -> None:
+        """Lance le traitement des images.
+
+        Args:
+            total (int): Nombre d'images a traité au maximum.
+
+        """
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
@@ -295,11 +341,25 @@ class GalleryWidget(QWidget):
         self.btn_cancel.setVisible(True)
         self.btn_cancel.setEnabled(True)
 
-    def on_batch_progress(self, done: int, total: int, label: str):
+    def on_batch_progress(self, done: int, total: int, label: str) -> None:
+        """Gère le traitement par lot et met à jour l'UI.
+
+        Args:
+            done (int): Nombre d'image traité
+            total (int): Nombre d'image a traiter au total.
+            label (str): Le message.
+
+        """
         self.progress_bar.setValue(done)
         self.progress_label.setText(f"{done} / {total} - {label}")
 
-    def on_batch_finished(self, cancelled: bool):
+    def on_batch_finished(self, cancelled: bool) -> None:
+        """Gère la fin du traitement par lot et met à jour l'UI.
+
+        Args:
+            cancelled (bool): Etat annulé.
+
+        """
         total = self.progress_bar.maximum()
         self.progress_label.setText(self.translator.tr("⛔ Annulé") if cancelled else self.translator.tr("✅ Terminé - {total} images traitées").format(total=total))
         self.btn_batch.setEnabled(True)
@@ -314,7 +374,8 @@ class GalleryWidget(QWidget):
 
     # ── Prefetch ──────────────────────────────────────────────────────────────
 
-    def prefetch_visible(self):
+    def prefetch_visible(self) -> None:
+        """Précharge les images visibles et une zone étendue pour le scroll."""
         vp = self.list_view.viewport()
         rect = vp.rect()
         size = self._gvm.cell_size

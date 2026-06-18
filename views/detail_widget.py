@@ -1,31 +1,23 @@
-"""Panneau de détail d'une image dans l'interface de la galerie.
+"""Widget de détail d'une image sélectionnée.
 
-Ce composant constitue la vue dédiée à l'inspection et à l'édition des métadonnées
-d'une image sélectionnée. Il permet d'afficher un aperçu, de modifier la description
-et les mots-clés, de déclencher l'auto-complétion, de visualiser les images similaires
-et d'épingler/désépingler une image.
+Ce module contient le panneau de détail utilisé dans l'interface de galerie.
+Il permet de consulter et modifier les métadonnées d'une image, d'afficher
+un aperçu, d'explorer les images similaires et d'accéder aux outils de
+segmentation interactive via SAM3.
 
-Toute la logique métier est déléguée au ViewModel associé : ce widget ne gère que
-l'affichage et la propagation des interactions utilisateur.
-
-Le clic sur l'aperçu (gauche ou droit) ouvre désormais Sam3Dialog pour permettre
-la segmentation interactive avec SAM3.
-
-Contenu :
- - Aperçu cliquable de l'image avec ouverture Sam3Dialog
- - Champs d'édition (description, mots-clés, nom de fichier)
- - Bouton d'auto-complétion des métadonnées
- - Bouton 📌 d'épinglage/désépinglage
- - Grille des images similaires avec scores de proximité
- - Interaction temps réel avec le ViewModel via signaux Qt
+Le widget agit comme une vue MVVM : il présente les données fournies par
+les ViewModels et relaie les actions de l'utilisateur sans implémenter
+de logique métier.
 
 Responsabilités :
- 1. Afficher les métadonnées de l'image sélectionnée
- 2. Permettre l'édition de la description, des mots-clés et du nom de fichier
- 3. Déclencher les actions utilisateur (rename, auto-complétion, sauvegarde, pin)
- 4. Afficher dynamiquement les images similaires et leurs scores
- 5. Ouvrir Sam3Dialog pour la segmentation interactive
- 6. Refléter l'état du ViewModel sans contenir de logique métier
+    1. Afficher l'aperçu et les métadonnées de l'image sélectionnée.
+    2. Permettre l'édition du nom, de la description et des mots-clés.
+    3. Déclencher les actions utilisateur (renommage, sauvegarde,
+       auto-complétion, épinglage).
+    4. Afficher les images similaires et leurs scores de proximité.
+    5. Ouvrir l'outil de segmentation SAM3 pour l'image courante ou
+       une image voisine.
+    6. Synchroniser l'interface avec l'état des ViewModels associés.
 """
 
 from __future__ import annotations
@@ -69,14 +61,9 @@ class DetailWidget(QWidget):
         detail_vm: DetailViewModel,
         sam3_vm: Sam3ViewModel,
         translator: I18nManager,
-        parent=None,
-    ):
-        """Args:
-        detail_vm: Le viewmodel de ce widget.
-        sam3_vm: ViewModel SAM3 partagé du workspace.
-
-        """
-        super().__init__(parent)
+    ) -> None:
+        """Initialise le panneau de detail."""
+        super().__init__()
         self._vm = detail_vm
         self._sam3_vm = sam3_vm
         self._current_pixmap: QPixmap | None = None
@@ -88,7 +75,8 @@ class DetailWidget(QWidget):
 
     # ── Construction ─────────────────────────────────────────────────────────
 
-    def build_ui(self):
+    def build_ui(self) -> None:
+        """Construit l'ui."""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(6)
@@ -165,7 +153,8 @@ class DetailWidget(QWidget):
         scroll.setWidget(self._neighbors_widget)
         layout.addWidget(scroll)
 
-    def connect_vm(self):
+    def connect_vm(self) -> None:
+        """Lie les vms avec le detail widget."""
         # View → ViewModel
         self.btn_rename.clicked.connect(lambda: self._vm.rename(self.title_edit.text().strip()))
         self.btn_autocomplete.clicked.connect(self._vm.auto_complete)
@@ -174,7 +163,7 @@ class DetailWidget(QWidget):
 
         action_pin = QAction(self.translator.tr("Search"), self)
         action_pin.setShortcut(QKeySequence("Ctrl+E"))
-        action_pin.triggered.connect(lambda: self._vm.toggle_pin())
+        action_pin.triggered.connect(self._vm.toggle_pin)
         self.addAction(action_pin)
 
         # Debounce sauvegarde
@@ -183,8 +172,8 @@ class DetailWidget(QWidget):
         self._save_timer.setSingleShot(True)
         self._save_timer.timeout.connect(self.schedule_vm_save)
 
-        self.desc_edit.textChanged.connect(lambda: self._save_timer.start())
-        self.keywords_edit.textChanged.connect(lambda: self._save_timer.start())
+        self.desc_edit.textChanged.connect(self._save_timer.start)
+        self.keywords_edit.textChanged.connect(self._save_timer.start)
 
         # ViewModel → View
         self._vm.signal_preview_ready.connect(self.on_signal_preview_ready)
@@ -207,7 +196,14 @@ class DetailWidget(QWidget):
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
-    def on_signal_preview_ready(self, pixmap: QPixmap, img_name: str):
+    def on_signal_preview_ready(self, pixmap: QPixmap, img_name: str) -> None:
+        """Met a jour la preview d'une image.
+
+        Args:
+            pixmap (QPixmap): L'image.
+            img_name (str): Le nom de l'image.
+
+        """
         self._current_pixmap = pixmap
         # Conserve le chemin absolu pour Sam3Dialog
         folder = self._vm._folder
@@ -223,7 +219,15 @@ class DetailWidget(QWidget):
             )
             self.preview.setPixmap(scaled)
 
-    def on_signal_metadata_loaded(self, img_name: str, desc: str, keywords: list[str]):
+    def on_signal_metadata_loaded(self, img_name: str, desc: str, keywords: list[str]) -> None:
+        """Met a jour les meta data d'une image, en bloquant puis débloquant les signeaux pour pas faire de boucle.
+
+        Args:
+            img_name (str): Le nom de l'image.
+            desc (str): La description de l'image.
+            keywords (list[str]): Les mots clés de l'image.
+
+        """
         self.title_edit.setText(img_name)
         self.title_edit.setStyleSheet("")
         self.title_edit.setToolTip("")
@@ -235,7 +239,14 @@ class DetailWidget(QWidget):
         self.desc_edit.blockSignals(False)
         self.keywords_edit.blockSignals(False)
 
-    def on_signal_pin_changed(self, img_name: str, is_pinned: bool):
+    def on_signal_pin_changed(self, img_name: str, is_pinned: bool) -> None:
+        """Met a jour le statut épinglé sur une image.
+
+        Args:
+            img_name (str): Le nom de l'image.
+            is_pinned (bool): Son statut.
+
+        """
         if img_name != self.title_edit.text():
             return
         self.btn_pin.blockSignals(True)
@@ -248,7 +259,13 @@ class DetailWidget(QWidget):
             self.btn_pin.setToolTip(self.translator.tr("Épingler cette image"))
             self.btn_pin.setStyleSheet("")
 
-    def display_neighbors(self, neighbors: dict[str, float]):
+    def display_neighbors(self, neighbors: dict[str, float]) -> None:
+        """Affiche les voisins d'une image.
+
+        Args:
+            neighbors (dict[str, float]): Dictionnaire avec le nom et le score de la similarité cosinus.
+
+        """
         for i in reversed(range(self._neighbors_grid.count())):
             w = self._neighbors_grid.itemAt(i).widget()
             if w:
@@ -262,6 +279,7 @@ class DetailWidget(QWidget):
         folder = self._vm._folder
         THUMB = 80
         col, row = 0, 0
+        nb_colonne = 3
 
         for neighbor_name, score in neighbors.items():
             if not folder:
@@ -303,44 +321,83 @@ class DetailWidget(QWidget):
             self._neighbors_grid.addWidget(cell, row, col)
 
             col += 1
-            if col == 3:
+            if col == nb_colonne:
                 col, row = 0, row + 1
 
-    def on_signal_autocomplete_started(self):
+    def on_signal_autocomplete_started(self) -> None:
+        """Desactive le bouton d'autocomplete et active le chargement."""
         self.lbl_loading.setVisible(True)
         self.btn_autocomplete.setEnabled(False)
 
-    def on_signal_autocomplete_finished(self, desc: str, keywords: list[str]):
+    def on_signal_autocomplete_finished(self, desc: str, keywords: list[str]) -> None:
+        """Met a jour les informations et les affiches.
+
+        Args:
+            desc (str): La description de l'image.
+            keywords (list[str]): Les mots clés de l'image.
+
+        """
         self.desc_edit.setText(desc)
         self.keywords_edit.setText(", ".join(keywords))
         self.lbl_loading.setVisible(False)
         self.btn_autocomplete.setEnabled(True)
 
-    def on_signal_autocomplete_error(self, msg: str):
+    def on_signal_autocomplete_error(self, msg: str) -> None:
+        """Met a jour le bouton d'auto complete et met un message d'erreur.
+
+        Args:
+            msg (str): Le message d'erreur.
+
+        """
         self.title_edit.setText(self.translator.tr("Erreur : {msg}").format(msg=msg))
         self.lbl_loading.setVisible(False)
         self.btn_autocomplete.setEnabled(True)
 
-    def on_signal_rename_done(self, new_name: str):
+    def on_signal_rename_done(self, new_name: str) -> None:
+        """Met a jour le visuel du titre.
+
+        Args:
+            new_name (str): Le nouveau titre.
+
+        """
         self.title_edit.setText(new_name)
         self.title_edit.setStyleSheet("")
         self.title_edit.setToolTip("")
 
-    def on_signal_rename_error(self, msg: str):
+    def on_signal_rename_error(self, msg: str) -> None:
+        """Met a jour le visuel d'erreur du titre.
+
+        Args:
+            msg (str): Le message d'erreur.
+
+        """
         self.title_edit.setStyleSheet(rename_error_style())
         self.title_edit.setToolTip(self.translator.tr("❌ {msg}").format(msg=msg))
 
-    def on_k_changed(self, value: int):
+    def on_k_changed(self, value: int) -> None:
+        """Met a jours le nombre de voisins et rafraîchit les résultats affichés.
+
+        Args:
+            value (int): Nouvelle valeur du paramètre k.
+
+        """
         self._vm.k_neighbors = value
         self._vm.refresh_neighbors()
 
     # ── SAM3 ─────────────────────────────────────────────────────────────────
 
-    def open_sam3_dialog(self):
+    def open_sam3_dialog(self) -> None:
         """Ouvre Sam3Dialog pour l'image actuellement affichée."""
         self._open_sam3_with(self._current_pixmap, self._current_img_path)
 
-    def _open_sam3_with(self, pixmap: QPixmap | None, img_path: str | None):
+    def _open_sam3_with(self, pixmap: QPixmap | None, img_path: str | None) -> None:
+        """Ouvre Sam3Dialog pour l'image passé en parametre.
+
+        Args:
+            pixmap (QPixmap | None): L'image QPixmap.
+            img_path (str | None): Le chemin de l'image.
+
+        """
         if not pixmap or pixmap.isNull():
             return
         title = self.title_edit.text()
@@ -350,13 +407,13 @@ class DetailWidget(QWidget):
             title=title,
             img_path=img_path,
             translator=self.translator,
-            parent=self,
         )
         dlg.show()
 
     # ── Sauvegarde ────────────────────────────────────────────────────────────
 
-    def schedule_vm_save(self):
+    def schedule_vm_save(self) -> None:
+        """Récupère la description et les mots-clés saisis par l'utilisateur, puis déclenche leur sauvegarde via le ViewModel."""
         desc = self.desc_edit.toPlainText()
         keywords = [k.strip() for k in self.keywords_edit.text().split(",") if k.strip()]
         self._vm.schedule_save(desc, keywords)

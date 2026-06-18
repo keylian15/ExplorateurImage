@@ -44,7 +44,7 @@ class SearchTree(Tree):
         if self.current is None:
             raise ValueError("No current node")
 
-        node = SearchNode(query=query, results=results, parent=self.current)
+        node = SearchNode(query=query, results=results)
 
         self.current.add_child(node)
         self._nodes[node.id] = node

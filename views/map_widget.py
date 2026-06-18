@@ -1,38 +1,19 @@
-"""Onglet de visualisation de la carte 2D sémantique.
-
-Ce widget représente l'interface graphique de la projection 2D des images après réduction
-dimensionnelle (UMAP) et clustering (HDBSCAN). Il permet de visualiser les images sous forme
-de points colorés regroupés par clusters, d'interagir avec la scène (sélection, zoom, filtrage)
-et d'explorer les regroupements sémantiques.
-
-Toute la logique de calcul, de clustering et de transformation des données est entièrement
-déléguée au MapViewModel. Ce composant se limite à l'affichage graphique et à la gestion
-des interactions utilisateur.
-
-Contenu :
- - Zone de contrôle (lancement du calcul, paramètres, reset filtre, statut)
- - Vue graphique interactive (QGraphicsView) représentant les points 2D
- - Légende dynamique des clusters avec noms et effectifs
- - Dock de paramètres (UMAP / HDBSCAN)
- - Dock de recherche avec barre, arbre d'historique, bouton sauvegarde et affinage
- - Interaction directe avec les points (hover, sélection, centrage)
- - Filtrage visuel des clusters et zoom contextuel
- - Mise à jour dynamique des noms de clusters
+"""Onglet de visualisation de la carte 2D sémantique (UMAP + HDBSCAN).
 
 Responsabilités :
- 1. Afficher la projection 2D des images sous forme de points interactifs
- 2. Représenter visuellement les clusters avec une palette de couleurs dédiée
- 3. Permettre la sélection et la mise en surbrillance d'une image
- 4. Gérer les interactions utilisateur (zoom, clic, hover, filtrage)
- 5. Afficher et mettre à jour la légende des clusters dynamiquement
- 6. Permettre l'isolation visuelle d'un cluster avec zoom automatique
- 7. Relayer les actions utilisateur vers le ViewModel sans logique métier
- 8. Synchroniser l'affichage avec les résultats du calcul du ViewModel
- 9. Filtrer les noeuds visibles selon une requête sémantique
- 10. Gérer l'arbre d'historique des recherches avec affinage
+ 1. Afficher les images sous forme de points colorés par cluster dans une scène interactive
+ 2. Gérer le zoom, le déplacement et la sélection des points
+ 3. Afficher et mettre à jour la légende des clusters
+ 4. Permettre l'isolation visuelle d'un cluster avec zoom automatique
+ 5. Filtrer les points visibles selon une requête sémantique
+ 6. Gérer le dock de recherche avec historique et affinage
+ 7. Relayer les interactions utilisateur vers le MapViewModel sans logique métier
 """
 
 from __future__ import annotations
+
+from collections import Counter
+from collections.abc import Callable
 
 from PyQt6.QtCore import QRectF, Qt, QTimer
 from PyQt6.QtGui import QAction, QBrush, QColor, QKeySequence, QPainter, QPen, QWheelEvent
@@ -45,10 +26,13 @@ from PyQt6.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsItem,
     QGraphicsScene,
+    QGraphicsSceneHoverEvent,
+    QGraphicsSceneMouseEvent,
     QGraphicsView,
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QMainWindow,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -93,12 +77,16 @@ _HOVER_RADIUS = 0.5
 
 
 class MapNode(QGraphicsEllipseItem):
-    def __init__(self, img_name: str, cluster: int, color: QColor, callback_select):
-        """Args:
-        img_name (str): Nom de l'image
-        cluster (int): Numéro du cluster
-        color (QColor): Couleur du cluster
-        callback_select (function): Fonction de sélection
+    """Nœud interactif représentant une image sur la carte 2D."""
+
+    def __init__(self, img_name: str, cluster: int, color: QColor, callback_select: Callable[[str], None]) -> None:
+        """Initialise les nodes de la map.
+
+        Args:
+            img_name (str): Nom de l'image
+            cluster (int): Numéro du cluster
+            color (QColor): Couleur du cluster
+            callback_select (function): Fonction de sélection
 
         """
         r = _POINT_RADIUS
@@ -114,8 +102,8 @@ class MapNode(QGraphicsEllipseItem):
         self.setZValue(1)
         self._cb_sel = callback_select
 
-    def hoverEnterEvent(self, event):
-        """Surcharge l'évènement de survol
+    def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+        """Surcharge l'évènement de survol.
 
         Args:
             event (QGraphicsSceneHoverEvent): Evènement de survol
@@ -128,8 +116,8 @@ class MapNode(QGraphicsEllipseItem):
         QToolTip.showText(event.screenPos(), self.img_name)
         super().hoverEnterEvent(event)
 
-    def hoverLeaveEvent(self, event):
-        """Surcharge l'évènement de survol
+    def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+        """Surcharge l'évènement de survol.
 
         Args:
             event (QGraphicsSceneHoverEvent): Evènement de survol
@@ -141,8 +129,8 @@ class MapNode(QGraphicsEllipseItem):
         self.setZValue(5 if self.isSelected() else 1)
         super().hoverLeaveEvent(event)
 
-    def mousePressEvent(self, event):
-        """Surcharge l'évènement de clic
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        """Surcharge l'évènement de clic.
 
         Args:
             event (QGraphicsSceneMouseEvent): Evènement de clic
@@ -152,7 +140,7 @@ class MapNode(QGraphicsEllipseItem):
             self._cb_sel(self.img_name)
         super().mousePressEvent(event)
 
-    def mark_selected(self, selected: bool):
+    def mark_selected(self, selected: bool) -> None:
         """Marque selectionné le noeud.
 
         Args:
@@ -171,15 +159,18 @@ class MapNode(QGraphicsEllipseItem):
 
 
 class MapView(QGraphicsView):
+    """Vue zoomable de la carte 2D."""
+
     ZOOM_FACTOR = 1.15
 
-    def __init__(self, scene: QGraphicsScene, parent=None):
-        """Args:
-        scene (QGraphicsScene): Scene à afficher.
-        parent (QWidget, optional): Parent. Defaults to None.
+    def __init__(self, scene: QGraphicsScene) -> None:
+        """Initialise la vue zoomable de la carte 2D.
+
+        Args:
+            scene (QGraphicsScene): Scene à afficher.
 
         """
-        super().__init__(scene, parent)
+        super().__init__(scene)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
@@ -187,7 +178,7 @@ class MapView(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-    def wheelEvent(self, event: QWheelEvent):
+    def wheelEvent(self, event: QWheelEvent) -> None:
         """Gere l'évènement de roulette de souris.
 
         Args:
@@ -197,7 +188,7 @@ class MapView(QGraphicsView):
         factor = self.ZOOM_FACTOR if event.angleDelta().y() > 0 else 1 / self.ZOOM_FACTOR
         self.scale(factor, factor)
 
-    def zoom_to_rect(self, rect: QRectF, margin: float = 60.0):
+    def zoom_to_rect(self, rect: QRectF, margin: float = 60.0) -> None:
         """Zoom à une zone.
 
         Args:
@@ -208,7 +199,7 @@ class MapView(QGraphicsView):
         padded = rect.adjusted(-margin, -margin, margin, margin)
         self.fitInView(padded, Qt.AspectRatioMode.KeepAspectRatio)
 
-    def reset_zoom(self):
+    def reset_zoom(self) -> None:
         """Réinitialise le zoom."""
         self.resetTransform()
 
@@ -219,15 +210,18 @@ class MapView(QGraphicsView):
 
 
 class SettingsDock(QDockWidget):
-    def __init__(self, params: dict[str, int], on_apply, parent=None, translator: I18nManager = None):
-        """Args:
-        params (dict[str, int]): Paramètres de la carte.
-        on_apply (function): Fonction à appeler lors de l'application des paramètres.
-        parent (QWidget, optional): Parent. Defaults to None.
-        translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
+    """Dock de paramètres de la carte 2D (View pure)."""
+
+    def __init__(self, params: dict[str, int], on_apply: Callable[[], None], translator: I18nManager) -> None:
+        """Initialise le dock de paramètres de la carte.
+
+        Args:
+            params (dict[str, int]): Paramètres de la carte.
+            on_apply (function): Fonction à appeler lors de l'application des paramètres.
+            translator (I18nManager): Le gestionnaire de traduction.
 
         """
-        super().__init__(translator.tr("Paramètres de la carte"), parent)
+        super().__init__(translator.tr("Paramètres de la carte"))
         self.on_apply = on_apply
         self.translator = translator
         self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea)
@@ -275,7 +269,7 @@ class SettingsDock(QDockWidget):
         self.setWidget(content)
         self.setMinimumWidth(240)
 
-    def apply(self):
+    def apply(self) -> None:
         """Applique les paramètres."""
         self.on_apply(self.current_params())
 
@@ -292,7 +286,7 @@ class SettingsDock(QDockWidget):
             "hdbscan_min_cluster": self._spin_hdbscan.value(),
         }
 
-    def set_params(self, params: dict[str, int]):
+    def set_params(self, params: dict[str, int]) -> None:
         """Change les parametres.
 
         Args:
@@ -310,15 +304,18 @@ class SettingsDock(QDockWidget):
 
 
 class MapTab(QWidget):
-    def __init__(self, map_vm: MapViewModel, main_window, translator: I18nManager, parent=None):
-        """Args:
-        map_vm (MapViewModel): Le view model de la carte.
-        main_window (MainWindow): La fenetre principale.
-        parent (QWidget, optional): Le parent. Defaults to None.
-        translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
+    """Onglet de visualisation de la carte 2D sémantique."""
+
+    def __init__(self, map_vm: MapViewModel, main_window: QMainWindow, translator: I18nManager) -> None:
+        """Initialise la carte 2D.
+
+        Args:
+            map_vm (MapViewModel): Le view model de la carte.
+            main_window (MainWindow): La fenetre principale.
+            translator (I18nManager, optional): Le gestionnaire de traduction. Defaults to None.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._vm = map_vm
         self._main_window = main_window
         self.translator = translator
@@ -332,18 +329,17 @@ class MapTab(QWidget):
         # Dock recherche (construit depuis workspace_widget)
         self._search_dock: QDockWidget | None = None
 
-        self.build_ui()
-
         # Dock paramètres
         self._settings_dock = SettingsDock(
             self._vm.params,
             on_apply=self._vm.apply_params,
-            parent=main_window,
             translator=translator,
         )
+
+        self.build_ui()
         main_window.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._settings_dock)
         self._settings_dock.setVisible(False)
-        self._settings_dock.visibilityChanged.connect(lambda v: self._btn_settings.setChecked(v))
+        self._settings_dock.visibilityChanged.connect(self._btn_settings.setChecked)
 
         # Câblage ViewModel → View
         self._vm.signal_compute_started.connect(self.on_signal_compute_started)
@@ -358,7 +354,7 @@ class MapTab(QWidget):
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
-    def build_ui(self):
+    def build_ui(self) -> None:
         """Construit le widget."""
         root = QVBoxLayout(self)
         root.setContentsMargins(8, 8, 8, 8)
@@ -373,7 +369,7 @@ class MapTab(QWidget):
 
         self._btn_settings = QPushButton(self.translator.tr("⚙️ Paramètres"))
         self._btn_settings.setCheckable(True)
-        self._btn_settings.clicked.connect(lambda checked: self._settings_dock.setVisible(checked))
+        self._btn_settings.clicked.connect(self._settings_dock.setVisible)
         bar.addWidget(self._btn_settings)
 
         self._btn_reset_filter = QPushButton(self.translator.tr("Réinitialiser le filtre"))
@@ -400,7 +396,7 @@ class MapTab(QWidget):
         h.setSpacing(8)
 
         self._scene = QGraphicsScene(self)
-        self._view = MapView(self._scene, self)
+        self._view = MapView(self._scene)
         self._view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         h.addWidget(self._view, stretch=5)
 
@@ -424,14 +420,14 @@ class MapTab(QWidget):
 
         root.addLayout(h)
 
-    def build_search_dock(self, main_window) -> QDockWidget:
+    def build_search_dock(self, main_window: QMainWindow) -> QDockWidget:
         """Construit et retourne le dock de recherche de la carte.
 
         Doit être appelé depuis WorkspaceWidget après construction,
         une fois que main_window est disponible.
 
         Args:
-            main_window: La QMainWindow à laquelle rattacher le dock.
+            main_window (QMainWindow): La QMainWindow à laquelle rattacher le dock.
 
         Returns:
             QDockWidget: Le dock de recherche.
@@ -505,12 +501,12 @@ class MapTab(QWidget):
 
     # ── Slots internes ─────────────────────────────────────────────────────
 
-    def on_signal_search_saved(self):
+    def on_signal_search_saved(self) -> None:
         """Rafraîchit l'arbre après sauvegarde d'une recherche."""
         if hasattr(self, "tree_widget"):
             self.tree_widget.refresh()
 
-    def on_signal_tree_node_clicked(self, node_id: str):
+    def on_signal_tree_node_clicked(self, node_id: str) -> None:
         """Navigue vers le noeud cliqué dans l'arbre.
 
         Args:
@@ -529,7 +525,7 @@ class MapTab(QWidget):
         if hasattr(self, "tree_widget"):
             self.tree_widget.refresh()
 
-    def _on_dock_search_text_changed(self, text: str):
+    def _on_dock_search_text_changed(self, text: str) -> None:
         """Relaie le texte du dock au ViewModel.
 
         Args:
@@ -543,16 +539,16 @@ class MapTab(QWidget):
 
     # ── Slots ─────────────────────────────────────────────────────────────────
 
-    def on_signal_compute_started(self):
-        """Callback pour tout nettoyer"""
+    def on_signal_compute_started(self) -> None:
+        """Met à jour le statut lors du démarrage du calcul pour nettoyer."""
         self._btn_compute.setEnabled(False)
         self._scene.clear()
         self._nodes.clear()
         self._cluster_rects.clear()
         self._btn_reset_filter.setEnabled(False)
 
-    def on_error(self, msg: str):
-        """Callback pour afficher un message d'erreur
+    def on_error(self, msg: str) -> None:
+        """Met à jour le statut en cas d'erreur.
 
         Args:
             msg (str): Message d'erreur
@@ -561,8 +557,8 @@ class MapTab(QWidget):
         self._lbl_status.setText(self.translator.tr("❌ {msg}").format(msg=msg))
         self._btn_compute.setEnabled(True)
 
-    def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
-        """Callback pour afficher les clusters
+    def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]) -> None:
+        """Met à jour l'affichage des clusters après calcul.
 
         Args:
             points (list[tuple[float, float]]): Coordonnées des points
@@ -583,8 +579,8 @@ class MapTab(QWidget):
         if hasattr(self, "dock_search_bar") and self.dock_search_bar.text().strip():
             self._vm.schedule_search(self.dock_search_bar.text())
 
-    def on_cluster_named(self, cid: int, name: str):
-        """Callback lors du nommage.
+    def on_cluster_named(self, cid: int, name: str) -> None:
+        """Met à jour le nom d'un cluster.
 
         Args:
             cid (int): Identifiant du cluster
@@ -594,7 +590,7 @@ class MapTab(QWidget):
         self._cluster_names[cid] = name
         self.refresh_legend_names()
 
-    def on_search_results(self, matching_names: list[str]):
+    def on_search_results(self, matching_names: list[str]) -> None:
         """Applique le filtre de recherche sur les noeuds.
 
         Args:
@@ -641,7 +637,7 @@ class MapTab(QWidget):
 
     # ── Scène ─────────────────────────────────────────────────────────────────
 
-    def build_scene(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
+    def build_scene(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]) -> None:
         """Construit la scène.
 
         Args:
@@ -664,8 +660,17 @@ class MapTab(QWidget):
         ry = (max(ys) - min(ys)) or 1
         W = H = 800.0
 
-        def sp(px, py):
-            """Renvoi les coordonnées de la scène."""
+        def sp(px: float, py: float) -> tuple[float, float]:
+            """Renvoi les coordonnées de la scène.
+
+            Args:
+                px (float): Coordonnée x du point.
+                py (float): Coordonnée y du point.
+
+            Returns:
+                tuple[float, float]: Coordonnées x et y sur la scène.
+
+            """
             return (px - min(xs)) / rx * W, (py - min(ys)) / ry * H
 
         unique = sorted(set(labels))
@@ -706,7 +711,7 @@ class MapTab(QWidget):
 
     # ── Légende ───────────────────────────────────────────────────────────────
 
-    def clear_legend(self):
+    def clear_legend(self) -> None:
         """Nettoie la légende."""
         self._legend_labels.clear()
         while self._legend_layout.count() > 1:
@@ -714,7 +719,7 @@ class MapTab(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-    def build_legend(self, color_map: dict[int, QColor], labels: list[int], cluster_names: dict[int, str]):
+    def build_legend(self, color_map: dict[int, QColor], labels: list[int], cluster_names: dict[int, str]) -> None:
         """Construit la légende.
 
         Args:
@@ -723,8 +728,6 @@ class MapTab(QWidget):
             cluster_names (dict[int, str]): Nom des clusters.
 
         """
-        from collections import Counter
-
         counts = Counter(labels)
         for cid in sorted(color_map.keys()):
             label_text = cluster_names.get(cid, f"Cluster {cid}")
@@ -749,7 +752,7 @@ class MapTab(QWidget):
             container.setLayout(row)
             self._legend_layout.addWidget(container)
 
-    def refresh_legend_names(self):
+    def refresh_legend_names(self) -> None:
         """Rafraichi la légende."""
         for cid, lbl in self._legend_labels.items():
             base = self._cluster_names.get(cid, f"Cluster {cid}")
@@ -760,7 +763,7 @@ class MapTab(QWidget):
 
     # ── Interactions ──────────────────────────────────────────────────────────
 
-    def on_node_clicked(self, img_name: str):
+    def on_node_clicked(self, img_name: str) -> None:
         """Highlight le node lorsqu'on clique dessus.
 
         Args:
@@ -770,7 +773,7 @@ class MapTab(QWidget):
         self.highlight(img_name)
         self._vm._gallery_vm.select_image(img_name)
 
-    def highlight(self, img_name: str):
+    def highlight(self, img_name: str) -> None:
         """Highlight un node.
 
         Args:
@@ -785,7 +788,7 @@ class MapTab(QWidget):
             node.mark_selected(True)
             self._view.centerOn(node)
 
-    def filter_and_zoom_cluster(self, cluster_id: int):
+    def filter_and_zoom_cluster(self, cluster_id: int) -> None:
         """Filtre et zoom sur un cluster.
 
         Args:
@@ -806,7 +809,7 @@ class MapTab(QWidget):
             self._view.zoom_to_rect(self._cluster_rects[cluster_id])
         self._btn_reset_filter.setEnabled(True)
 
-    def reset_all_filters(self):
+    def reset_all_filters(self) -> None:
         """Réinitialise tous les filtres (recherche + cluster)."""
         if hasattr(self, "dock_search_bar"):
             self.dock_search_bar.blockSignals(True)
@@ -825,7 +828,7 @@ class MapTab(QWidget):
 
     # ── API externe ───────────────────────────────────────────────────────────
 
-    def on_image_selected(self, img_name: str):
+    def on_image_selected(self, img_name: str) -> None:
         """Highlight un node.
 
         Args:
@@ -835,7 +838,7 @@ class MapTab(QWidget):
         if self._nodes:
             self.highlight(img_name)
 
-    def hide_search_dock(self):
+    def hide_search_dock(self) -> None:
         """Masque le dock de recherche de la carte."""
         if self._search_dock:
             self._search_dock.setVisible(False)

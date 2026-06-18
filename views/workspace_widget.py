@@ -1,21 +1,16 @@
-"""Widget représentant un espace de travail complet.
+"""Widget représentant un espace de travail complet (galerie, carte 2D, thème, détail).
 
-Chaque workspace est autonome : il possède ses propres instances de ViewModels
-(GalleryViewModel, DetailViewModel, AutocompleteViewModel, MapViewModel, Sam3ViewModel)
-et ses propres vues (GalleryWidget, DetailWidget, MapTab, StyleTab).
-
-Le Sam3ViewModel est partagé au sein du workspace : le modèle SAM3 est chargé
-une seule fois en arrière-plan au démarrage. Chaque ouverture de dialog plein
-écran (clic droit sur une image) réutilise le modèle déjà chargé.
+Chaque workspace est autonome et instancie ses propres ViewModels et vues.
+Le Sam3Service est partagé au niveau application et injecté au démarrage.
 
 Responsabilités :
  1. Instancier les ViewModels dans le bon ordre de dépendance
- 2. Transmettre les données du workspace (k_neighbors, map_params, pinned_images) aux ViewModels
- 3. Assembler les 3 onglets (Galerie, Carte 2D, Thème)
- 4. Gérer le dock de détail en interne
- 5. Ouvrir automatiquement le dossier restauré depuis la config
- 6. Exposer les métadonnées du workspace (id, nom, dossier courant, paramètres, épingles, arbres)
- 7. Partager le Sam3ViewModel et lancer le chargement du modèle en fond au démarrage
+ 2. Assembler les trois onglets : Galerie, Carte 2D, Paramètres
+ 3. Gérer les docks (détail, recherche galerie, recherche carte)
+ 4. Restaurer automatiquement le dossier depuis la configuration
+ 5. Exposer les métadonnées du workspace (dossier, k_neighbors, map_params, épingles, arbres)
+ 6. Propager les événements internes (sélection d'image, changement de dossier) vers la fenêtre principale
+ 7. Masquer tous les docks lors du changement d'onglet workspace
 """
 
 from __future__ import annotations
@@ -36,6 +31,7 @@ from PyQt6.QtWidgets import (
 from models import workspace_repository as ws_repo
 from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
+from services.sam3_service import Sam3Service
 from viewmodels.autocomplete_vm import AutocompleteViewModel
 from viewmodels.detail_vm import DetailViewModel
 from viewmodels.gallery_vm import GalleryViewModel
@@ -53,7 +49,7 @@ class WorkspaceWidget(QWidget):
     signal_folder_changed = pyqtSignal(str, str)  # (ws_id, folder_path)
     signal_closed = pyqtSignal(str)  # ws_id
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 pour ignorer le nombre d'arguments dans le constructeur
         self,
         ws_id: str,
         name: str,
@@ -62,22 +58,24 @@ class WorkspaceWidget(QWidget):
         main_window: QMainWindow,
         folder: str | None = None,
         ws_data: dict | None = None,
-        parent=None,
         translator: I18nManager = None,
-        sam3_service=None,
-    ):
-        """Args:
-        ws_id (str): Identifiant unique du workspace.
-        name (str): Nom affiché dans l'onglet parent.
-        client (OllamaWrapper): Client Ollama partagé.
-        config (dict): Configuration globale.
-        main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
-        folder (str | None): Dossier à restaurer, ou None.
-        ws_data (dict | None): Données complètes du workspace.
-        parent: Parent Qt.
+        sam3_service: Sam3Service = None,
+    ) -> None:
+        """Initialise le workspace.
+
+        Args:
+            ws_id (str): Identifiant unique du workspace.
+            name (str): Nom affiché dans l'onglet parent.
+            client (OllamaWrapper): Client Ollama partagé.
+            config (dict): Configuration globale.
+            main_window (QMainWindow): Fenêtre principale, nécessaire pour les docks.
+            folder (str | None): Dossier à restaurer, ou None.
+            ws_data (dict | None): Données complètes du workspace.
+            translator (I18nManager): Gestionnaire de traduction.
+            sam3_service (Sam3Service): Service SAM3 partagé pour le workspace.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self.ws_id = ws_id
         self.ws_name = name
         self._main_window = main_window
@@ -93,16 +91,16 @@ class WorkspaceWidget(QWidget):
         self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data, sam3_service, translator=translator)
 
         # ── Vues ──────────────────────────────────────────────────────────────
-        self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, translator, parent=self)
-        self._detail_widget = DetailWidget(self.detail_vm, self.sam3_vm, translator, self)
-        self._map_tab = MapTab(self.map_vm, main_window, translator, self)
-        self._style_tab = StyleTab(translator, self)
+        self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, translator)
+        self._detail_widget = DetailWidget(self.detail_vm, self.sam3_vm, translator)
+        self._map_tab = MapTab(self.map_vm, main_window, translator)
+        self._style_tab = StyleTab(translator)
 
         self._gallery_widget.btn_open.clicked.connect(self.open_folder_dialog)
 
         action_open_workspace = QAction("Open Workspace", self)
         action_open_workspace.setShortcut(QKeySequence("Ctrl+O"))
-        action_open_workspace.triggered.connect(lambda: self.open_folder_dialog())
+        action_open_workspace.triggered.connect(self.open_folder_dialog)
         self.addAction(action_open_workspace)
 
         # ── Onglets internes ──────────────────────────────────────────────────
@@ -148,22 +146,52 @@ class WorkspaceWidget(QWidget):
 
     @property
     def current_folder(self) -> str | None:
+        """Retourner le chemin du dossier actuellement ouvert dans la galerie.
+
+        Returns:
+            str | None: Chemin du dossier ouvert, ou None si aucun dossier n'est ouvert.
+
+        """
         return self.gallery_vm.current_folder
 
     @property
     def current_k_neighbors(self) -> int:
+        """Retourner le nombre de voisins k actuellement configuré dans le workspace.
+
+        Returns:
+            int: Nombre de voisins k.
+
+        """
         return self.detail_vm.k_neighbors
 
     @property
     def current_map_params(self) -> dict:
+        """Retourner les paramètres de la carte actuelle.
+
+        Returns:
+            dict: Paramètres de la carte (zoom, centre, etc.).
+
+        """
         return self.map_vm.params
 
     @property
     def current_pinned_images(self) -> list[str]:
+        """Retourner la liste des images épinglées dans le workspace.
+
+        Returns:
+            list[str]: Liste des noms d'images épinglées.
+
+        """
         return self.gallery_vm.pinned_images
 
     @property
     def current_search_trees(self) -> dict:
+        """Retourner les arbres de recherche actuels pour la galerie et la carte.
+
+        Returns:
+            dict: Dictionnaire contenant les arbres de recherche pour la galerie et la carte.
+
+        """
         return {
             "gallery": self.gallery_vm.search_tree.to_dict(),
             "map": self.map_vm.search_tree.to_dict(),
@@ -171,29 +199,55 @@ class WorkspaceWidget(QWidget):
 
     # ── Slots internes ────────────────────────────────────────────────────────
 
-    def _on_image_selected(self, img_name: str):
+    def _on_image_selected(self, img_name: str) -> None:
+        """Afficher le dock de détail et notifier le DetailViewModel de l'image sélectionnée.
+
+        Args:
+            img_name (str): Nom de l'image sélectionnée.
+
+        """
         if not self._dock.isVisible():
             self._dock.setVisible(True)
         self.detail_vm.on_image_selected(img_name)
 
-    def _on_folder_changed(self, folder: str):
+    def _on_folder_changed(self, folder: str) -> None:
+        """Émettre un signal pour notifier le changement de dossier du workspace.
+
+        Args:
+            folder (str): Nouveau chemin du dossier ouvert.
+
+        """
         self.signal_folder_changed.emit(self.ws_id, folder)
 
     # ── API publique ──────────────────────────────────────────────────────────
 
-    def open_folder_dialog(self):
+    def open_folder_dialog(self) -> None:
+        """Ouvrir un dialog pour choisir un dossier et l'ouvrir dans la galerie."""
         folder = QFileDialog.getExistingDirectory(self, "Choisir un dossier")
         if folder:
             self.gallery_vm.open_folder(folder)
 
-    def show_dock(self, visible: bool = True):
+    def show_dock(self, visible: bool = True) -> None:
+        """Afficher ou cacher le dock de détail.
+
+        Args:
+            visible (bool): Indique si le dock doit être affiché ou caché.
+
+        """
         self._dock.setVisible(visible)
 
-    def hide_dock(self):
+    def hide_dock(self) -> None:
+        """Cacher tous les docks du workspace."""
         self._dock.setVisible(False)
         self._search_dock.setVisible(False)
         self._map_search_dock.setVisible(False)
 
-    def rename(self, new_name: str):
+    def rename(self, new_name: str) -> None:
+        """Renommer le workspace et mettre à jour le titre du dock.
+
+        Args:
+            new_name (str): Nouveau nom du workspace.
+
+        """
         self.ws_name = new_name
         self._dock.setWindowTitle(self.translator.tr("Détails - {name}").format(name=new_name))

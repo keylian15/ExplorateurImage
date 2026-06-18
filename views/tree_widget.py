@@ -1,5 +1,16 @@
+"""Composant visuel affichant l'arbre de recherche sous forme de labels cliquables.
+
+Responsabilités :
+ 1. Afficher la racine de l'arbre avec un style distinct
+ 2. Afficher les noeuds enfants indentés selon leur profondeur
+ 3. Mettre en évidence le noeud courant
+ 4. Émettre un signal lors du clic sur un noeud
+ 5. Se reconstruire entièrement à chaque appel de refresh()
+"""
+
 from __future__ import annotations
 
+from PyQt6 import QtGui
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QFrame,
@@ -11,6 +22,7 @@ from PyQt6.QtWidgets import (
 )
 
 from models.tree.search_tree import SearchTree
+from models.tree.tree_node import TreeNode
 from services.i18n_manager import I18nManager
 
 
@@ -19,8 +31,18 @@ class SearchNodeLabel(QLabel):
 
     signal_clicked = pyqtSignal(str)  # node_id
 
-    def __init__(self, text: str, node_id: str, is_root: bool = False, is_current: bool = False, depth: int = 0, parent=None):
-        super().__init__(parent)
+    def __init__(self, text: str, node_id: str, is_root: bool = False, is_current: bool = False, depth: int = 0) -> None:
+        """Initialise le label avec le texte, l'identifiant du noeud et les styles.
+
+        Args:
+            text (str): texte à afficher.
+            node_id (str): identifiant unique du noeud.
+            is_root (bool): True si c'est le noeud racine.
+            is_current (bool): True si c'est le noeud actuellement sélectionné.
+            depth (int): profondeur dans l'arbre pour l'indentation.
+
+        """
+        super().__init__()
         self._node_id = node_id
         self._is_root = is_root
         self.setText(text)
@@ -37,7 +59,13 @@ class SearchNodeLabel(QLabel):
             self.setCursor(Qt.CursorShape.PointingHandCursor)
             self.setToolTip(f"Naviguer vers : {text}")
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+        """Émet un signal lorsque le label est cliqué, sauf si c'est la racine.
+
+        Args:
+            event (QtGui.QMouseEvent): l'événement de clic de souris.
+
+        """
         if not self._is_root and event.button() == Qt.MouseButton.LeftButton:
             self.signal_clicked.emit(self._node_id)
         super().mousePressEvent(event)
@@ -52,8 +80,15 @@ class TreeViewWidget(QWidget):
 
     signal_node_clicked = pyqtSignal(str)  # node_id
 
-    def __init__(self, tree: SearchTree, translator: I18nManager, parent=None):
-        super().__init__(parent)
+    def __init__(self, tree: SearchTree, translator: I18nManager) -> None:
+        """Initialise le widget avec l'arbre et le traducteur.
+
+        Args:
+            tree (SearchTree): instance de SearchTree.
+            translator (I18nManager): instance de I18nManager pour la traduction des textes.
+
+        """
+        super().__init__()
         self.tree = tree
         self.translator = translator
 
@@ -80,7 +115,7 @@ class TreeViewWidget(QWidget):
 
         self.refresh()
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Reconstruit l'affichage de l'arbre."""
         # Vider le layout
         while self._tree_layout.count():
@@ -109,7 +144,14 @@ class TreeViewWidget(QWidget):
         self._tree_layout.addWidget(sep)
 
         # Enfants récursifs (on skip la racine __root__)
-        def add_children(node, depth: int):
+        def add_children(node: TreeNode, depth: int) -> None:
+            """Ajoute récursivement les enfants du noeud donné au layout.
+
+            Args:
+                node (TreeNode): le noeud dont on veut afficher les enfants.
+                depth (int): profondeur actuelle dans l'arbre pour l'indentation.
+
+            """
             for child in node.children:
                 is_current = child == self.tree.current
                 query_text = child.query if hasattr(child, "query") else child.id

@@ -300,7 +300,7 @@ class GalleryViewModel(QObject):
         self._search_text = text
         self._search_timer.start()
 
-    def do_search(self):
+    def do_search(self) -> None:
         """Effectue la recherche sémantique et met à jour la liste des images."""
         text = self._search_text.strip()
         if not text:
