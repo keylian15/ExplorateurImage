@@ -2751,8 +2751,8 @@ le to_dict() du SearchTree correspondant (ou {} si absent).</p>
 
     <div class="doc doc-contents ">
 
-        <p>Retourne la liste des workspaces depuis la config.
-Garantit au moins un workspace par défaut.
+        <p>Retourne la liste des workspaces depuis la config.</p>
+<p>Garantit au moins un workspace par défaut.
 Injecte les valeurs par défaut pour les clés manquantes.</p>
 
 
@@ -2847,8 +2847,11 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
-<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne la liste des workspaces depuis la config.</span>
+
 <span class="sd">    Garantit au moins un workspace par défaut.</span>
 <span class="sd">    Injecte les valeurs par défaut pour les clés manquantes.</span>
 
@@ -2865,22 +2868,23 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
         <span class="k">return</span> <span class="p">[</span><span class="n">make_workspace</span><span class="p">(</span><span class="s2">&quot;Workspace 1&quot;</span><span class="p">)]</span>
 
     <span class="n">validated</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="n">workspaces</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">ws</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">:</span>
-            <span class="c1"># Injecte les clés manquantes pour la rétrocompatibilité</span>
-            <span class="k">if</span> <span class="s2">&quot;k_neighbors&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">:</span>
-                <span class="n">ws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-                <span class="n">ws</span><span class="p">[</span><span class="s2">&quot;k_neighbors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_DEFAULT_K_NEIGHBORS</span>
-            <span class="k">if</span> <span class="s2">&quot;map_params&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">:</span>
-                <span class="n">ws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-                <span class="n">ws</span><span class="p">[</span><span class="s2">&quot;map_params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">_DEFAULT_MAP_PARAMS</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;pinned_images&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">:</span>
-                <span class="n">ws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-                <span class="n">ws</span><span class="p">[</span><span class="s2">&quot;pinned_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="s2">&quot;history_search&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">:</span>
-                <span class="n">ws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-                <span class="n">ws</span><span class="p">[</span><span class="s2">&quot;history_search&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gallery&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span> <span class="p">{}}</span>
-            <span class="n">validated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="n">workspaces</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">workspace</span> <span class="ow">and</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">workspace</span><span class="p">:</span>
+            <span class="n">validated_ws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;k_neighbors&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validated_ws</span><span class="p">:</span>
+                <span class="n">validated_ws</span><span class="p">[</span><span class="s2">&quot;k_neighbors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_DEFAULT_K_NEIGHBORS</span>
+
+            <span class="k">if</span> <span class="s2">&quot;map_params&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validated_ws</span><span class="p">:</span>
+                <span class="n">validated_ws</span><span class="p">[</span><span class="s2">&quot;map_params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">_DEFAULT_MAP_PARAMS</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;pinned_images&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validated_ws</span><span class="p">:</span>
+                <span class="n">validated_ws</span><span class="p">[</span><span class="s2">&quot;pinned_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;history_search&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validated_ws</span><span class="p">:</span>
+                <span class="n">validated_ws</span><span class="p">[</span><span class="s2">&quot;history_search&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gallery&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;map&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+
+            <span class="n">validated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">validated_ws</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">validated</span> <span class="k">if</span> <span class="n">validated</span> <span class="k">else</span> <span class="p">[</span><span class="n">make_workspace</span><span class="p">(</span><span class="s2">&quot;Workspace 1&quot;</span><span class="p">)]</span>
 </code></pre></div></td></tr></table></div>
@@ -3106,19 +3110,19 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/workspace_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
 <span class="normal">236</span>
-<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_workspace</span><span class="p">(</span><span class="n">workspaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">remove_workspace</span><span class="p">(</span><span class="n">workspaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime un workspace de la liste. Garantit qu&#39;il en reste au moins un.</span>
 
 <span class="sd">    Args:</span>
@@ -3223,9 +3227,7 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/workspace_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
@@ -3236,7 +3238,9 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 <span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
-<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">workspaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">workspaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour la liste des workspaces dans la config et retourne la config modifiée.</span>
 
 <span class="sd">    Args:</span>
@@ -3267,7 +3271,7 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Met à jour les champs d'un workspace identifié par son id.</p>
+        <p>Mettre à jour les champs d'un workspace identifié par son id.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3290,7 +3294,7 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Liste courante.</p>
+                <p>Liste courante des workspaces.</p>
               </div>
             </td>
             <td>
@@ -3318,10 +3322,11 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
                 <code>**kwargs</code>
             </td>
             <td>
+                  <code>dict[str, any</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Champs à mettre à jour (name, folder, k_neighbors, map_params, pinned_images…).</p>
+                <p>Champs à mettre à jour.</p>
               </div>
             </td>
             <td>
@@ -3347,7 +3352,7 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>list[dict]: Liste mise à jour (copie défensive).</p>
+                <p>list[dict]: Nouvelle liste de workspaces mise à jour.</p>
               </div>
             </td>
           </tr>
@@ -3357,9 +3362,7 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>models/workspace_repository.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
@@ -3375,24 +3378,34 @@ Injecte les valeurs par défaut pour les clés manquantes.</p>
 <span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
-<span class="normal">222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_workspace</span><span class="p">(</span><span class="n">workspaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Met à jour les champs d&#39;un workspace identifié par son id.</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_workspace</span><span class="p">(</span><span class="n">workspaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mettre à jour les champs d&#39;un workspace identifié par son id.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        workspaces (list[dict]): Liste courante.</span>
+<span class="sd">        workspaces (list[dict]): Liste courante des workspaces.</span>
 <span class="sd">        ws_id (str): Identifiant du workspace à modifier.</span>
-<span class="sd">        **kwargs: Champs à mettre à jour (name, folder, k_neighbors, map_params, pinned_images…).</span>
+<span class="sd">        **kwargs (dict[str, any): Champs à mettre à jour.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list[dict]: Liste mise à jour (copie défensive).</span>
+<span class="sd">        list[dict]: Nouvelle liste de workspaces mise à jour.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="n">workspaces</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ws</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ws_id</span><span class="p">:</span>
-            <span class="n">ws</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
-            <span class="n">ws</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="n">workspaces</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">workspace</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ws_id</span><span class="p">:</span>
+            <span class="n">updated_workspace</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+            <span class="n">updated_workspace</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updated_workspace</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">result</span>
 </code></pre></div></td></tr></table></div>
             </details>

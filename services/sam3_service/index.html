@@ -930,6 +930,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#services.sam3_service.Sam3Service.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#services.sam3_service.Sam3Service.apply_box_prompt" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -956,6 +967,17 @@
     <span class="md-ellipsis">
       
         extract_result
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#services.sam3_service.Sam3Service.find_bpe_path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_bpe_path
       
     </span>
   </a>
@@ -2040,6 +2062,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#services.sam3_service.Sam3Service.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        __init__
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#services.sam3_service.Sam3Service.apply_box_prompt" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2066,6 +2099,17 @@
     <span class="md-ellipsis">
       
         extract_result
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#services.sam3_service.Sam3Service.find_bpe_path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        find_bpe_path
       
     </span>
   </a>
@@ -2254,12 +2298,7 @@ state   = service.reset_prompts(state)</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>services/sam3_service.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 55</span>
 <span class="normal"> 56</span>
 <span class="normal"> 57</span>
 <span class="normal"> 58</span>
@@ -2482,7 +2521,25 @@ state   = service.reset_prompts(state)</p>
 <span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
-<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Sam3Service</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Sam3Service</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper autour de Sam3Processor.</span>
 
 <span class="sd">    Usage type :</span>
@@ -2496,7 +2553,24 @@ state   = service.reset_prompts(state)</p>
 
     <span class="n">signal_loaded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Service de haut niveau pour l&#39;utilisation du modèle SAM3.</span>
+
+<span class="sd">        Encapsule le Sam3Processor et fournit une interface simplifiée pour charger</span>
+<span class="sd">        le modèle, définir une image, appliquer des prompts (texte ou géométriques)</span>
+<span class="sd">        et extraire les résultats de segmentation.</span>
+
+<span class="sd">        Ce service gère également l&#39;état de chargement du modèle et expose un signal</span>
+<span class="sd">        lorsque celui-ci est prêt.</span>
+
+<span class="sd">        Usage typique :</span>
+<span class="sd">            service = Sam3Service()</span>
+<span class="sd">            service.load_model()</span>
+<span class="sd">            state = service.set_image(pil_image)</span>
+<span class="sd">            state = service.apply_text_prompt(&quot;dog&quot;, state)</span>
+<span class="sd">            result = service.extract_result(state)</span>
+<span class="sd">            state = service.reset_prompts(state)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2506,7 +2580,7 @@ state   = service.reset_prompts(state)</p>
     <span class="c1"># ── Chargement ────────────────────────────────────────────────────────────</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_find_bpe_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_bpe_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Retourne le chemin du fichier BPE relatif au dossier d&#39;exécution.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;sam3&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;sam3&quot;</span> <span class="o">/</span> <span class="s2">&quot;assets&quot;</span> <span class="o">/</span> <span class="s2">&quot;bpe_simple_vocab_16e6.txt.gz&quot;</span><span class="p">)</span>
 
@@ -2529,10 +2603,7 @@ state   = service.reset_prompts(state)</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_loading</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">sam3.sam3</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_sam3_image_model</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">sam3.sam3.model.sam3_image_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sam3Processor</span>
-
-            <span class="n">bpe_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_bpe_path</span><span class="p">()</span>
+            <span class="n">bpe_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_bpe_path</span><span class="p">()</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">build_sam3_image_model</span><span class="p">(</span><span class="n">bpe_path</span><span class="o">=</span><span class="n">bpe_path</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span> <span class="o">=</span> <span class="n">Sam3Processor</span><span class="p">(</span>
@@ -2551,7 +2622,7 @@ state   = service.reset_prompts(state)</p>
 
     <span class="c1"># ── Image ─────────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pil_image</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pil_image</span><span class="p">:</span> <span class="n">PILImage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise l&#39;état SAM3 à partir d&#39;une image PIL RGB.</span>
 
 <span class="sd">        Args:</span>
@@ -2561,8 +2632,7 @@ state   = service.reset_prompts(state)</p>
 <span class="sd">            dict state utilisable par les méthodes suivantes.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">set_image</span><span class="p">(</span><span class="n">pil_image</span><span class="p">)</span>
@@ -2573,15 +2643,14 @@ state   = service.reset_prompts(state)</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applique un prompt texte sur l&#39;état courant.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            prompt: texte décrivant l&#39;objet (ex : &quot;shoe&quot;).</span>
-<span class="sd">            state: état SAM3 retourné par set_image.</span>
+<span class="sd">            prompt (str): texte décrivant l&#39;objet (ex : &quot;shoe&quot;).</span>
+<span class="sd">            state (dict[str, Any]): état SAM3 retourné par set_image.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Nouvel état avec masques mis à jour.</span>
+<span class="sd">            dict[str, Any]: Nouvel état avec masques mis à jour.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">set_text_prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
@@ -2597,21 +2666,26 @@ state   = service.reset_prompts(state)</p>
         <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
         <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Applique un prompt boîte en coordonnées pixel xyxy.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Appliquer un prompt sous forme de boîte de sélection à un état SAM3.</span>
 
-<span class="sd">        Convertit en cxcywh normalisé comme attendu par SAM3.</span>
+<span class="sd">        Convertit des coordonnées pixel (xyxy) en format normalisé cxcywh, puis applique</span>
+<span class="sd">        ce prompt géométrique au modèle SAM3 pour mettre à jour l&#39;état des masques.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            x0, y0, x1, y1: coordonnées pixel (coin haut-gauche → bas-droit).</span>
-<span class="sd">            img_w, img_h: dimensions de l&#39;image originale.</span>
-<span class="sd">            state: état SAM3 courant.</span>
-<span class="sd">            positive: True = inclure, False = exclure.</span>
+<span class="sd">        x0 (float): Coordonnée X du coin supérieur gauche.</span>
+<span class="sd">        y0 (float): Coordonnée Y du coin supérieur gauche.</span>
+<span class="sd">        x1 (float): Coordonnée X du coin inférieur droit.</span>
+<span class="sd">        y1 (float): Coordonnée Y du coin inférieur droit.</span>
+<span class="sd">        img_w (int): Largeur de l&#39;image.</span>
+<span class="sd">        img_h (int): Hauteur de l&#39;image.</span>
+<span class="sd">        state (dict[str, Any]): État SAM3 courant.</span>
+<span class="sd">        positive (bool, optional): Indique si la boîte est positive (inclure) ou négative (exclure). Defaults to True.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Nouvel état avec masques mis à jour.</span>
+<span class="sd">        dict[str, Any]: Nouvel état SAM3 mis à jour avec les masques.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
         <span class="c1"># Conversion xyxy pixel → cxcywh normalisé</span>
         <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span> <span class="o">+</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">img_w</span>
@@ -2619,8 +2693,6 @@ state   = service.reset_prompts(state)</p>
         <span class="n">w</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">img_w</span>
         <span class="n">h</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">/</span> <span class="n">img_h</span>
         <span class="n">box_cxcywh</span> <span class="o">=</span> <span class="p">[</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
-
-        <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">add_geometric_prompt</span><span class="p">(</span><span class="n">box_cxcywh</span><span class="p">,</span> <span class="n">positive</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
@@ -2635,7 +2707,7 @@ state   = service.reset_prompts(state)</p>
 <span class="sd">            État nettoyé (encodage image conservé).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
         <span class="n">new_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">reset_all_prompts</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_state</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -2646,18 +2718,17 @@ state   = service.reset_prompts(state)</p>
         <span class="k">return</span> <span class="n">new_state</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_confidence_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Modifie le seuil de confiance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set le seuil de confiance.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            threshold: float entre 0 et 1.</span>
-<span class="sd">            state: état SAM3 courant.</span>
+<span class="sd">            threshold (float): float entre 0 et 1.</span>
+<span class="sd">            state (dict[str, Any]): état SAM3 courant.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            État mis à jour.</span>
+<span class="sd">            dict[str, Any]: État mis à jour.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
         <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">set_confidence_threshold</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
@@ -2695,8 +2766,9 @@ state   = service.reset_prompts(state)</p>
             <span class="k">return</span> <span class="n">result</span>
 
         <span class="k">try</span><span class="p">:</span>
+            <span class="n">seuil</span> <span class="o">=</span> <span class="mf">0.5</span>
             <span class="k">for</span> <span class="n">mask_t</span><span class="p">,</span> <span class="n">box_t</span><span class="p">,</span> <span class="n">score_t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">masks_raw</span><span class="p">,</span> <span class="n">boxes_raw</span><span class="p">,</span> <span class="n">scores_raw</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-                <span class="n">mask_np</span> <span class="o">=</span> <span class="n">mask_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
+                <span class="n">mask_np</span> <span class="o">=</span> <span class="n">mask_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">seuil</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask_np</span><span class="p">)</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">boxes_xyxy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box_t</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
                 <span class="n">score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">score_t</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">score_t</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">score_t</span><span class="p">)</span>
@@ -2706,9 +2778,7 @@ state   = service.reset_prompts(state)</p>
 
         <span class="k">return</span> <span class="n">result</span>
 
-    <span class="c1"># ── Interne ───────────────────────────────────────────────────────────────</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_check_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_loaded</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Le modèle SAM3 n&#39;est pas encore chargé. Appelez load_model() d&#39;abord.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -2774,6 +2844,88 @@ state   = service.reset_prompts(state)</p>
 <div class="doc doc-object doc-function">
 
 
+<h4 id="services.sam3_service.Sam3Service.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">()</span></code>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Service de haut niveau pour l'utilisation du modèle SAM3.</p>
+<p>Encapsule le Sam3Processor et fournit une interface simplifiée pour charger
+le modèle, définir une image, appliquer des prompts (texte ou géométriques)
+et extraire les résultats de segmentation.</p>
+<p>Ce service gère également l'état de chargement du modèle et expose un signal
+lorsque celui-ci est prêt.</p>
+
+
+<details class="usage-typique-" open>
+  <summary>Usage typique</summary>
+  <p>service = Sam3Service()
+service.load_model()
+state = service.set_image(pil_image)
+state = service.apply_text_prompt("dog", state)
+result = service.extract_result(state)
+state = service.reset_prompts(state)</p>
+</details>
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>services/sam3_service.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Service de haut niveau pour l&#39;utilisation du modèle SAM3.</span>
+
+<span class="sd">    Encapsule le Sam3Processor et fournit une interface simplifiée pour charger</span>
+<span class="sd">    le modèle, définir une image, appliquer des prompts (texte ou géométriques)</span>
+<span class="sd">    et extraire les résultats de segmentation.</span>
+
+<span class="sd">    Ce service gère également l&#39;état de chargement du modèle et expose un signal</span>
+<span class="sd">    lorsque celui-ci est prêt.</span>
+
+<span class="sd">    Usage typique :</span>
+<span class="sd">        service = Sam3Service()</span>
+<span class="sd">        service.load_model()</span>
+<span class="sd">        state = service.set_image(pil_image)</span>
+<span class="sd">        state = service.apply_text_prompt(&quot;dog&quot;, state)</span>
+<span class="sd">        result = service.extract_result(state)</span>
+<span class="sd">        state = service.reset_prompts(state)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_is_loaded</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_is_loading</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="services.sam3_service.Sam3Service.apply_box_prompt" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">apply_box_prompt</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">img_w</span><span class="p">,</span> <span class="n">img_h</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
@@ -2782,130 +2934,25 @@ state   = service.reset_prompts(state)</p>
 
     <div class="doc doc-contents ">
 
-        <p>Applique un prompt boîte en coordonnées pixel xyxy.</p>
-<p>Convertit en cxcywh normalisé comme attendu par SAM3.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>x0, y0, x1, y1</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>coordonnées pixel (coin haut-gauche → bas-droit).</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>img_w, img_h</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>dimensions de l'image originale.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>state</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>état SAM3 courant.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>positive</code>
-            </td>
-            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>True = inclure, False = exclure.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Nouvel état avec masques mis à jour.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Appliquer un prompt sous forme de boîte de sélection à un état SAM3.</p>
+<p>Convertit des coordonnées pixel (xyxy) en format normalisé cxcywh, puis applique
+ce prompt géométrique au modèle SAM3 pour mettre à jour l'état des masques.</p>
+<p>Args:
+x0 (float): Coordonnée X du coin supérieur gauche.
+y0 (float): Coordonnée Y du coin supérieur gauche.
+x1 (float): Coordonnée X du coin inférieur droit.
+y1 (float): Coordonnée Y du coin inférieur droit.
+img_w (int): Largeur de l'image.
+img_h (int): Hauteur de l'image.
+state (dict[str, Any]): État SAM3 courant.
+positive (bool, optional): Indique si la boîte est positive (inclure) ou négative (exclure). Defaults to True.</p>
+<p>Returns:
+dict[str, Any]: Nouvel état SAM3 mis à jour avec les masques.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span>
 <span class="normal">174</span>
@@ -2925,7 +2972,27 @@ state   = service.reset_prompts(state)</p>
 <span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
-<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_box_prompt</span><span class="p">(</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_box_prompt</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">x0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">y0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -2936,21 +3003,26 @@ state   = service.reset_prompts(state)</p>
     <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applique un prompt boîte en coordonnées pixel xyxy.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Appliquer un prompt sous forme de boîte de sélection à un état SAM3.</span>
 
-<span class="sd">    Convertit en cxcywh normalisé comme attendu par SAM3.</span>
+<span class="sd">    Convertit des coordonnées pixel (xyxy) en format normalisé cxcywh, puis applique</span>
+<span class="sd">    ce prompt géométrique au modèle SAM3 pour mettre à jour l&#39;état des masques.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        x0, y0, x1, y1: coordonnées pixel (coin haut-gauche → bas-droit).</span>
-<span class="sd">        img_w, img_h: dimensions de l&#39;image originale.</span>
-<span class="sd">        state: état SAM3 courant.</span>
-<span class="sd">        positive: True = inclure, False = exclure.</span>
+<span class="sd">    x0 (float): Coordonnée X du coin supérieur gauche.</span>
+<span class="sd">    y0 (float): Coordonnée Y du coin supérieur gauche.</span>
+<span class="sd">    x1 (float): Coordonnée X du coin inférieur droit.</span>
+<span class="sd">    y1 (float): Coordonnée Y du coin inférieur droit.</span>
+<span class="sd">    img_w (int): Largeur de l&#39;image.</span>
+<span class="sd">    img_h (int): Hauteur de l&#39;image.</span>
+<span class="sd">    state (dict[str, Any]): État SAM3 courant.</span>
+<span class="sd">    positive (bool, optional): Indique si la boîte est positive (inclure) ou négative (exclure). Defaults to True.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Nouvel état avec masques mis à jour.</span>
+<span class="sd">    dict[str, Any]: Nouvel état SAM3 mis à jour avec les masques.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
     <span class="c1"># Conversion xyxy pixel → cxcywh normalisé</span>
     <span class="n">cx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x0</span> <span class="o">+</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">img_w</span>
@@ -2958,8 +3030,6 @@ state   = service.reset_prompts(state)</p>
     <span class="n">w</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="o">/</span> <span class="n">img_w</span>
     <span class="n">h</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span><span class="p">)</span> <span class="o">/</span> <span class="n">img_h</span>
     <span class="n">box_cxcywh</span> <span class="o">=</span> <span class="p">[</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
-
-    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">add_geometric_prompt</span><span class="p">(</span><span class="n">box_cxcywh</span><span class="p">,</span> <span class="n">positive</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
@@ -3045,7 +3115,7 @@ state   = service.reset_prompts(state)</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Nouvel état avec masques mis à jour.</p>
+                <p>dict[str, Any]: Nouvel état avec masques mis à jour.</p>
               </div>
             </td>
           </tr>
@@ -3055,34 +3125,32 @@ state   = service.reset_prompts(state)</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_text_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_text_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Applique un prompt texte sur l&#39;état courant.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        prompt: texte décrivant l&#39;objet (ex : &quot;shoe&quot;).</span>
-<span class="sd">        state: état SAM3 retourné par set_image.</span>
+<span class="sd">        prompt (str): texte décrivant l&#39;objet (ex : &quot;shoe&quot;).</span>
+<span class="sd">        state (dict[str, Any]): état SAM3 retourné par set_image.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Nouvel état avec masques mis à jour.</span>
+<span class="sd">        dict[str, Any]: Nouvel état avec masques mis à jour.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">set_text_prompt</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
@@ -3169,26 +3237,7 @@ ne détecte pas l'objet dans l'image.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">251</span>
 <span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span>
@@ -3209,7 +3258,27 @@ ne détecte pas l'objet dans l'image.</p>
 <span class="normal">269</span>
 <span class="normal">270</span>
 <span class="normal">271</span>
-<span class="normal">272</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SegmentationResult</span><span class="p">:</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">extract_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SegmentationResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extrait les masques, boîtes et scores depuis l&#39;état SAM3.</span>
 
 <span class="sd">    Gère proprement les tenseurs vides retournés quand SAM3</span>
@@ -3240,8 +3309,9 @@ ne détecte pas l'objet dans l'image.</p>
         <span class="k">return</span> <span class="n">result</span>
 
     <span class="k">try</span><span class="p">:</span>
+        <span class="n">seuil</span> <span class="o">=</span> <span class="mf">0.5</span>
         <span class="k">for</span> <span class="n">mask_t</span><span class="p">,</span> <span class="n">box_t</span><span class="p">,</span> <span class="n">score_t</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">masks_raw</span><span class="p">,</span> <span class="n">boxes_raw</span><span class="p">,</span> <span class="n">scores_raw</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-            <span class="n">mask_np</span> <span class="o">=</span> <span class="n">mask_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.5</span>
+            <span class="n">mask_np</span> <span class="o">=</span> <span class="n">mask_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">seuil</span>
             <span class="n">result</span><span class="o">.</span><span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask_np</span><span class="p">)</span>
             <span class="n">result</span><span class="o">.</span><span class="n">boxes_xyxy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box_t</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
             <span class="n">score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">score_t</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">score_t</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">score_t</span><span class="p">)</span>
@@ -3250,6 +3320,39 @@ ne détecte pas l'objet dans l'image.</p>
         <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="services.sam3_service.Sam3Service.find_bpe_path" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">find_bpe_path</span><span class="p">()</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retourne le chemin du fichier BPE relatif au dossier d'exécution.</p>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>services/sam3_service.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_bpe_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le chemin du fichier BPE relatif au dossier d&#39;exécution.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;sam3&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;sam3&quot;</span> <span class="o">/</span> <span class="s2">&quot;assets&quot;</span> <span class="o">/</span> <span class="s2">&quot;bpe_simple_vocab_16e6.txt.gz&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3346,34 +3449,31 @@ ne détecte pas l'objet dans l'image.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">105</span>
 <span class="normal">106</span>
 <span class="normal">107</span>
 <span class="normal">108</span>
 <span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Charge le modèle SAM3. Bloquant - à appeler depuis un worker.</span>
 
 <span class="sd">    Args:</span>
@@ -3387,10 +3487,7 @@ ne détecte pas l'objet dans l'image.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_is_loading</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">sam3.sam3</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_sam3_image_model</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">sam3.sam3.model.sam3_image_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sam3Processor</span>
-
-        <span class="n">bpe_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_bpe_path</span><span class="p">()</span>
+        <span class="n">bpe_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_bpe_path</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">build_sam3_image_model</span><span class="p">(</span><span class="n">bpe_path</span><span class="o">=</span><span class="n">bpe_path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span> <span class="o">=</span> <span class="n">Sam3Processor</span><span class="p">(</span>
@@ -3477,25 +3574,25 @@ ne détecte pas l'objet dans l'image.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reset_prompts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reset_prompts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime tous les prompts et réinitialise les masques.</span>
 
 <span class="sd">    Args:</span>
@@ -3505,7 +3602,7 @@ ne détecte pas l'objet dans l'image.</p>
 <span class="sd">        État nettoyé (encodage image conservé).</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
     <span class="n">new_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">reset_all_prompts</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">new_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">new_state</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -3531,7 +3628,7 @@ ne détecte pas l'objet dans l'image.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Modifie le seuil de confiance.</p>
+        <p>Set le seuil de confiance.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3596,7 +3693,7 @@ ne détecte pas l'objet dans l'image.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>État mis à jour.</p>
+                <p>dict[str, Any]: État mis à jour.</p>
               </div>
             </td>
           </tr>
@@ -3606,34 +3703,32 @@ ne détecte pas l'objet dans l'image.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_confidence_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifie le seuil de confiance.</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_confidence_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set le seuil de confiance.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        threshold: float entre 0 et 1.</span>
-<span class="sd">        state: état SAM3 courant.</span>
+<span class="sd">        threshold (float): float entre 0 et 1.</span>
+<span class="sd">        state (dict[str, Any]): état SAM3 courant.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        État mis à jour.</span>
+<span class="sd">        dict[str, Any]: État mis à jour.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">set_confidence_threshold</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
@@ -3673,6 +3768,7 @@ ne détecte pas l'objet dans l'image.</p>
                 <code>pil_image</code>
             </td>
             <td>
+                  <code><span title="PIL.Image">Image</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3712,21 +3808,20 @@ ne détecte pas l'objet dans l'image.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>services/sam3_service.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pil_image</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pil_image</span><span class="p">:</span> <span class="n">PILImage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise l&#39;état SAM3 à partir d&#39;une image PIL RGB.</span>
 
 <span class="sd">    Args:</span>
@@ -3736,8 +3831,7 @@ ne détecte pas l'objet dans l'image.</p>
 <span class="sd">        dict state utilisable par les méthodes suivantes.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_loaded</span><span class="p">()</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_loaded</span><span class="p">()</span>
 
     <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">autocast</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processor</span><span class="o">.</span><span class="n">set_image</span><span class="p">(</span><span class="n">pil_image</span><span class="p">)</span>
@@ -3785,15 +3879,15 @@ ne détecte pas l'objet dans l'image.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>services/sam3_service.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SegmentationResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Résultat d&#39;une segmentation SAM3.&quot;&quot;&quot;</span>
 
