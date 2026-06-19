@@ -24,7 +24,11 @@ from __future__ import annotations
 
 import json
 import os
+import random
+from collections import defaultdict
 
+import numpy as np
+from PIL import Image as PILImage
 from PyQt6.QtCore import (
     QMutex,
     QMutexLocker,
@@ -36,7 +40,9 @@ from PyQt6.QtCore import (
 )
 from PyQt6.QtGui import QPixmap
 
+from services.box_search_strategies import pil_to_bytes
 from services.ollama_wrapper import OllamaWrapper
+from services.sam3_service import Sam3Service
 from services.thumbnail_cache import ThumbnailCache
 
 MODEL_EMBED = "nomic-embed-text:v1.5"
@@ -57,10 +63,15 @@ class TaskSignals(QObject):
 class ThumbnailTask(QRunnable):
     """Charge une miniature à partir d'un fichier image."""
 
-    def __init__(self, img_name: str, cache: ThumbnailCache):
-        """Args:
-        img_name (str): Nom du fichier image
-        cache (ThumbnailCache): Cache de miniatures
+    def __init__(self, img_name: str, cache: ThumbnailCache) -> None:
+        """Initialise une tâche de génération de miniature.
+
+        Configure une tâche exécutable dans un pool de threads pour charger ou générer
+        une miniature à partir d'un fichier image, avec accès au cache partagé.
+
+        Args:
+            img_name (str): Nom du fichier image à traiter.
+            cache (ThumbnailCache): Cache de miniatures utilisé pour la récupération ou la génération.
 
         """
         super().__init__()
@@ -69,7 +80,7 @@ class ThumbnailTask(QRunnable):
         self.signals = TaskSignals()
         self.setAutoDelete(True)
 
-    def run(self):
+    def run(self) -> None:
         """Lance le chargement de la miniature."""
         pixmap = self.cache.make_thumbnail(self.img_name)
         if pixmap and not pixmap.isNull():
@@ -84,20 +95,25 @@ class ThumbnailScheduler(QObject):
     signal_thumbnail_ready = pyqtSignal(str, QPixmap)
     POOL_THREADS = 4
 
-    def __init__(self, cache: ThumbnailCache, parent=None):
-        """Args:
-        cache (ThumbnailCache): Cache de miniatures
-        parent (Any, optional): Parent QObject. Defaults to None.
+    def __init__(self, cache: ThumbnailCache) -> None:
+        """Initialise le planificateur de génération de miniatures.
+
+        Configure un pool de threads et un système de synchronisation pour gérer
+        la création asynchrone de miniatures avec mise en cache et évitement des doublons.
+
+        Args:
+            cache (ThumbnailCache): Cache utilisé pour stocker et récupérer les miniatures.
+            parent (QObject, optional): Objet parent Qt.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self.cache = cache
         self._pool = QThreadPool()
         self._pool.setMaxThreadCount(self.POOL_THREADS)
         self._mutex = QMutex()
         self._pending: set[str] = set()
 
-    def set_cache(self, cache: ThumbnailCache):
+    def set_cache(self, cache: ThumbnailCache) -> None:
         """Remplace le cache de miniatures.
 
         Args:
@@ -108,7 +124,7 @@ class ThumbnailScheduler(QObject):
         with QMutexLocker(self._mutex):
             self._pending.clear()
 
-    def submit(self, img_name: str):
+    def submit(self, img_name: str) -> None:
         """Soumet une image à la création de miniatures.
 
         Args:
@@ -126,32 +142,38 @@ class ThumbnailScheduler(QObject):
         task.signals.signal_error.connect(self.on_signal_error)
         self._pool.start(task)
 
-    def flush_pending(self):
+    def flush_pending(self) -> None:
         """Vide les images en attente de miniatures."""
         with QMutexLocker(self._mutex):
             self._pending.clear()
 
-    def wait_all(self):
+    def wait_all(self) -> None:
         """Attend que toutes les miniatures soient créées."""
         self._pool.waitForDone()
 
-    def on_signal_done(self, img_name: str, pixmap: QPixmap):
-        """Callback appelé quand une miniature est créée.
+    def on_signal_done(self, img_name: str, pixmap: QPixmap) -> None:
+        """Finaliser la génération d'une miniature et notifier les abonnés.
+
+        Retire l'image de la liste des traitements en attente et émet le signal
+        indiquant que la miniature est prête.
 
         Args:
-            img_name (str): Nom de l'image
-            pixmap (QPixmap): Miniature
+            img_name (str): Nom de l'image.
+            pixmap (QPixmap): Miniature générée.
 
         """
         with QMutexLocker(self._mutex):
             self._pending.discard(img_name)
         self.signal_thumbnail_ready.emit(img_name, pixmap)
 
-    def on_signal_error(self, img_name: str):
-        """Callback appelé quand une erreur se produit lors de la création d'une miniature.
+    def on_signal_error(self, img_name: str) -> None:
+        """Gérer une erreur survenue lors de la génération d'une miniature.
+
+        Retire l'image concernée de la liste des tâches en attente afin d'éviter
+        qu'elle bloque le traitement global.
 
         Args:
-            img_name (str): Nom de l'image
+        img_name (str): Nom de l'image en erreur.
 
         """
         with QMutexLocker(self._mutex):
@@ -169,17 +191,19 @@ class AutoCompleteWorker(QThread):
     signal_finished = pyqtSignal(dict)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, image_path: str, client: OllamaWrapper):
-        """Args:
-        image_path (str): Chemin vers l'image
-        client (OllamaWrapper): Client Ollama
+    def __init__(self, image_path: str, client: OllamaWrapper) -> None:
+        """Initialise le worker pour auto completer.
+
+        Args:
+            image_path (str): Chemin vers l'image
+            client (OllamaWrapper): Client Ollama.
 
         """
         super().__init__()
         self.image_path = image_path
         self.client = client
 
-    def run(self):
+    def run(self) -> None:
         """Lance l'auto-complétion sur l'image."""
         try:
             result = self.client.get_description_and_keywords_from_image(self.image_path)
@@ -200,11 +224,13 @@ class AutoCompleteAllWorker(QThread):
     signal_image_error = pyqtSignal(int, str, str)
     signal_all_done = pyqtSignal()
 
-    def __init__(self, folder: str, images: list[str], client: OllamaWrapper):
-        """Args:
-        folder (str): Dossier contenant les images
-        images (list[str]): Liste des noms des images
-        client (OllamaWrapper): Client Ollama
+    def __init__(self, folder: str, images: list[str], client: OllamaWrapper) -> None:
+        """Initialise le worker pour tout auto compléter.
+
+        Args:
+            folder (str): Dossier contenant les images
+            images (list[str]): Liste des noms des images
+            client (OllamaWrapper): Client Ollama.
 
         """
         super().__init__()
@@ -213,11 +239,11 @@ class AutoCompleteAllWorker(QThread):
         self.client = client
         self._cancelled = False
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Annule le traitement."""
         self._cancelled = True
 
-    def run(self):
+    def run(self) -> None:
         """Lance l'auto-complétion."""
         for i, img_name in enumerate(self.images):
             if self._cancelled:
@@ -242,13 +268,15 @@ class SaveMetadataWorker(QThread):
     signal_finished = pyqtSignal()
     signal_error = pyqtSignal(str)
 
-    def __init__(self, image_name: str, folder: str, desc: str, keywords: list[str], client: OllamaWrapper):
-        """Args:
-        image_name (str): Nom de l'image.
-        folder (str): Dossier de l'image.
-        desc (str): Description de l'image.
-        keywords (list[str]): Mots-clés de l'image.
-        client (OllamaWrapper): Client Ollama.
+    def __init__(self, image_name: str, folder: str, desc: str, keywords: list[str], client: OllamaWrapper) -> None:
+        """Initialise le worker pour save les metadata d'une image.(id, path, descirption, keywords, embbeding).
+
+        Args:
+            image_name (str): Nom de l'image.
+            folder (str): Dossier de l'image.
+            desc (str): Description de l'image.
+            keywords (list[str]): Mots-clés de l'image.
+            client (OllamaWrapper): Client Ollama.
 
         """
         super().__init__()
@@ -258,7 +286,7 @@ class SaveMetadataWorker(QThread):
         self.keywords = keywords
         self.client = client
 
-    def run(self):
+    def run(self) -> None:
         """Lance la sauvegarde des métadonnées."""
         try:
             embedding = self.client.embed(
@@ -306,12 +334,18 @@ class MapWorker(QThread):
         umap_n_neighbors: int = 15,
         umap_min_dist: float = 0.1,
         hdbscan_min_cluster: int = 15,
-    ):
-        """Args:
-        index (dict): Index des images.
-        client (OllamaWrapper): Client Ollama.
-        umap_n_neighbors (int, optional): Nombre de voisins pour UMAP. Defaults to 15.
-        umap_min_dist (float, optional): Distance minimale pour UMAP. Defaults to 0.1.
+    ) -> None:
+        """Initialise le worker de génération de carte de clusters.
+
+        Configure les paramètres nécessaires au calcul de projection (UMAP) et de clustering
+        (HDBSCAN) à partir des embeddings de l'index.
+
+        Args:
+            index (dict): Index des images contenant notamment les embeddings.
+            client (OllamaWrapper): Client utilisé pour les traitements sémantiques.
+            umap_n_neighbors (int, optional): Nombre de voisins pour UMAP. Defaults to 15.
+            umap_min_dist (float, optional): Distance minimale pour UMAP. Defaults to 0.1.
+            hdbscan_min_cluster (int, optional): Taille minimale d'un cluster pour HDBSCAN.
 
         """
         super().__init__()
@@ -322,17 +356,15 @@ class MapWorker(QThread):
         self.hdbscan_min_cluster = hdbscan_min_cluster
         self.cluster_names: dict[int, str] = {}
 
-    def run(self):
+    def run(self) -> None:
         """Lance le calcul."""
         try:
             self.compute()
         except Exception as exc:
             self.signal_error.emit(str(exc))
 
-    def compute(self):
-        """Calcule les embeddings et les clusters."""
-        import numpy as np
-
+    def compute(self) -> None:
+        """Fait le Calcule les embeddings et les clusters."""
         # ── 1. Embeddings ─────────────────────────────────────
         self.signal_progress.emit("Extraction des embeddings…")
         names, vectors = [], []
@@ -341,8 +373,8 @@ class MapWorker(QThread):
             if emb:
                 names.append(name)
                 vectors.append(emb)
-
-        if len(vectors) < 2:
+        min_vecors_size = 2
+        if len(vectors) < min_vecors_size:
             self.signal_error.emit(f"Pas assez d'embeddings ({len(vectors)} / min 2).")
             return
 
@@ -350,7 +382,7 @@ class MapWorker(QThread):
 
         # ── 2. UMAP ───────────────────────────────────────────
         self.signal_progress.emit(f"UMAP sur {len(names)} images…")
-        import umap  # type: ignore
+        import umap  # noqa: PLC0415
 
         embedding_2d = umap.UMAP(
             n_neighbors=min(self.umap_n_neighbors, len(names) - 1),
@@ -364,7 +396,7 @@ class MapWorker(QThread):
         # ── 3. HDBSCAN ────────────────────────────────────────
         self.signal_progress.emit("Clustering HDBSCAN…")
         try:
-            import hdbscan  # type: ignore
+            import hdbscan  # noqa: PLC0415
 
             labels: list[int] = (
                 hdbscan.HDBSCAN(
@@ -389,7 +421,7 @@ class MapWorker(QThread):
         self.signal_progress.emit("Nommage des clusters terminé, carte prête.")
         self.signal_finished.emit(points, labels, names, self.cluster_names)
 
-    def name_clusters_async(self, names: list[str], labels: list[int]):
+    def name_clusters_async(self, names: list[str], labels: list[int]) -> None:
         """Nomme les clusters en fonction des descriptions et mots clés des images.
 
         Args:
@@ -397,9 +429,6 @@ class MapWorker(QThread):
             labels (list[int]): Les labels des clusters.
 
         """
-        import random
-        from collections import defaultdict
-
         # Tri des labels par ordre croissant
         unique = sorted(c for c in set(labels) if c >= 0)
         if not unique:
@@ -461,15 +490,17 @@ class Sam3LoadWorker(QThread):
     signal_finished = pyqtSignal()
     signal_error = pyqtSignal(str)
 
-    def __init__(self, service, parent=None):
-        """Args:
-        service (Sam3Service): instance du service SAM3.
+    def __init__(self, service: Sam3Service) -> None:
+        """Initialise le worker pour load.
+
+        Args:
+            service (Sam3Service): instance du service SAM3.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._service = service
 
-    def run(self):
+    def run(self) -> None:
         """Lance le chargement du modèle."""
         try:
             self._service.load_model()
@@ -484,17 +515,19 @@ class Sam3EncodeWorker(QThread):
     signal_finished = pyqtSignal(object)  # state dict
     signal_error = pyqtSignal(str)
 
-    def __init__(self, service, pil_image, parent=None):
-        """Args:
-        service (Sam3Service): instance du service SAM3.
-        pil_image: PIL.Image RGB à encoder.
+    def __init__(self, service: Sam3Service, pil_image: PILImage) -> None:
+        """Initialise le worker pour l'encodage.
+
+        Args:
+            service (Sam3Service): instance du service SAM3.
+            pil_image (PILImage): PIL.Image RGB à encoder.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._service = service
         self._image = pil_image
 
-    def run(self):
+    def run(self) -> None:
         """Lance l'encodage de l'image."""
         try:
             state = self._service.set_image(self._image)
@@ -509,19 +542,21 @@ class Sam3SegmentWorker(QThread):
     signal_finished = pyqtSignal(object, object)  # (new_state, SegmentationResult)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, service, state: dict, prompt_fn, parent=None):
-        """Args:
-        service (Sam3Service): instance du service SAM3.
-        state (dict): état SAM3 courant.
-        prompt_fn: callable(state) -> new_state appliquant le prompt.
+    def __init__(self, service: Sam3Service, state: dict, prompt_fn) -> None:
+        """Initialise le worker de segmentation.
+
+        Args:
+            service (Sam3Service): instance du service SAM3.
+            state (dict): état SAM3 courant.
+            prompt_fn (function): new_state appliquant le prompt.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._service = service
         self._state = state
         self._prompt_fn = prompt_fn
 
-    def run(self):
+    def run(self) -> None:
         """Applique le prompt et extrait le résultat."""
         try:
             new_state = self._prompt_fn(self._state)
@@ -537,17 +572,19 @@ class Sam3ResetWorker(QThread):
     signal_finished = pyqtSignal(object)  # new_state
     signal_error = pyqtSignal(str)
 
-    def __init__(self, service, state: dict, parent=None):
-        """Args:
-        service (Sam3Service): instance du service SAM3.
-        state (dict): état SAM3 courant.
+    def __init__(self, service: Sam3Service, state: dict) -> None:
+        """Initialise le worker pour reset.
+
+        Args:
+            service (Sam3Service): instance du service SAM3.
+            state (dict): état SAM3 courant.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._service = service
         self._state = state
 
-    def run(self):
+    def run(self) -> None:
         """Réinitialise les prompts."""
         try:
             new_state = self._service.reset_prompts(state=self._state)
@@ -562,8 +599,7 @@ class Sam3ResetWorker(QThread):
 
 
 class ObjectSearchAllWorker(QThread):
-    """Parcourt toutes les images du dossier et détecte celles où
-    l'objet texte est trouvé avec un score >= threshold.
+    """Parcourt toutes les images du dossier et détecte celles où l'objet texte est trouvé avec un score >= threshold.
 
     Travaille directement avec le Sam3Service (déjà chargé) de manière
     synchrone dans le thread secondaire — jamais dans le thread Qt principal.
@@ -583,13 +619,26 @@ class ObjectSearchAllWorker(QThread):
     def __init__(
         self,
         folder: str,
-        images: list,  # list[str] — noms de fichiers
-        service,  # Sam3Service déjà chargé
+        images: list,
+        service: Sam3Service,
         text: str,
         threshold: float = 0.75,
-        parent=None,
-    ):
-        super().__init__(parent)
+    ) -> None:
+        """Initialise le worker de recherche d'objet sur toutes les images.
+
+        Configure les paramètres nécessaires pour parcourir l'ensemble du dossier et
+        détecter la présence d'un objet décrit par un texte via Sam3Service, en filtrant
+        les résultats selon un seuil de confiance.
+
+        Args:
+        folder (str): Chemin du dossier contenant les images.
+        images (list): Liste des noms de fichiers à analyser.
+        service (Sam3Service): Service SAM3 déjà chargé utilisé pour la détection.
+        text (str): Description textuelle de l'objet à rechercher.
+        threshold (float, optional): Seuil minimal de confiance pour retenir une image.
+
+        """
+        super().__init__()
         self._folder = folder
         self._images = images
         self._service = service
@@ -602,9 +651,14 @@ class ObjectSearchAllWorker(QThread):
         self._cancelled = True
 
     def run(self) -> None:
-        try:
-            from PIL import Image as PILImage
+        """Exécuter la recherche SAM3 sur l'ensemble des images.
 
+        Parcourt toutes les images du dataset, applique le modèle SAM3 sur chacune d'elles
+        avec un prompt textuel, calcule le score maximal obtenu et conserve les images
+        dont le score dépasse le seuil défini. Émet des signaux de progression, de match,
+        de fin de traitement ou d'erreur.
+        """
+        try:
             matched: list[str] = []
             total = len(self._images)
 
@@ -675,8 +729,23 @@ class EmbeddingBoxSearchWorker(QThread):
     signal_finished = pyqtSignal(list)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, crop, folder: str, images: list, index: dict, client: OllamaWrapper, threshold: float = 0.3, max_results: int = 0, parent=None):
-        super().__init__(parent)
+    def __init__(self, crop: PILImage, folder: str, images: list, index: dict, client: OllamaWrapper, threshold: float = 0.3, max_results: int = 0) -> None:
+        """Initialise le worker de recherche basé sur les embeddings (rapide).
+
+        Configure les paramètres nécessaires à une recherche par similarité cosinus :
+        description VLM, génération d'embedding et comparaison sur l'ensemble de l'index.
+
+        Args:
+        crop (PILImage): Image recadrée représentant la région d'intérêt.
+        folder (str): Chemin du dossier contenant les images.
+        images (list): Liste des images à analyser pour la progression.
+        index (dict): Index contenant les embeddings des images.
+        client (OllamaWrapper): Client utilisé pour la génération VLM et embeddings.
+        threshold (float, optional): Seuil minimal de similarité cosinus.
+        max_results (int, optional): Nombre maximum de résultats (0 = illimité).
+
+        """
+        super().__init__()
         self._crop = crop
         self._folder = folder
         self._images = images
@@ -693,8 +762,6 @@ class EmbeddingBoxSearchWorker(QThread):
     def run(self) -> None:
         """Exécute la recherche par embedding."""
         try:
-            from services.box_search_strategies import _pil_to_bytes
-
             MODEL_VLM = "qwen2.5vl:7b"
             MODEL_EMBED_LOCAL = "nomic-embed-text:v1.5"
             PROMPT_FR = (
@@ -702,7 +769,7 @@ class EmbeddingBoxSearchWorker(QThread):
             )
 
             # 1. Description VLM du crop
-            result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_FR, image=_pil_to_bytes(self._crop))
+            result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_FR, image=pil_to_bytes(self._crop))
             description = result.response.strip()
 
             if self._cancelled:
@@ -769,8 +836,24 @@ class Sam3BoxSearchWorker(QThread):
     signal_finished = pyqtSignal(list)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, crop, folder: str, images: list, index: dict, client: OllamaWrapper, service, threshold: float = 0.75, max_results: int = 0, parent=None):
-        super().__init__(parent)
+    def __init__(self, crop: PILImage, folder: str, images: list, index: dict, client: OllamaWrapper, service: Sam3Service, threshold: float = 0.75, max_results: int = 0) -> None:
+        """Initialise le worker de recherche SAM3 (précision élevée).
+
+        Configure les paramètres nécessaires à la recherche basée uniquement sur SAM3 :
+        nomination de l'objet via VLM, puis segmentation et scoring sur l'ensemble du dataset.
+
+        Args:
+        crop (PILImage): Image recadrée représentant la région d'intérêt.
+        folder (str): Chemin du dossier contenant les images.
+        images (list): Liste des images à analyser.
+        index (dict): Index des métadonnées utilisé pour le suivi de progression.
+        client (OllamaWrapper): Client utilisé pour l'analyse VLM.
+        service (Sam3Service): Service SAM3 déjà initialisé.
+        threshold (float, optional): Seuil minimal du score SAM3 pour conserver une image.
+        max_results (int, optional): Nombre maximum de résultats (0 = illimité).
+
+        """
+        super().__init__()
         self._crop = crop
         self._folder = folder
         self._images = images
@@ -788,15 +871,11 @@ class Sam3BoxSearchWorker(QThread):
     def run(self) -> None:
         """Exécute la recherche SAM3."""
         try:
-            from PIL import Image as PILImage
-
-            from services.box_search_strategies import _pil_to_bytes
-
             MODEL_VLM = "qwen2.5vl:7b"
             PROMPT_EN = "In one or two English words, name the main object in this image. Return only the object name, nothing else."
 
             # 1. Nom de l'objet en anglais
-            result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_EN, image=_pil_to_bytes(self._crop))
+            result = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_EN, image=pil_to_bytes(self._crop))
             object_name = result.response.strip().splitlines()[0].strip()[:50]
 
             if self._cancelled:
@@ -853,7 +932,7 @@ class HybridBoxSearchWorker(QThread):
      1. Appel VLM pour obtenir un nom anglais + concepts (format NAME:/CONCEPTS:).
      2. Embedding des concepts → présélection des candidats au-dessus d'un seuil bas.
      3. SAM3 sur les candidats uniquement.
-     4. Score final = score_embedding × score_sam3 (ou score_sam3 dégradé si SAM3 = 0).
+     4. Score final = score_embedding x score_sam3 (ou score_sam3 dégradé si SAM3 = 0).
      5. Émet signal_match pour chaque résultat retenu.
 
     Args:
@@ -874,8 +953,28 @@ class HybridBoxSearchWorker(QThread):
     signal_finished = pyqtSignal(list)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, crop, folder: str, images: list, index: dict, client: OllamaWrapper, service, embed_threshold: float = 0.3, sam3_threshold: float = 0.5, max_results: int = 0, parent=None):
-        super().__init__(parent)
+    def __init__(
+        self, crop: PILImage, folder: str, images: list, index: dict, client: OllamaWrapper, service: Sam3Service, embed_threshold: float = 0.3, sam3_threshold: float = 0.5, max_results: int = 0
+    ) -> None:
+        """Initialise le worker de recherche hybride (embedding + SAM3).
+
+        Configure les paramètres nécessaires au pipeline hybride de recherche :
+        analyse VLM, présélection par embeddings, raffinement via SAM3 et scoring final
+        combiné.
+
+        Args:
+        crop (PILImage): Image recadrée représentant la région d'intérêt.
+        folder (str): Chemin du dossier contenant les images.
+        images (list): Liste des images à analyser.
+        index (dict): Index des métadonnées et embeddings des images.
+        client (OllamaWrapper): Client utilisé pour les embeddings et VLM.
+        service (Sam3Service): Service SAM3 déjà initialisé.
+        embed_threshold (float, optional): Seuil de présélection basé sur les embeddings.
+        sam3_threshold (float, optional): Seuil appliqué au score SAM3 final.
+        max_results (int, optional): Nombre maximum de résultats retournés (0 = illimité).
+
+        """
+        super().__init__()
         self._crop = crop
         self._folder = folder
         self._images = images
@@ -894,10 +993,6 @@ class HybridBoxSearchWorker(QThread):
     def run(self) -> None:
         """Exécute la recherche hybride."""
         try:
-            from PIL import Image as PILImage
-
-            from services.box_search_strategies import _pil_to_bytes
-
             MODEL_VLM = "qwen2.5vl:7b"
             MODEL_EMBED_LOCAL = "nomic-embed-text:v1.5"
 
@@ -910,7 +1005,7 @@ class HybridBoxSearchWorker(QThread):
             )
 
             # 1a. Nom anglais pour SAM3
-            result_en = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID_EN, image=_pil_to_bytes(self._crop))
+            result_en = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID_EN, image=pil_to_bytes(self._crop))
             object_name = result_en.response.strip().splitlines()[0].strip()[:50]
 
             if self._cancelled:
@@ -918,7 +1013,7 @@ class HybridBoxSearchWorker(QThread):
                 return
 
             # 1b. Description française pour l'embedding
-            result_fr = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID_FR, image=_pil_to_bytes(self._crop))
+            result_fr = self._client.generate_with_image(model=MODEL_VLM, prompt=PROMPT_HYBRID_FR, image=pil_to_bytes(self._crop))
             description_fr = result_fr.response.strip()
 
             if self._cancelled:
@@ -1003,8 +1098,21 @@ class EmbeddingTextSearchWorker(QThread):
     signal_finished = pyqtSignal(list)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, text: str, folder: str, images: list, index: dict, client: OllamaWrapper, threshold: float = 0.3, parent=None):
-        super().__init__(parent)
+    def __init__(self, text: str, folder: str, images: list, index: dict, client: OllamaWrapper, threshold: float = 0.3) -> None:
+        """Initialise le worker de recherche de similarité.
+
+        Configure les paramètres nécessaires à l'exécution de la recherche par texte via embedding cosinus (sans SAM3).
+
+        Args:
+        text (str): Texte de la requête de recherche.
+        folder (str): Chemin du dossier contenant les images.
+        images (list): Liste des images à traiter.
+        index (dict): Index contenant les embeddings des images.
+        client (OllamaWrapper): Client utilisé pour les embeddings et la similarité.
+        threshold (float, optional): Seuil minimal de similarité. Par défaut à 0.3.
+
+        """
+        super().__init__()
         self._text = text
         self._folder = folder
         self._images = images
@@ -1014,9 +1122,20 @@ class EmbeddingTextSearchWorker(QThread):
         self._cancelled = False
 
     def cancel(self) -> None:
+        """Annuler la recherche."""
         self._cancelled = True
 
     def run(self) -> None:
+        """Exécuter la recherche de similarité sur l'ensemble des images.
+
+        Calcule l'embedding de la requête puis compare celui-ci à tous les embeddings
+        disponibles dans l'index. Émet des signaux de progression, de correspondance,
+        de fin de traitement ou d'erreur. Supporte l'annulation en cours d'exécution.
+
+        Returns:
+        None
+
+        """
         try:
             query_emb = self._client.embed(model=MODEL_EMBED, text=self._text)
             matched: list[str] = []

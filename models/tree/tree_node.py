@@ -1,4 +1,4 @@
-"""models/tree/tree_node.py
+"""models/tree/tree_node.py.
 
 Noeud générique d'arbre.
 
@@ -14,6 +14,7 @@ hériteront de cette classe.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from uuid import uuid4
 
 
@@ -25,9 +26,14 @@ class TreeNode:
         node_id: str | None = None,
         parent: TreeNode | None = None,
     ) -> None:
-        """Args:
-        node_id (str | None):Identifiant unique du noeud.Généré automatiquement si None.
-        parent (TreeNode | None): Parent du noeud.
+        """Initialise un nœud de l'arbre.
+
+        Crée un nœud avec un identifiant unique et un parent optionnel.
+        Si aucun identifiant n'est fourni, un UUID est généré automatiquement.
+
+        Args:
+            node_id (str | None, optional): Identifiant unique du nœud. Généré automatiquement si None.
+            parent (TreeNode | None, optional): Nœud parent. None si le nœud est racine.
 
         """
         self.id: str = node_id or str(uuid4())
@@ -92,29 +98,28 @@ class TreeNode:
 
         return depth
 
-    def iter_parents(self):
-        """Itère sur les parents du noeud.
+    def iter_parents(self) -> Iterator[TreeNode]:
+        """Itérer sur les parents du nœud.
 
         Yields:
-            TreeNode
+            TreeNode: les nœuds parents successifs jusqu'à la racine.
 
         """
         current = self.parent
 
         while current is not None:
             yield current
-            current = current.parent
+            current = current.paren
 
-    def iter_children_recursive(self):
-        """Itère récursivement sur tous les enfants.
+    def iter_children_recursive(self) -> Iterator[TreeNode]:
+        """Itérer récursivement sur tous les enfants.
 
         Yields:
-            TreeNode
+            TreeNode: chaque nœud enfant (incluant les descendants).
 
         """
         for child in self.children:
             yield child
-
             yield from child.iter_children_recursive()
 
     def to_dict(self) -> dict:

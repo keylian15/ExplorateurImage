@@ -69,7 +69,7 @@ def load() -> dict[str, str]:
     return dict(_DEFAULTS)
 
 
-def save(colors: dict[str, str]):
+def save(colors: dict[str, str]) -> None:
     """Écrit colors.json.
 
     Args:

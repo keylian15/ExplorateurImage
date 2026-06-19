@@ -1,3 +1,13 @@
+"""Nœud spécialisé de l'arbre de recherche.
+
+Représente une unité de recherche dans l'arbre, contenant :
+- la requête utilisateur
+- les résultats associés (liste de noms d'images)
+
+Ce nœud étend TreeNode afin d'être intégré dans la structure hiérarchique
+de SearchTree et supporte la sérialisation.
+"""
+
 from models.tree.tree_node import TreeNode
 
 

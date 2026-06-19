@@ -1,4 +1,4 @@
-"""models/tree/tree.py
+"""models/tree/tree.py.
 
 Arbre générique.
 
@@ -13,6 +13,8 @@ Aucune logique métier spécifique ne doit être ajoutée ici.
 """
 
 from __future__ import annotations
+
+from collections.abc import Iterator
 
 from models.tree.tree_node import TreeNode
 
@@ -57,8 +59,7 @@ class Tree:
         self._nodes[node.id] = node
 
     def push(self, node: TreeNode) -> None:
-        """Ajoute un noeud enfant au noeud courant
-        et le définit comme noeud courant.
+        """Ajoute un noeud enfant au noeud courant et le définit comme noeud courant.
 
         Args:
             node (TreeNode): Noeud à ajouter.
@@ -139,11 +140,11 @@ class Tree:
         """
         return node_id in self._nodes
 
-    def iter_nodes(self):
-        """Itère sur tous les noeuds.
+    def iter_nodes(self) -> Iterator[TreeNode]:
+        """Itérer sur tous les nœuds de la structure.
 
         Yields:
-            TreeNode
+            TreeNode: chaque nœud présent dans la structure.
 
         """
         yield from self._nodes.values()
@@ -160,28 +161,3 @@ class Tree:
             "current_id": (self.current.id if self.current else None),
             "nodes": [node.to_dict() for node in self.iter_nodes()],
         }
-
-    def print_tree(self) -> None:
-        """Affiche tout l'arbre de manière hiérarchique."""
-        if self.root is None:
-            print("[Tree] empty")
-            return
-
-        print("\n[Tree] full structure:\n")
-
-        def print_node(node, depth=0):
-
-            label = getattr(node, "query", None) or node.id
-
-            prefix = "  " * depth
-
-            current_marker = ""
-            if node == self.current:
-                current_marker = "  <-- CURRENT"
-
-            print(f"{prefix}- {label} ({node.id}){current_marker}")
-
-            for child in node.children:
-                print_node(child, depth + 1)
-
-        print_node(self.root)

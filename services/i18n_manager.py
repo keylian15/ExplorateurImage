@@ -1,3 +1,13 @@
+"""Gestion de l'internationalisation (i18n) de l'application.
+
+Ce module centralise le chargement, la gestion et la récupération des traductions
+depuis un fichier JSON. Il permet de changer dynamiquement la langue active et
+de fournir des libellés lisibles pour l'interface utilisateur.
+
+Il inclut également des métadonnées d'affichage (nom + drapeau) pour les langues
+supportées afin d'améliorer l'expérience utilisateur dans les sélecteurs de langue.
+"""
+
 import json
 from pathlib import Path
 
@@ -24,7 +34,23 @@ _LANGUAGE_META: dict[str, tuple[str, str]] = {
 
 
 class I18nManager:
-    def __init__(self, lang: str = "fr", file_path: str = "i18n.json"):
+    """Gérer l'internationalisation de l'application.
+
+    Charge et fournit l'accès aux traductions à partir d'un fichier i18n JSON,
+    en fonction de la langue active sélectionnée.
+    """
+
+    def __init__(self, lang: str = "fr", file_path: str = "i18n.json") -> None:
+        """Initialise le gestionnaire d'internationalisation.
+
+        Charge les traductions depuis un fichier JSON et configure la langue active
+        utilisée pour la récupération des chaînes traduites.
+
+        Args:
+        lang (str, optional): Langue active utilisée pour les traductions. Defaults to "fr".
+        file_path (str, optional): Chemin du fichier de traductions i18n. Defaults to "i18n.json".
+
+        """
         self.file_path = Path(file_path)
         self.lang = lang
         self.translations: dict[str, dict[str, str]] = {}

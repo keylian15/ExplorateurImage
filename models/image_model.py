@@ -31,12 +31,11 @@ from PyQt6.QtCore import (
     QModelIndex,
     QPoint,
     QRect,
-    QSize,
     Qt,
     pyqtSignal,
 )
 from PyQt6.QtGui import QBrush, QColor, QFont, QPainter, QPen, QPixmap
-from PyQt6.QtWidgets import QStyle, QStyledItemDelegate
+from PyQt6.QtWidgets import QStyle, QStyledItemDelegate, QStyleOptionViewItem
 
 from services.thumbnail_cache import ThumbnailCache
 from services.workers import ThumbnailScheduler
@@ -69,14 +68,25 @@ _COL_PIN_ICON = QColor(255, 255, 255)  # icône blanche
 class ImageListModel(QAbstractListModel):
     """Stocke une liste ordonnée de noms de fichiers images."""
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self) -> None:
+        """Initialise le modèle de liste d'images.
+
+        Met en place les structures internes nécessaires pour stocker et gérer
+        une liste ordonnée d'images, ainsi que leur état de sélection et d'indexation.
+
+        Attributs:
+        _images (list[str]): Liste ordonnée des noms d'images.
+        _indexed (set[str]): Ensemble des images déjà indexées.
+        _selected (str | None): Image actuellement sélectionnée.
+        _pinned (set[str]): Ensemble des images épinglées.
+        """
+        super().__init__()
         self._images: list[str] = []
         self._indexed: set[str] = set()
         self._selected: str | None = None
         self._pinned: set[str] = set()
 
-    def set_images(self, images: list[str]):
+    def set_images(self, images: list[str]) -> None:
         """Remplace la liste d'images par une nouvelle. Réinitialise la sélection.
 
         Args:
@@ -87,7 +97,7 @@ class ImageListModel(QAbstractListModel):
         self._images = list(images)
         self.endResetModel()
 
-    def set_indexed(self, indexed: set[str]):
+    def set_indexed(self, indexed: set[str]) -> None:
         """Met à jour la liste des images indexées. Émet un signal de changement de données pour les images concernées.
 
         Args:
@@ -98,7 +108,7 @@ class ImageListModel(QAbstractListModel):
         if self._images:
             self.dataChanged.emit(self.index(0), self.index(len(self._images) - 1), [INDEXED_ROLE])
 
-    def set_pinned(self, pinned: set[str]):
+    def set_pinned(self, pinned: set[str]) -> None:
         """Met à jour l'ensemble des images épinglées.
 
         Args:
@@ -109,7 +119,7 @@ class ImageListModel(QAbstractListModel):
         if self._images:
             self.dataChanged.emit(self.index(0), self.index(len(self._images) - 1), [PINNED_ROLE])
 
-    def set_selected(self, img_name: str | None):
+    def set_selected(self, img_name: str | None) -> None:
         """Met à jour l'image sélectionnée. Émet un signal de changement de données pour l'ancienne et la nouvelle image sélectionnée.
 
         Args:
@@ -150,7 +160,7 @@ class ImageListModel(QAbstractListModel):
         except ValueError:
             return None
 
-    def notify_image_updated(self, img_name: str):
+    def notify_image_updated(self, img_name: str) -> None:
         """Indique que l'image donnée a été mise à jour. Émet un signal de changement de données pour cette image.
 
         Args:
@@ -176,7 +186,7 @@ class ImageListModel(QAbstractListModel):
         """
         return len(self._images)
 
-    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole) -> str | bool | None:
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole) -> str | bool | None:
         """Retourne les données pour une cellule donnée et un rôle donné.
 
         Args:
@@ -226,37 +236,22 @@ class ImageGridDelegate(QStyledItemDelegate):
         cache: ThumbnailCache,
         scheduler: ThumbnailScheduler,
         cell_size: int = 192,
-        parent=None,
-    ):
+    ) -> None:
         """Initialise le delegate avec une référence au cache de thumbnails et au scheduler de génération de thumbnails.
 
         Args:
             cache (ThumbnailCache): Le cache de thumbnails à utiliser pour récupérer les thumbnails à dessiner
             scheduler (ThumbnailScheduler): Le scheduler de génération de thumbnails à utiliser pour demander la génération de thumbnails manquants
             cell_size (int, optional): La taille des cellules en pixels. Par défaut à 192.
-            parent (Any, optional): Le parent QObject. Par défaut à None.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self.cache = cache
         self.scheduler = scheduler
         self.cell_size = cell_size
         self.scheduler.signal_thumbnail_ready.connect(self.on_signal_thumbnail_ready)
 
-    def sizeHint(self, _option, _index) -> QSize:
-        """Override de la méthode sizeHint pour retourner la taille des cellules.
-
-        Args:
-            _option (QStyleOptionViewItem): Les options de style du QListView
-            _index (QModelIndex): L'index du QListView
-
-        Returns:
-            QSize: La taille des cellules en pixels
-
-        """
-        return QSize(self.cell_size, self.cell_size)
-
-    def set_cell_size(self, size: int):
+    def set_cell_size(self, size: int) -> None:
         """Met à jour la taille des cellules.
 
         Args:
@@ -268,9 +263,8 @@ class ImageGridDelegate(QStyledItemDelegate):
         """
         self.cell_size = size
 
-    def paint(self, painter: QPainter, option, index: QModelIndex):
-        """Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée,
-        point vert si indexée, badge 📌 en haut à gauche si épinglée.
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
+        """Dessine une cellule : thumbnail centré, bordure bleue si sélectionnée, point vert si indexée, badge 📌 en haut à gauche si épinglée.
 
         Args:
             painter (QPainter): Le painter à utiliser pour dessiner la cellule.
@@ -323,7 +317,7 @@ class ImageGridDelegate(QStyledItemDelegate):
 
         painter.restore()
 
-    def draw_pin_badge(self, painter: QPainter, cell_rect: QRect):
+    def draw_pin_badge(self, painter: QPainter, cell_rect: QRect) -> None:
         """Dessine le badge épingle dans le coin haut-gauche de la cellule.
 
         Le badge est un petit carré arrondi ambré avec l'emoji 📌 centré.
@@ -355,7 +349,7 @@ class ImageGridDelegate(QStyledItemDelegate):
         painter.setPen(_COL_PIN_ICON)
         painter.drawText(badge_rect, Qt.AlignmentFlag.AlignCenter, "📌")
 
-    def on_signal_thumbnail_ready(self, img_name: str):
+    def on_signal_thumbnail_ready(self, img_name: str) -> None:
         """Emet un signal pour indiquer que le thumbnail d'une image est prêt, afin que la cellule correspondante soit redessinée.
 
         Args:

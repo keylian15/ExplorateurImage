@@ -1,4 +1,5 @@
 """Ce module centralise l'ensemble du système de style de l'application (QSS, couleurs, typographie et métriques).
+
 Il constitue l'unique point de configuration de l'apparence graphique et permet une mise à jour dynamique du thème.
 
 Les couleurs sont chargées depuis `colors.json` via `color_repository`, ce qui permet leur modification en temps réel

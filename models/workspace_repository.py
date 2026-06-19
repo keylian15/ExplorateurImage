@@ -149,6 +149,7 @@ def get_search_trees(ws_data: dict) -> dict:
 
 def load(config: dict) -> list[dict]:
     """Retourne la liste des workspaces depuis la config.
+
     Garantit au moins un workspace par défaut.
     Injecte les valeurs par défaut pour les clés manquantes.
 
@@ -165,22 +166,23 @@ def load(config: dict) -> list[dict]:
         return [make_workspace("Workspace 1")]
 
     validated = []
-    for ws in workspaces:
-        if isinstance(ws, dict) and "id" in ws and "name" in ws:
-            # Injecte les clés manquantes pour la rétrocompatibilité
-            if "k_neighbors" not in ws:
-                ws = dict(ws)
-                ws["k_neighbors"] = _DEFAULT_K_NEIGHBORS
-            if "map_params" not in ws:
-                ws = dict(ws)
-                ws["map_params"] = dict(_DEFAULT_MAP_PARAMS)
-            if "pinned_images" not in ws:
-                ws = dict(ws)
-                ws["pinned_images"] = []
-            if "history_search" not in ws:
-                ws = dict(ws)
-                ws["history_search"] = {"gallery": {}, "map": {}}
-            validated.append(ws)
+    for workspace in workspaces:
+        if isinstance(workspace, dict) and "id" in workspace and "name" in workspace:
+            validated_ws = dict(workspace)
+
+            if "k_neighbors" not in validated_ws:
+                validated_ws["k_neighbors"] = _DEFAULT_K_NEIGHBORS
+
+            if "map_params" not in validated_ws:
+                validated_ws["map_params"] = dict(_DEFAULT_MAP_PARAMS)
+
+            if "pinned_images" not in validated_ws:
+                validated_ws["pinned_images"] = []
+
+            if "history_search" not in validated_ws:
+                validated_ws["history_search"] = {"gallery": {}, "map": {}}
+
+            validated.append(validated_ws)
 
     return validated if validated else [make_workspace("Workspace 1")]
 
@@ -201,24 +203,28 @@ def save(config: dict, workspaces: list[dict]) -> dict:
     return config
 
 
-def update_workspace(workspaces: list[dict], ws_id: str, **kwargs) -> list[dict]:
-    """Met à jour les champs d'un workspace identifié par son id.
+def update_workspace(workspaces: list[dict], ws_id: str, **kwargs: dict[str, any]) -> list[dict]:
+    """Mettre à jour les champs d'un workspace identifié par son id.
 
     Args:
-        workspaces (list[dict]): Liste courante.
+        workspaces (list[dict]): Liste courante des workspaces.
         ws_id (str): Identifiant du workspace à modifier.
-        **kwargs: Champs à mettre à jour (name, folder, k_neighbors, map_params, pinned_images…).
+        **kwargs (dict[str, any): Champs à mettre à jour.
 
     Returns:
-        list[dict]: Liste mise à jour (copie défensive).
+        list[dict]: Nouvelle liste de workspaces mise à jour.
 
     """
     result = []
-    for ws in workspaces:
-        if ws["id"] == ws_id:
-            ws = dict(ws)
-            ws.update(kwargs)
-        result.append(ws)
+
+    for workspace in workspaces:
+        if workspace["id"] == ws_id:
+            updated_workspace = dict(workspace)
+            updated_workspace.update(kwargs)
+            result.append(updated_workspace)
+        else:
+            result.append(workspace)
+
     return result
 
 

@@ -1,11 +1,27 @@
-# ------------------------------
-# Exceptions spécifiques (pédagogie + robustesse)
-# ------------------------------
+"""Service Wrapper Ollama - Interface de communication avec l'API Ollama.
+
+Ce module fournit une interface Python simplifiée et typée pour interagir avec un serveur Ollama.
+Il permet la génération de texte, l'analyse d'images, la gestion du serveur et la création d'embeddings.
+
+Fonctionnalités principales :
+- Gestion et vérification du serveur Ollama
+- Requêtes API (/api/version, /api/tags, /api/generate, /api/embed)
+- Génération de texte et analyse multimodale (image + texte)
+- Calcul de similarité cosinus
+- Construction de représentations textuelles pour embeddings
+- Outils de récupération et d'indexation d'images
+
+Auteur principal : Rémi Cozot - IUT Calais.
+Ajouts et extensions : Keylian Turbé.
+"""
+
 # Permet les annotations de types en avant-référence (Python < 3.11)
 from __future__ import annotations
 
 import base64  # Encodage base64 requis pour envoyer des images à /api/generate
 import json  # Sérialisation/désérialisation JSON
+import math
+import os
 import shutil  # Pour trouver l'exécutable "ollama" dans le PATH
 import socket  # Pour tester rapidement si un port TCP est ouvert
 import subprocess  # Pour lancer "ollama serve"
@@ -16,7 +32,7 @@ from pathlib import Path  # Manipulation robuste des chemins
 from typing import Any
 
 # ------------------------------
-# Exceptions spécifiques (pédagogie + robustesse)
+# Exceptions spécifiques
 # ------------------------------
 
 
@@ -97,7 +113,17 @@ class OllamaWrapper:
         self,
         base_url: str = "http://10.22.28.190:11434",
         timeout_s: float = 240.0,
-    ):
+    ) -> None:
+        """Initialise le client Ollama.
+
+        Configure l'accès au serveur Ollama ainsi que les paramètres réseau utilisés
+        pour les requêtes HTTP.
+
+        Args:
+        base_url (str, optional): URL du serveur Ollama. Par défaut "http://10.22.28.190:11434".
+        timeout_s (float, optional): Timeout des requêtes en secondes. Par défaut 240.0.
+
+        """
         self._base_url: str = base_url.rstrip("/")  # Normalise : pas de "/" final
         self._timeout_s: float = timeout_s  # Timeout réseau pour les requêtes HTTP
 
@@ -208,7 +234,7 @@ class OllamaWrapper:
     # --------------------------
 
     def get_version(self) -> str:
-        """Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}"""
+        """Retourne la version du serveur Ollama via GET /api/version. :contentReference[oaicite:3]{index=3}."""
         payload = self._http_request_json("GET", "/api/version", body=None)
         # La doc renvoie typiquement { "version": "x.y.z" }.
         version = payload.get("version")
@@ -217,7 +243,7 @@ class OllamaWrapper:
         return version
 
     def list_models(self) -> list[OllamaModelInfo]:
-        """Liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}"""
+        """Fait la liste les modèles installés via GET /api/tags. :contentReference[oaicite:4]{index=4}."""
         payload = self._http_request_json("GET", "/api/tags", body=None)
         raw_models = payload.get("models")
         if not isinstance(raw_models, list):
@@ -269,7 +295,7 @@ class OllamaWrapper:
         system: str | None = None,
         options: Mapping[str, Any] | None = None,
     ) -> OllamaGenerateResult:
-        """Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}
+        """Appelle POST /api/generate en texte seul (stream=false). :contentReference[oaicite:5]{index=5}.
 
         Args:
             model: nom du modèle (ex: "llama3", "mistral", etc.)
@@ -322,8 +348,7 @@ class OllamaWrapper:
         system: str | None = None,
         options: Mapping[str, Any] | None = None,
     ) -> OllamaGenerateResult:
-        """Appelle POST /api/generate avec une image (multimodal).
-        Ollama attend une liste "images" contenant des chaînes base64. :contentReference[oaicite:6]{index=6}
+        """Appelle POST /api/generate avec une image (multimodal). Ollama attend une liste "images" contenant des chaînes base64. :contentReference[oaicite:6]{index=6}.
 
         Args:
             model: modèle vision (ex: "llava", "qwen2.5-vl", etc.)
@@ -416,7 +441,20 @@ class OllamaWrapper:
 
         raise OllamaResponseError(f"Réponse /api/embed inattendue: {payload!r}")
 
-    def build_embedding(self, description, keywords):
+    def build_embedding(self, description: str, keywords: list[str]) -> str:
+        """Construire une représentation textuelle destinée à l'embedding.
+
+        Combine une description et une liste de mots-clés en une seule chaîne de texte
+        structurée afin d'améliorer la qualité de l'encodage sémantique.
+
+        Args:
+            description (str): Description textuelle de l'image.
+            keywords (list[str]): Liste de mots-clés associés.
+
+        Returns:
+            str: Texte formaté prêt à être encodé en embedding.
+
+        """
         return f"{description}\n\nConcepts clés : {', '.join(keywords)}"
 
     # --------------------------
@@ -435,9 +473,14 @@ class OllamaWrapper:
         On utilise urllib (stdlib) pour éviter une dépendance à requests/httpx dans un contexte étudiant.
         """
         # Import local pour ne pas polluer le namespace global et montrer le principe.
-        import urllib.error  # Exceptions réseau HTTP
-        import urllib.request  # Client HTTP standard
-        from urllib.parse import urljoin  # Construit proprement l'URL finale
+        # Exceptions réseau HTTP
+        import urllib.error  # noqa: PLC0415
+
+        # Client HTTP standard
+        import urllib.request  # noqa: PLC0415
+
+        # Construit proprement l'URL finale
+        from urllib.parse import urljoin  # noqa: PLC0415
 
         # Construit l'URL complète.
         url: str = urljoin(self._base_url + "/", path.lstrip("/"))
@@ -490,12 +533,21 @@ class OllamaWrapper:
         return payload
 
     def similarite_cosinus(self, vec_a: list[float], vec_b: list[float]) -> float:
-        """Calcule la similarité cosinus entre deux vecteurs numériques.
-        Retourne un score entre -1 et 1, pour les embeddings c'est entre 0 et 1.
-        """
-        import math
+        """Fait le calcule de la similarité cosinus entre deux vecteurs.
 
-        # Produit scalaire
+        Mesure la proximité directionnelle entre deux vecteurs numériques.
+        Le score retourné est compris entre -1 et 1, mais pour des embeddings
+        textuels il est généralement compris entre 0 et 1.
+
+        Args:
+            vec_a (list[float]): Premier vecteur.
+            vec_b (list[float]): Deuxième vecteur.
+
+        Returns:
+            float: Score de similarité cosinus entre les deux vecteurs.
+                Retourne 0.0 si l'un des vecteurs est nul.
+
+        """  # Produit scalaire
         dot_product = sum(a * b for a, b in zip(vec_a, vec_b, strict=False))
 
         # Normes des vecteurs
@@ -509,8 +561,18 @@ class OllamaWrapper:
         return dot_product / (norm_a * norm_b)
 
     def get_images_from_folder(self, folder_path: str) -> list:
-        import os
+        """Récupérer les images présentes dans un dossier.
 
+        Parcourt un dossier et retourne la liste des fichiers image (.jpg, .png)
+        avec leurs chemins complets.
+
+        Args:
+        folder_path (str): Chemin du dossier à analyser.
+
+        Returns:
+        list[str]: Liste des chemins complets des images trouvées.
+
+        """
         images = []
 
         for file_name in os.listdir(folder_path):
@@ -518,7 +580,30 @@ class OllamaWrapper:
                 images.append(os.path.join(folder_path, file_name))
         return images
 
-    def get_description_and_keywords_from_image(self, image_path: str):
+    def get_description_and_keywords_from_image(self, image_path: str) -> dict[str, str | list[str]]:
+        """Générer une description sémantique et des mots-clés à partir d'une image.
+
+        Utilise un modèle VLM pour analyser une image et produire une description
+        structurée ainsi qu'une liste de mots-clés destinés à l'indexation et à la
+        recherche.
+
+        Le modèle est guidé par un prompt strict imposant :
+        - une description en 2 à 4 phrases
+        - exactement 5 mots-clés pertinents
+
+        La réponse du modèle est ensuite parsée pour extraire ces deux éléments.
+        En cas d'échec du parsing, la réponse brute est utilisée comme description
+        et les mots-clés sont laissés vides.
+
+        Args:
+        image_path (str): Chemin de l'image à analyser.
+
+        Returns:
+        dict[str, str | list[str]]: Dictionnaire contenant :
+        - description (str): description générée de l'image
+        - keywords (list[str]): liste de mots-clés extraits ou vide si échec
+
+        """
         question = "Décris cette image pour un moteur de recherche. Réponds uniquement dans ce format :\n\nDescription: <2 à 4 phrases>\nKeywords: <mot1>, <mot2>, <mot3>, <mot4>, <mot5>"
 
         system_prompt = (
@@ -556,7 +641,23 @@ class OllamaWrapper:
 
         return {"description": desc_part, "keywords": keywords}
 
-    def get_description_and_keywords(self, folder_path: str):
+    def get_description_and_keywords(self, folder_path: str) -> list[dict[str, str | list[str]]]:
+        """Extraire les descriptions et mots-clés de toutes les images d'un dossier.
+
+        Parcourt un dossier d'images, génère pour chacune une description et des mots-clés,
+        puis retourne une structure normalisée contenant les métadonnées associées.
+
+        Args:
+        folder_path (str): Chemin du dossier contenant les images.
+
+        Returns:
+        list[dict]: Liste de dictionnaires contenant pour chaque image :
+        - id : identifiant généré
+        - path : chemin de l'image
+        - description : description générée
+        - keywords : mots-clés associés
+
+        """
         images = self.get_images_from_folder(folder_path)
 
         data = []

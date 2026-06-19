@@ -61,16 +61,17 @@ class GalleryViewModel(QObject):
     signal_pin_changed = pyqtSignal(str, bool)  # (img_name, is_pinned)
     signal_saved_search = pyqtSignal()  # une recherche a été sauvegardée
 
-    def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None, parent=None):
-        """Args:
-        client (OllamaWrapper): client Ollama
-        config (dict): configuration
-        ws_id (str): identifiant du workspace (pour la persistance des épingles)
-        ws_data (dict | None): données du workspace (pour restaurer les épingles et l'arbre)
-        parent (QObject, optional): parent. Defaults to None.
+    def __init__(self, client: OllamaWrapper, config: dict, ws_id: str = "", ws_data: dict | None = None) -> None:
+        """Initialise la logique de la vue de la galerie.
+
+        Args:
+            client (OllamaWrapper): client Ollama
+            config (dict): configuration
+            ws_id (str): identifiant du workspace (pour la persistance des épingles)
+            ws_data (dict | None): données du workspace (pour restaurer les épingles et l'arbre)
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._client = client
         self._config = config
         self._ws_id = ws_id
@@ -140,7 +141,7 @@ class GalleryViewModel(QObject):
 
     # ── Dossier ───────────────────────────────────────────────────────────────
 
-    def open_folder(self, folder: str):
+    def open_folder(self, folder: str) -> None:
         """Ouvre un dossier.
 
         Args:
@@ -157,19 +158,19 @@ class GalleryViewModel(QObject):
         self.refresh(None)
         self.signal_folder_changed.emit(folder)
 
-    def load_index(self):
+    def load_index(self) -> None:
         """Charge l'index du dossier courant."""
         self.index = index_repository.load(self.current_folder)
         self.model.set_indexed(set(self.index.keys()))
         self.signal_index_changed.emit(set(self.index.keys()))
 
-    def reload_index(self):
+    def reload_index(self) -> None:
         """Recharge l'index du dossier courant."""
         self.load_index()
 
     # ── Images ────────────────────────────────────────────────────────────────
 
-    def refresh(self, images: list[str] | None):
+    def refresh(self, images: list[str] | None) -> None:
         """Rafraîchit la liste des images. Les épinglées apparaissent en premier.
 
         Args:
@@ -237,7 +238,7 @@ class GalleryViewModel(QObject):
         """
         return img_name in self._pinned
 
-    def pin_image(self, img_name: str):
+    def pin_image(self, img_name: str) -> None:
         """Épingle une image (la met en tête de galerie).
 
         Args:
@@ -252,7 +253,7 @@ class GalleryViewModel(QObject):
         self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
         self.signal_pin_changed.emit(img_name, True)
 
-    def unpin_image(self, img_name: str):
+    def unpin_image(self, img_name: str) -> None:
         """Désépingle une image.
 
         Args:
@@ -267,11 +268,11 @@ class GalleryViewModel(QObject):
         self.refresh(None if not self._search_text else self.filtered_images(self._search_text))
         self.signal_pin_changed.emit(img_name, False)
 
-    def toggle_pin(self, img_name: str):
-        """Bascule l'état épinglé d'une image.
+    def toggle_pin(self, img_name: str) -> None:
+        """Bascule l'état d'épinglage d'une image (épinglée ↔ non épinglée).
 
         Args:
-            img_name (str): Nom de l'image.
+            img_name (str): Nom de l'image à épingler ou désépingler.
 
         """
         if self.is_pinned(img_name):
@@ -279,8 +280,8 @@ class GalleryViewModel(QObject):
         else:
             self.pin_image(img_name)
 
-    def save_pinned(self):
-        """Persiste la liste des épingles dans le workspace courant."""
+    def save_pinned(self) -> None:
+        """Sauvegarde la liste des épingles dans le workspace courant."""
         if not self._ws_id:
             return
         workspaces = ws_repo.load(self._config)
@@ -290,7 +291,7 @@ class GalleryViewModel(QObject):
 
     # ── Recherche ─────────────────────────────────────────────────────────────
 
-    def schedule_search(self, text: str):
+    def schedule_search(self, text: str) -> None:
         """Lance la recherche après un delai.
 
         Args:
@@ -321,16 +322,20 @@ class GalleryViewModel(QObject):
 
         self.refresh(self._result_images)
 
-    def filtered_images(self, filter_text: str, context: list[str] = None) -> list[str]:
-        """Renvoi les 100 images les plus proches de la requête.
-        Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.
+    def filtered_images(self, filter_text: str, context: list[str] | None = None) -> list[str]:
+        """Recherche et filtre les images les plus pertinentes pour une requête textuelle.
+
+        Construit une similarité entre la requête et les embeddings des images, puis combine
+        la similarité cosinus et un score de correspondance textuelle pour classer les résultats.
+        Les images épinglées sont exclues du calcul et réinjectées en priorité ailleurs dans le flux.
 
         Args:
-            filter_text (str): Requête de recherche.
-            context (list[str]): Liste de nom d'images servant de base. Si none ce base sur toutes les images.
+            filter_text (str): Texte de la requête de recherche.
+            context (list[str] | None): Liste optionnelle d'images servant de périmètre de recherche.
+                Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.
 
         Returns:
-            list[str]: Liste des images. Les épinglées sont en tête.
+            list[str]: Liste des noms d'images triées par pertinence (jusqu'à 100 résultats).
 
         """
         # Récupère les embeddings de la requête
@@ -345,6 +350,7 @@ class GalleryViewModel(QObject):
 
         pinned_set = set(self._pinned)
         scores = {}
+        score_sim = 0.5
         for key, data in images.items():
             # Exclut les images épinglées.
             if key in pinned_set:
@@ -355,8 +361,8 @@ class GalleryViewModel(QObject):
             score = sim * 1.0
             if text_match:
                 score += 0.3
-            if sim > 0.5 and text_match:
-                score += 0.5
+            if sim > score_sim and text_match:
+                score += score_sim
             scores[key] = score
         sorted_items = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return [name for name, _ in sorted_items[:100]]
@@ -387,7 +393,7 @@ class GalleryViewModel(QObject):
 
     # ── Sélection ─────────────────────────────────────────────────────────────
 
-    def select_image(self, img_name: str):
+    def select_image(self, img_name: str) -> None:
         """Selectionne l'image.
 
         Args:
@@ -399,20 +405,20 @@ class GalleryViewModel(QObject):
 
     # ── Zoom ──────────────────────────────────────────────────────────────────
 
-    def zoom_in(self):
+    def zoom_in(self) -> None:
         """Zoom in sur les images."""
         levels = THUMB["size_levels"]
         if self._size_index < len(levels) - 1:
             self._size_index += 1
             self.apply_zoom()
 
-    def zoom_out(self):
+    def zoom_out(self) -> None:
         """Zoom out sur les images."""
         if self._size_index > 0:
             self._size_index -= 1
             self.apply_zoom()
 
-    def apply_zoom(self):
+    def apply_zoom(self) -> None:
         """Applique le zoom."""
         self._cell_size = THUMB["size_levels"][self._size_index]
         self.cache.resize(self._cell_size)
@@ -422,7 +428,7 @@ class GalleryViewModel(QObject):
 
     # ── Repaint ───────────────────────────────────────────────────────────────
 
-    def on_signal_repaint_requested(self, img_name: str):
+    def on_signal_repaint_requested(self, img_name: str) -> None:
         """Notifie quand une image a été modifiée.
 
         Args:

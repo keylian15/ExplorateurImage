@@ -18,27 +18,25 @@ Responsabilités :
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QLabel, QWidget
+from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtWidgets import QLabel
 
 
 class ClickableLabel(QLabel):
     """Class qui représente une QLabel avec callbacks clic gauche et droit."""
 
-    def __init__(self, text_or_parent=None, parent=None):
-        """Args:
-        text_or_parent (str | QWidget, optional): Texte du QLabel ou QWidget parent. Defaults to None.
-        parent (QWidget, optional): QWidget parent. Defaults to None.
+    def __init__(self, text: str = "") -> None:
+        """Initialise le QLabel avec les callbacks de clic.
+
+        Args:
+            text (str, optional): Texte affiché par le QLabel.
+
         """
-        if isinstance(text_or_parent, str):
-            super().__init__(text_or_parent, parent)
-        elif isinstance(text_or_parent, QWidget):
-            super().__init__(text_or_parent)
-        else:
-            super().__init__(parent)
+        super().__init__(text)
         self.rightClicked = None
         self.leftClicked = None
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         """Detect le clic gauche et droit.
 
         Args:

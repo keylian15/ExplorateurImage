@@ -40,11 +40,13 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QImage, QPixmap
 
 from models import workspace_repository as ws_repo
+from services.box_search_strategies import crop_pil
 from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
-from services.sam3_service import SegmentationResult
+from services.sam3_service import Sam3Service, SegmentationResult
 from services.workers import (
     EmbeddingBoxSearchWorker,
+    EmbeddingTextSearchWorker,
     HybridBoxSearchWorker,
     ObjectSearchAllWorker,
     Sam3BoxSearchWorker,
@@ -122,8 +124,26 @@ class Sam3ViewModel(QObject):
     # ── Signal spécifique box search (informe la View de la stratégie active) ─
     signal_box_search_strategy = pyqtSignal(str)  # nom de la stratégie en cours
 
-    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, ws_id: str, ws_data: dict, sam3_service, parent=None, translator: I18nManager = None):
-        super().__init__(parent)
+    def __init__(self, client: OllamaWrapper, config: dict, gallery_vm: GalleryViewModel, ws_id: str, ws_data: dict, sam3_service: Sam3Service, translator: I18nManager) -> None:
+        """Initialise le ViewModel de segmentation et de recherche d'objets.
+
+        Configure les dépendances principales (client LLM, configuration, galerie,
+        service SAM3), ainsi que les workers utilisés pour le chargement, l'encodage,
+        la segmentation et la recherche.
+
+        Connecte également les signaux du service SAM3.
+
+        Args:
+            client (OllamaWrapper): Client utilisé pour les modèles LLM.
+            config (dict): Configuration globale de l'application.
+            gallery_vm (GalleryViewModel): ViewModel de la galerie d'images.
+            ws_id (str): Identifiant du workspace courant.
+            ws_data (dict): Données associées au workspace.
+            sam3_service (Sam3Service): Service responsable du modèle SAM3.
+            translator (I18nManager): Gestionnaire de traduction.
+
+        """
+        super().__init__()
 
         self._client = client
         self._config = config
@@ -133,7 +153,7 @@ class Sam3ViewModel(QObject):
         self.translator = translator
 
         self._service = sam3_service
-        self._service.signal_loaded.connect(self._on_model_loaded)
+        self._service.signal_loaded.connect(self.on_model_loaded)
         self._state: dict | None = None
         self._confidence: float = 0.5
 
@@ -147,22 +167,43 @@ class Sam3ViewModel(QObject):
 
     @property
     def is_model_loaded(self) -> bool:
-        """Indique si le modèle SAM3 est chargé."""
+        """Indique si le modèle SAM3 est chargé et prêt à être utilisé.
+
+        Returns:
+            bool: True si le modèle est chargé, False sinon.
+
+        """
         return self._service.is_loaded
 
     @property
     def is_image_encoded(self) -> bool:
-        """Indique si une image est encodée et prête pour les prompts."""
+        """Indique si une image a été encodée et est prête pour les prompts.
+
+        Returns:
+            bool: True si un état d'image est disponible, False sinon.
+
+        """
         return self._state is not None
 
     @property
     def is_busy(self) -> bool:
-        """True si un worker de segmentation est en cours d'exécution."""
+        """Indique si un worker lié à la segmentation est en cours d'exécution.
+
+        Returns:
+            bool: True si au moins un worker (load, encode, segment ou reset)
+            est actif, False sinon.
+
+        """
         return any(w is not None and w.isRunning() for w in (self._load_worker, self._encode_worker, self._segment_worker, self._reset_worker))
 
     @property
     def is_searching(self) -> bool:
-        """True si une recherche globale est en cours."""
+        """Indique si une recherche est actuellement en cours.
+
+        Returns:
+            bool: True si un worker de recherche existe et est en cours d'exécution, False sinon.
+
+        """
         return self._search_worker is not None and self._search_worker.isRunning()
 
     # ── Chargement modèle ─────────────────────────────────────────────────────
@@ -178,21 +219,26 @@ class Sam3ViewModel(QObject):
             return
 
         self.signal_model_loading.emit()
-        self._load_worker = Sam3LoadWorker(self._service, self)
+        self._load_worker = Sam3LoadWorker(self._service)
         self._load_worker.signal_error.connect(self.signal_model_error)
         self._load_worker.start()
 
-    def _on_model_loaded(self) -> None:
+    def on_model_loaded(self) -> None:
+        """Déclenche le signal indiquant que le modèle est chargé et prêt à être utilisé."""
         self.signal_model_ready.emit()
 
     # ── Encodage image ────────────────────────────────────────────────────────
 
     def encode_image(self, pixmap: QPixmap, img_path: str | None = None) -> None:
-        """Encode l'image dans l'état SAM3 (arrière-plan).
+        """Encode une image pour l'utiliser dans le modèle SAM3 (préparation du contexte).
+
+        L'image est stockée comme base de segmentation (arrière-plan) afin de permettre
+        les opérations de prompt et de détection.
 
         Args:
-            pixmap: QPixmap de l'image à segmenter.
-            img_path: chemin disque optionnel - préféré à la conversion en mémoire.
+            pixmap (QPixmap): Image à encoder pour la segmentation.
+            img_path (str | None): Chemin disque optionnel de l'image.
+                S'il est fourni, il est préféré à une conversion en mémoire.
 
         """
         if not self._service.is_loaded or self.is_busy:
@@ -200,32 +246,52 @@ class Sam3ViewModel(QObject):
         self._state = None
         self.signal_encoding.emit()
 
-        pil = self._to_pil(pixmap, img_path)
+        pil = self.to_pil(pixmap, img_path)
         if pil is None:
             self.signal_encoding_error.emit(self.translator.tr("Impossible de convertir l'image."))
             return
 
-        self._encode_worker = Sam3EncodeWorker(self._service, pil, self)
-        self._encode_worker.signal_finished.connect(self._on_encoded)
+        self._encode_worker = Sam3EncodeWorker(self._service, pil)
+        self._encode_worker.signal_finished.connect(self.on_encoded)
         self._encode_worker.signal_error.connect(self.signal_encoding_error)
         self._encode_worker.start()
 
-    def _on_encoded(self, state: dict) -> None:
+    def on_encoded(self, state: dict) -> None:
+        """Emet un signal lorsque l'image est encodé.
+
+        Args:
+            state (dict): Le nouvel etat de l'image.
+
+        """
         self._state = state
         self.signal_encoded.emit()
 
     # ── Prompts ───────────────────────────────────────────────────────────────
 
     def apply_text_prompt(self, prompt: str) -> None:
-        """Applique un prompt texte."""
-        if not self._can_segment():
+        """Applique un prompt texte.
+
+        Args:
+            prompt (str): Le prompt a appliquer.
+
+        """
+        if not self.can_segment():
             return
         svc = self._service
 
-        def fn(state):
+        def fn(state: dict) -> dict:
+            """Applique un prompt textuel au service.
+
+            Args:
+                state (dict): État courant du traitement.
+
+            Returns:
+                dict: État mis à jour après application du prompt.
+
+            """
             return svc.apply_text_prompt(prompt, state)
 
-        self._run_segment(fn)
+        self.run_segment(fn)
 
     def apply_box_prompt(
         self,
@@ -237,52 +303,97 @@ class Sam3ViewModel(QObject):
         img_h: int,
         positive: bool = True,
     ) -> None:
-        """Applique un prompt boîte en coordonnées pixel xyxy."""
-        if not self._can_segment():
+        """Applique un prompt de type bounding box sur une image.
+
+        La boîte est définie en coordonnées pixel (format xyxy) et utilisée comme
+        prompt pour guider le modèle (positif ou négatif selon le paramètre).
+
+        Args:
+            x0 (float): Coordonnée X de départ de la box.
+            y0 (float): Coordonnée Y de départ de la box.
+            x1 (float): Coordonnée X de fin de la box.
+            y1 (float): Coordonnée Y de fin de la box.
+            img_w (int): Largeur de l'image (validation des limites).
+            img_h (int): Hauteur de l'image (validation des limites).
+            positive (bool): Si True, la box est un prompt positif, sinon négatif.
+
+        """
+        if not self.can_segment():
             return
         svc = self._service
 
-        def fn(state):
+        def fn(state: dict) -> dict:
+            """Applique un prompt basé sur une sélection de boîte sur l'image.
+
+            Args:
+                state (dict): État courant du traitement.
+
+            Returns:
+                dict: État mis à jour après application du prompt.
+
+            """
             return svc.apply_box_prompt(x0, y0, x1, y1, img_w, img_h, state, positive)
 
-        self._run_segment(fn)
+        self.run_segment(fn)
 
     def reset_prompts(self) -> None:
         """Supprime tous les prompts."""
         if self._state is None or self.is_busy:
             return
         self.signal_resetting.emit()
-        self._reset_worker = Sam3ResetWorker(self._service, self._state, self)
-        self._reset_worker.signal_finished.connect(self._on_reset_done)
+        self._reset_worker = Sam3ResetWorker(self._service, self._state)
+        self._reset_worker.signal_finished.connect(self.on_reset_done)
         self._reset_worker.signal_error.connect(self.signal_segment_error)
         self._reset_worker.start()
 
-    def _on_reset_done(self, new_state: dict) -> None:
+    def on_reset_done(self, new_state: dict) -> None:
+        """Emet un signal lorsque le reset du model est fait.
+
+        Args:
+            new_state (dict): Le nouvel etat de l'image.
+
+        """
         self._state = new_state
         self.signal_reset_done.emit()
 
     def set_confidence(self, value: float) -> None:
-        """Modifie le seuil de confiance et relance la segmentation."""
+        """Set le seuil de confiance et relance la segmentation.
+
+        Args:
+            value (float): La nouvelle valeur de confiance.
+
+        """
         self._confidence = value
         if self._state is not None and not self.is_busy:
             svc = self._service
 
-            def fn(state):
+            def fn(state: dict) -> dict[str, any]:
+                """Définit le seuil de confiance utilisé par le service.
+
+                Args:
+                    state (dict): Nouvel état à appliquer au seuil de confiance.
+
+                Returns:
+                    dict[str, Any]: Le retour de set confidence_treshold.
+
+                """
                 return svc.set_confidence_threshold(value, state)
 
-            self._run_segment(fn)
+            self.run_segment(fn)
 
     # ── Recherche globale (texte direct) ──────────────────────────────────────
 
     def search_objects(self, text: str, threshold: float = 0.75, strategy_name: str = "sam3") -> None:
-        """Lance la recherche de l'objet `text` sur toutes les images du dossier.
+        """Lance une recherche d'objet sur toutes les images du dossier.
 
-        Bloque si le modèle n'est pas chargé ou si une recherche est déjà en cours.
-        Chaque correspondance est émise via signal_search_match au fil de l'eau.
+        La recherche est basée sur le texte fourni et utilise la stratégie sélectionnée.
+        La méthode est bloquée si le modèle n'est pas chargé ou si une recherche est déjà en cours.
+        Chaque correspondance est envoyée progressivement via le signal `signal_search_match`.
 
         Args:
-            text: texte décrivant l'objet (ex: "shoe", "dog").
-            threshold: score minimum SAM3 pour qu'une image soit retenue (0–1).
+            text (str): Description de l'objet à rechercher (ex: "shoe", "dog").
+            threshold (float): Score minimum pour valider une correspondance (0-1).
+            strategy_name (str): Stratégie utilisée pour la recherche (ex: "sam3").
 
         """
         if not self._service.is_loaded:
@@ -316,7 +427,6 @@ class Sam3ViewModel(QObject):
                 service=self._service,
                 text=text,
                 threshold=threshold,
-                parent=self,
             )
         elif strategy_name == "embedding":
             # Recherche texte via embedding : on crée un crop fictif (None)
@@ -326,7 +436,6 @@ class Sam3ViewModel(QObject):
                 self.signal_search_error.emit(self.translator.tr("Aucune image indexée dans ce dossier."))
                 return
             self.signal_search_started.emit(len(index))
-            from services.workers import EmbeddingTextSearchWorker
 
             worker = EmbeddingTextSearchWorker(
                 text=text,
@@ -335,7 +444,6 @@ class Sam3ViewModel(QObject):
                 index=index,
                 client=self._client,
                 threshold=threshold,
-                parent=self,
             )
         elif strategy_name == "hybrid":
             if not self._service.is_loaded:
@@ -348,7 +456,6 @@ class Sam3ViewModel(QObject):
                 service=self._service,
                 text=text,
                 threshold=threshold,
-                parent=self,
             )
         else:
             self.signal_search_error.emit(self.translator.tr("Stratégie inconnue : {name}.").format(name=strategy_name))
@@ -357,7 +464,7 @@ class Sam3ViewModel(QObject):
         self._search_worker = worker
         self._search_worker.signal_progress.connect(self.signal_search_progress)
         self._search_worker.signal_match.connect(self.signal_search_match)
-        self._search_worker.signal_finished.connect(self._on_search_finished)
+        self._search_worker.signal_finished.connect(self.on_search_finished)
         self._search_worker.signal_error.connect(self.signal_search_error)
         self._search_worker.start()
 
@@ -377,19 +484,23 @@ class Sam3ViewModel(QObject):
         sam3_threshold: float = 0.75,
         max_results: int = 0,
     ) -> None:
-        """Lance une recherche d'objet à partir d'une région dessinée sur l'image.
+        """Lance une recherche d'objet à partir d'une région sélectionnée (bounding box) sur une image.
 
-        Recadre la région de la box, choisit la stratégie demandée et lance
-        le worker correspondant. Utilise les mêmes signaux que search_objects.
+        La zone définie par les coordonnées est recadrée depuis l'image source, puis une recherche est effectuée selon la stratégie choisie.
+        La méthode utilise les mêmes signaux que `search_objects`.
 
         Args:
-            x0, y0, x1, y1: Coordonnées pixel de la box sur l'image originale.
-            img_w, img_h: Dimensions de l'image originale (pour validation).
-            pixmap: QPixmap de l'image courante (source du crop).
-            strategy_name: "embedding", "sam3" ou "hybrid".
-            threshold: Seuil principal (cosinus pour embedding, SAM3 score pour sam3).
-            sam3_threshold: Seuil SAM3 utilisé uniquement par les stratégies sam3/hybrid.
-            max_results: Nombre maximum de résultats (0 = illimité).
+            x0 (float): Coordonnée X de départ de la box (image originale).
+            y0 (float): Coordonnée Y de départ de la box (image originale).
+            x1 (float): Coordonnée X de fin de la box (image originale).
+            y1 (float): Coordonnée Y de fin de la box (image originale).
+            img_w (int): Largeur de l'image originale (validation des limites).
+            img_h (int): Hauteur de l'image originale (validation des limites).
+            pixmap (QPixmap): Image source utilisée pour extraire la région.
+            strategy_name (str): Stratégie de recherche à utiliser : "embedding", "sam3" ou "hybrid".
+            threshold (float): Seuil principal (cosine similarity pour embedding, score SAM3 pour sam3).
+            sam3_threshold (float): Seuil spécifique à SAM3 (utilisé uniquement pour les stratégies sam3 et hybrid).
+            max_results (int): Nombre maximum de résultats à retourner. 0 = illimité.
 
         """
         if self.is_searching:
@@ -412,15 +523,14 @@ class Sam3ViewModel(QObject):
             return
 
         # Crop PIL de la région de la box
-        pil_source = self._to_pil(pixmap, None)
+        pil_source = self.to_pil(pixmap, None)
         if pil_source is None:
             self.signal_search_error.emit(self.translator.tr("Impossible de convertir l'image courante."))
             return
 
-        from services.box_search_strategies import crop_pil
-
         crop = crop_pil(pil_source, x0, y0, x1, y1)
-        if crop.width < 4 or crop.height < 4:
+        crop_size = 4
+        if crop.width < crop_size or crop.height < crop_size:
             self.signal_search_error.emit(self.translator.tr("La région sélectionnée est trop petite."))
             return
 
@@ -443,7 +553,6 @@ class Sam3ViewModel(QObject):
                 client=self._client,
                 threshold=threshold,
                 max_results=max_results,
-                parent=self,
             )
         elif strategy_name == "sam3":
             worker = Sam3BoxSearchWorker(
@@ -455,7 +564,6 @@ class Sam3ViewModel(QObject):
                 service=self._service,
                 threshold=sam3_threshold,
                 max_results=max_results,
-                parent=self,
             )
         elif strategy_name == "hybrid":
             worker = HybridBoxSearchWorker(
@@ -468,7 +576,6 @@ class Sam3ViewModel(QObject):
                 embed_threshold=threshold,
                 sam3_threshold=sam3_threshold,
                 max_results=max_results,
-                parent=self,
             )
         else:
             self.signal_search_error.emit(self.translator.tr("Stratégie inconnue : {name}.").format(name=strategy_name))
@@ -477,7 +584,7 @@ class Sam3ViewModel(QObject):
         self._search_worker = worker
         worker.signal_progress.connect(self.signal_search_progress)
         worker.signal_match.connect(self.signal_search_match)
-        worker.signal_finished.connect(self._on_search_finished)
+        worker.signal_finished.connect(self.on_search_finished)
         worker.signal_error.connect(self.signal_search_error)
         worker.start()
 
@@ -487,31 +594,70 @@ class Sam3ViewModel(QObject):
             self._search_worker.cancel()
             self.signal_search_cancelled.emit()
 
-    def _on_search_finished(self, matched: list) -> None:
+    def on_search_finished(self, matched: list) -> None:
+        """Emet un signal lorsque la recherche est fini avec la liste des images trouvé.
+
+        Args:
+            matched (list): Liste de noms des images.
+
+        """
         self.signal_search_finished.emit(matched)
 
     # ── Interne segmentation ──────────────────────────────────────────────────
 
-    def _can_segment(self) -> bool:
+    def can_segment(self) -> bool:
+        """Retourne si la segmentation est possible.
+
+        Returns:
+            bool: La possibilité de segmenter.
+
+        """
         return self._service.is_loaded and self._state is not None and not self.is_busy
 
-    def _run_segment(self, prompt_fn) -> None:
+    def run_segment(self, prompt_fn) -> None:
+        """Lance la segmentation.
+
+        Args:
+            prompt_fn (function): La fonction de prompt.
+
+        """
         self.signal_segmenting.emit()
-        self._segment_worker = Sam3SegmentWorker(self._service, self._state, prompt_fn, self)
-        self._segment_worker.signal_finished.connect(self._on_segment_done)
-        self._segment_worker.signal_error.connect(self._on_segment_error)
+        self._segment_worker = Sam3SegmentWorker(self._service, self._state, prompt_fn)
+        self._segment_worker.signal_finished.connect(self.on_segment_done)
+        self._segment_worker.signal_error.connect(self.on_segment_error)
         self._segment_worker.start()
 
-    def _on_segment_done(self, new_state: dict, result: SegmentationResult) -> None:
+    def on_segment_done(self, new_state: dict, result: SegmentationResult) -> None:
+        """Met a jour l'overlay et emet le signal overlay ready.
+
+        Args:
+            new_state (dict): Le nouvel etat de l'image.
+            result (SegmentationResult): Le résultat de la ségmentation.
+
+        """
         self._state = new_state
-        overlay = self._to_overlay(result)
+        overlay = self.to_overlay(result)
         self.signal_overlay_ready.emit(overlay)
 
-    def _on_segment_error(self, msg: str) -> None:
+    def on_segment_error(self, msg: str) -> None:
+        """Emet le signal d'erreur.
+
+        Args:
+            msg (str): Le message d'erreur.
+
+        """
         self.signal_segment_error.emit(self.translator.tr(msg))
 
-    def _to_overlay(self, result: SegmentationResult) -> MaskOverlay:
-        """Convertit SegmentationResult (type Service) en MaskOverlay (type View)."""
+    def to_overlay(self, result: SegmentationResult) -> MaskOverlay:
+        """Convertit SegmentationResult (type Service) en MaskOverlay (type View).
+
+        Args:
+            result (SegmentationResult): Les résultats de la ségmentation.
+
+        Returns:
+            MaskOverlay.
+
+        """
         return MaskOverlay(
             masks=result.masks,
             boxes_xyxy=result.boxes_xyxy,
@@ -521,11 +667,19 @@ class Sam3ViewModel(QObject):
         )
 
     @staticmethod
-    def _to_pil(pixmap: QPixmap, img_path: str | None) -> PILImage.Image | None:
+    def to_pil(pixmap: QPixmap, img_path: str | None) -> PILImage.Image | None:
         """Convertit un QPixmap en PIL.Image RGB.
 
         Utilise le chemin disque si disponible (qualité maximale),
         sinon convertit via QImage en mémoire.
+
+        Args:
+            pixmap (QPixmap): L'image.
+            img_path (str | None): Chemin de l'image.
+
+        Returns:
+            PILImage.Image | None: L'image PIL.
+
         """
         if img_path:
             try:

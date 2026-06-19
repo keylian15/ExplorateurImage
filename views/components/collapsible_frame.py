@@ -1,3 +1,16 @@
+"""CollapsibleFrame (PyQt6).
+
+Widget conteneur réutilisable avec en-tête cliquable permettant de replier ou déplier
+dynamiquement son contenu.
+
+Responsabilités principales :
+- Fournir un cadre visuel stylisé (bordure, fond, séparateur)
+- Afficher un titre avec une flèche indiquant l'état (ouvert / fermé)
+- Gérer l'interaction utilisateur pour replier / déplier la zone de contenu
+- Exposer un layout interne pour ajouter des widgets enfants
+- Encapsuler une logique UI réutilisable pour structurer des panneaux pliables
+"""
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
@@ -7,8 +20,14 @@ from styles import COLORS
 class CollapsibleFrame(QWidget):
     """QFrame avec titre cliquable pour replier/déplier le contenu."""
 
-    def __init__(self, title: str, parent=None):
-        super().__init__(parent)
+    def __init__(self, title: str) -> None:
+        """Initialise le QFrame.
+
+        Args:
+            title (str): Le titre a mettre.
+
+        """
+        super().__init__()
         c = COLORS
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)

@@ -49,7 +49,7 @@ class WorkspaceWidget(QWidget):
     signal_folder_changed = pyqtSignal(str, str)  # (ws_id, folder_path)
     signal_closed = pyqtSignal(str)  # ws_id
 
-    def __init__(  # noqa: PLR0913 pour ignorer le nombre d'arguments dans le constructeur
+    def __init__(
         self,
         ws_id: str,
         name: str,
@@ -85,10 +85,10 @@ class WorkspaceWidget(QWidget):
 
         # ── ViewModels ────────────────────────────────────────────────────────
         self.gallery_vm = GalleryViewModel(client, config, ws_id=ws_id, ws_data=_ws_data)
-        self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
+        self.detail_vm = DetailViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator)
         self.autocomplete_vm = AutocompleteViewModel(client, self.gallery_vm)
-        self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator=translator)
-        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data, sam3_service, translator=translator)
+        self.map_vm = MapViewModel(client, config, self.gallery_vm, ws_id, _ws_data, translator)
+        self.sam3_vm = Sam3ViewModel(client, config, self.gallery_vm, ws_id, _ws_data, sam3_service, translator)
 
         # ── Vues ──────────────────────────────────────────────────────────────
         self._gallery_widget = GalleryWidget(self.gallery_vm, self.autocomplete_vm, self.sam3_vm, translator)
