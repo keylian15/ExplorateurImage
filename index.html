@@ -329,21 +329,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stack-technique" class="md-nav__link">
+  <a href="#ia-utilisees" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stack technique
+        IA utilisées
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IA utilisées">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pour-le-projet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pour le projet
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#demarrage-rapide" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#pour-le-developpement" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Démarrage rapide
+        Pour le développement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stack-technique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stack technique
       
     </span>
   </a>
@@ -1918,21 +1946,49 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stack-technique" class="md-nav__link">
+  <a href="#ia-utilisees" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stack technique
+        IA utilisées
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IA utilisées">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pour-le-projet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pour le projet
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#demarrage-rapide" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#pour-le-developpement" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Démarrage rapide
+        Pour le développement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stack-technique" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stack technique
       
     </span>
   </a>
@@ -1957,23 +2013,83 @@
 
 
 <h1 id="explorateurimage">ExplorateurImage</h1>
+<p>Pour l'installation et le guide d'utilisation, il est conseillé de consulter la <a href="https://keylian15.github.io/ExplorateurImage/user/main/">documentation utilisateur</a>.</p>
+<hr />
 <h2 id="architecture">Architecture</h2>
 <p>Le projet suit une architecture <strong>MVVM</strong> (Model – View – ViewModel) organisée en quatre couches :</p>
 <pre><code>ExplorateurImage/
 ├── models/          # Données et accès persistance
 ├── services/        # Logique métier, IA, cache
+├── tools/           # Outils d'aide a la génration (docs / traduction)
 ├── viewmodels/      # État et logique de présentation
 └── views/           # Interface utilisateur PyQt6
 </code></pre>
+<p>Chaque workspace est autonome et instancie ses propres ViewModels. La fenêtre principale (<code>MainWindow</code>) orchestre plusieurs workspaces via un système d'onglets, chacun possédant sa propre galerie, carte 2D, historique de recherche et images épinglées.</p>
+<hr />
 <h2 id="fonctionnalites-principales">Fonctionnalités principales</h2>
 <ul>
-<li><strong>Galerie d'images</strong> avec thumbnails paginés et zoom (Ctrl+molette)</li>
-<li><strong>Auto-complétion</strong> des descriptions et mots-clés via <code>qwen2.5vl:7b</code></li>
-<li><strong>Recherche sémantique</strong> hybride (embedding cosinus + correspondance texte)</li>
-<li><strong>Carte 2D sémantique</strong> via UMAP + HDBSCAN avec clustering interactif</li>
-<li><strong>Images similaires</strong> (top-K voisins par similarité cosinus)</li>
-<li><strong>Renommage</strong> de fichiers avec mise à jour de l'index</li>
+<li><strong>Galerie d'images</strong> avec thumbnails paginés, zoom (Ctrl+molette) et cache LRU deux niveaux (mémoire + disque)</li>
+<li><strong>Indexation automatique</strong> des images par description textuelle et embedding sémantique via un modèle vision-langage</li>
+<li><strong>Recherche sémantique</strong> hybride combinant similarité cosinus sur les embeddings et correspondance textuelle</li>
+<li><strong>Images similaires</strong> calculées par similarité cosinus (top-K voisins)</li>
+<li><strong>Carte 2D sémantique</strong> projetant le corpus via UMAP + clustering HDBSCAN avec nommage automatique des clusters</li>
+<li><strong>Segmentation interactive</strong> SAM3 avec recherche d'objets par prompt texte ou région dessinée, selon trois stratégies (Embedding, SAM3, Hybride)</li>
+<li><strong>Historique de recherche</strong> structuré en arbre navigable avec affinage progressif</li>
+<li><strong>Images épinglées</strong> par workspace, persistées entre les sessions</li>
+<li><strong>Renommage</strong> de fichiers avec mise à jour de l'index et invalidation du cache</li>
+<li><strong>Multi-workspace</strong> avec onglets indépendants</li>
+<li><strong>Personnalisation du thème</strong> visuel (couleurs, thèmes prédéfinis, changement de langue à chaud)</li>
 </ul>
+<hr />
+<h2 id="ia-utilisees">IA utilisées</h2>
+<h3 id="pour-le-projet">Pour le projet</h3>
+<table>
+<thead>
+<tr>
+<th>Composant</th>
+<th>Technologie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modèle vision-langage</td>
+<td>Ollama (<code>qwen2.5vl:7b</code>)</td>
+</tr>
+<tr>
+<td>Embeddings sémantiques</td>
+<td>Ollama (<code>nomic-embed-text:v1.5</code>)</td>
+</tr>
+<tr>
+<td>Segmentation interactive</td>
+<td>SAM3 (Segment Anything Model 3)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pour-le-developpement">Pour le développement</h3>
+<p>Ce projet a été développé en collaboration avec des assistants IA. </p>
+<table>
+<thead>
+<tr>
+<th>Composant</th>
+<th>Technologie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documentations &amp; idées</td>
+<td>ChatGPT (<code>GPT-5.3-mini</code>)</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>Claude (<code>sonnet 4.6</code>)</td>
+</tr>
+<tr>
+<td>Traduction</td>
+<td>Ollama (<code>qwen3:8b</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h2 id="stack-technique">Stack technique</h2>
 <table>
 <thead>
@@ -1986,10 +2102,6 @@
 <tr>
 <td>Interface</td>
 <td>PyQt6</td>
-</tr>
-<tr>
-<td>Modèles IA</td>
-<td>Ollama (<code>qwen2.5vl:7b</code>, <code>nomic-embed-text:v1.5</code>)</td>
 </tr>
 <tr>
 <td>Réduction dimensionnelle</td>
@@ -2011,16 +2123,16 @@
 <td>Configuration</td>
 <td><code>config.json</code> racine</td>
 </tr>
+<tr>
+<td>Traduction</td>
+<td><code>i18n.json</code> racine</td>
+</tr>
+<tr>
+<td>Thème</td>
+<td><code>colors.json</code> racine</td>
+</tr>
 </tbody>
 </table>
-<h2 id="demarrage-rapide">Démarrage rapide</h2>
-<pre><code class="language-bash">python -m venv venv
-.\venv\Scripts\Activate 
-
-pip install -r requirements.txt
-
-python main.py
-</code></pre>
 
 
 
