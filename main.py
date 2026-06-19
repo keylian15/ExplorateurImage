@@ -27,7 +27,7 @@ from styles import get_stylesheet
 from views.main_window import MainWindow
 
 
-def restart_app():
+def restart_app() -> None:
     """Redémarre complètement le processus de l'application.
 
     Utilisé après un changement de langue : la configuration (incluant la
@@ -40,10 +40,27 @@ def restart_app():
     libère proprement les ressources (incluant SAM3) avant le redémarrage.
     """
     python = sys.executable
-    os.execv(python, [python] + sys.argv)
+    os.execv(python, [python, *sys.argv])
 
 
-def main():
+def main() -> None:
+    """Point d'entrée principal de l'application.
+
+    Initialise l'application Qt, charge la configuration globale et instancie
+    les services principaux (client LLM, gestionnaire i18n, service SAM3).
+
+    Met également en place le chargement asynchrone du modèle SAM3 avant de
+    lancer la boucle d'événements de l'application.
+
+    Workflow :
+    - création de QApplication
+    - application du style global
+    - chargement de la configuration
+    - initialisation des services (Ollama, i18n, SAM3)
+    - création et affichage de la fenêtre principale
+    - lancement du worker de chargement SAM3
+    - démarrage de la boucle Qt
+    """
     app = QApplication(sys.argv)
     app.setStyleSheet(get_stylesheet())
 

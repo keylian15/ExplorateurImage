@@ -28,7 +28,12 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import torch
+from PIL import Image as PILImage
 from PyQt6.QtCore import QObject, pyqtSignal
+
+from sam3.sam3 import build_sam3_image_model
+from sam3.sam3.model.sam3_image_processor import Sam3Processor
 
 # ── Résultat de segmentation ──────────────────────────────────────────────────
 
@@ -61,7 +66,24 @@ class Sam3Service(QObject):
 
     signal_loaded = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Service de haut niveau pour l'utilisation du modèle SAM3.
+
+        Encapsule le Sam3Processor et fournit une interface simplifiée pour charger
+        le modèle, définir une image, appliquer des prompts (texte ou géométriques)
+        et extraire les résultats de segmentation.
+
+        Ce service gère également l'état de chargement du modèle et expose un signal
+        lorsque celui-ci est prêt.
+
+        Usage typique :
+            service = Sam3Service()
+            service.load_model()
+            state = service.set_image(pil_image)
+            state = service.apply_text_prompt("dog", state)
+            result = service.extract_result(state)
+            state = service.reset_prompts(state)
+        """
         super().__init__()
         self._model = None
         self._processor = None
@@ -71,7 +93,7 @@ class Sam3Service(QObject):
     # ── Chargement ────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _find_bpe_path() -> str:
+    def find_bpe_path() -> str:
         """Retourne le chemin du fichier BPE relatif au dossier d'exécution."""
         return str(Path("sam3") / "sam3" / "assets" / "bpe_simple_vocab_16e6.txt.gz")
 
@@ -94,10 +116,7 @@ class Sam3Service(QObject):
         """
         self._is_loading = True
         try:
-            from sam3.sam3 import build_sam3_image_model
-            from sam3.sam3.model.sam3_image_processor import Sam3Processor
-
-            bpe_path = self._find_bpe_path()
+            bpe_path = self.find_bpe_path()
 
             self._model = build_sam3_image_model(bpe_path=bpe_path)
             self._processor = Sam3Processor(
@@ -116,7 +135,7 @@ class Sam3Service(QObject):
 
     # ── Image ─────────────────────────────────────────────────────────────────
 
-    def set_image(self, pil_image) -> dict[str, Any]:
+    def set_image(self, pil_image: PILImage) -> dict[str, Any]:
         """Initialise l'état SAM3 à partir d'une image PIL RGB.
 
         Args:
@@ -126,8 +145,7 @@ class Sam3Service(QObject):
             dict state utilisable par les méthodes suivantes.
 
         """
-        self._check_loaded()
-        import torch
+        self.check_loaded()
 
         with torch.autocast("cuda" if torch.cuda.is_available() else "cpu", dtype=torch.bfloat16):
             return self._processor.set_image(pil_image)
@@ -138,15 +156,14 @@ class Sam3Service(QObject):
         """Applique un prompt texte sur l'état courant.
 
         Args:
-            prompt: texte décrivant l'objet (ex : "shoe").
-            state: état SAM3 retourné par set_image.
+            prompt (str): texte décrivant l'objet (ex : "shoe").
+            state (dict[str, Any]): état SAM3 retourné par set_image.
 
         Returns:
-            Nouvel état avec masques mis à jour.
+            dict[str, Any]: Nouvel état avec masques mis à jour.
 
         """
-        self._check_loaded()
-        import torch
+        self.check_loaded()
 
         with torch.autocast("cuda" if torch.cuda.is_available() else "cpu", dtype=torch.bfloat16):
             return self._processor.set_text_prompt(prompt, state)
@@ -162,21 +179,26 @@ class Sam3Service(QObject):
         state: dict[str, Any],
         positive: bool = True,
     ) -> dict[str, Any]:
-        """Applique un prompt boîte en coordonnées pixel xyxy.
+        """Appliquer un prompt sous forme de boîte de sélection à un état SAM3.
 
-        Convertit en cxcywh normalisé comme attendu par SAM3.
+        Convertit des coordonnées pixel (xyxy) en format normalisé cxcywh, puis applique
+        ce prompt géométrique au modèle SAM3 pour mettre à jour l'état des masques.
 
         Args:
-            x0, y0, x1, y1: coordonnées pixel (coin haut-gauche → bas-droit).
-            img_w, img_h: dimensions de l'image originale.
-            state: état SAM3 courant.
-            positive: True = inclure, False = exclure.
+        x0 (float): Coordonnée X du coin supérieur gauche.
+        y0 (float): Coordonnée Y du coin supérieur gauche.
+        x1 (float): Coordonnée X du coin inférieur droit.
+        y1 (float): Coordonnée Y du coin inférieur droit.
+        img_w (int): Largeur de l'image.
+        img_h (int): Hauteur de l'image.
+        state (dict[str, Any]): État SAM3 courant.
+        positive (bool, optional): Indique si la boîte est positive (inclure) ou négative (exclure). Defaults to True.
 
         Returns:
-            Nouvel état avec masques mis à jour.
+        dict[str, Any]: Nouvel état SAM3 mis à jour avec les masques.
 
         """
-        self._check_loaded()
+        self.check_loaded()
 
         # Conversion xyxy pixel → cxcywh normalisé
         cx = (x0 + x1) / 2.0 / img_w
@@ -184,8 +206,6 @@ class Sam3Service(QObject):
         w = abs(x1 - x0) / img_w
         h = abs(y1 - y0) / img_h
         box_cxcywh = [cx, cy, w, h]
-
-        import torch
 
         with torch.autocast("cuda" if torch.cuda.is_available() else "cpu", dtype=torch.bfloat16):
             return self._processor.add_geometric_prompt(box_cxcywh, positive, state)
@@ -200,7 +220,7 @@ class Sam3Service(QObject):
             État nettoyé (encodage image conservé).
 
         """
-        self._check_loaded()
+        self.check_loaded()
         new_state = self._processor.reset_all_prompts(state)
         if new_state is None:
             new_state = {k: v for k, v in state.items()}
@@ -211,18 +231,17 @@ class Sam3Service(QObject):
         return new_state
 
     def set_confidence_threshold(self, threshold: float, state: dict[str, Any]) -> dict[str, Any]:
-        """Modifie le seuil de confiance.
+        """Set le seuil de confiance.
 
         Args:
-            threshold: float entre 0 et 1.
-            state: état SAM3 courant.
+            threshold (float): float entre 0 et 1.
+            state (dict[str, Any]): état SAM3 courant.
 
         Returns:
-            État mis à jour.
+            dict[str, Any]: État mis à jour.
 
         """
-        self._check_loaded()
-        import torch
+        self.check_loaded()
 
         with torch.autocast("cuda" if torch.cuda.is_available() else "cpu", dtype=torch.bfloat16):
             return self._processor.set_confidence_threshold(threshold, state)
@@ -260,8 +279,9 @@ class Sam3Service(QObject):
             return result
 
         try:
+            seuil = 0.5
             for mask_t, box_t, score_t in zip(masks_raw, boxes_raw, scores_raw, strict=False):
-                mask_np = mask_t[0].cpu().numpy() > 0.5
+                mask_np = mask_t[0].cpu().numpy() > seuil
                 result.masks.append(mask_np)
                 result.boxes_xyxy.append(box_t.cpu().numpy().tolist())
                 score = float(score_t.item() if hasattr(score_t, "item") else score_t)
@@ -271,8 +291,6 @@ class Sam3Service(QObject):
 
         return result
 
-    # ── Interne ───────────────────────────────────────────────────────────────
-
-    def _check_loaded(self) -> None:
+    def check_loaded(self) -> None:
         if not self._is_loaded:
             raise RuntimeError("Le modèle SAM3 n'est pas encore chargé. Appelez load_model() d'abord.")

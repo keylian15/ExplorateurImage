@@ -20,9 +20,15 @@ Responsabilités :
 
 from __future__ import annotations
 
+import io
+import os
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 
 from PIL import Image as PILImage
+
+from services.ollama_wrapper import OllamaWrapper
+from services.sam3_service import Sam3Service
 
 MODEL_VLM = "qwen2.5vl:7b"
 MODEL_EMBED = "nomic-embed-text:v1.5"
@@ -45,15 +51,21 @@ _PROMPT_HYBRID_EN = (
 
 
 def crop_pil(pil_image: PILImage.Image, x0: float, y0: float, x1: float, y1: float) -> PILImage.Image:
-    """Recadre une image PIL selon des coordonnées pixel.
+    """Recadrer une image selon une zone définie en coordonnées pixel.
+
+    Construit une boîte de recadrage à partir des coordonnées fournies, ajuste
+    automatiquement les limites pour rester dans l'image, puis retourne l'image
+    recadrée correspondante.
 
     Args:
-        pil_image: Image PIL source.
-        x0, y0: Coin haut-gauche de la box (pixels).
-        x1, y1: Coin bas-droit de la box (pixels).
+    pil_image (PILImage.Image): Image source à recadrer.
+    x0 (float): Coordonnée X du premier coin de la sélection.
+    y0 (float): Coordonnée Y du premier coin de la sélection.
+    x1 (float): Coordonnée X du second coin de la sélection.
+    y1 (float): Coordonnée Y du second coin de la sélection.
 
     Returns:
-        PIL.Image recadrée, clampée aux dimensions de l'image.
+    PILImage.Image: Image recadrée correspondant à la zone sélectionnée.
 
     """
     w, h = pil_image.size
@@ -76,30 +88,35 @@ class BoxSearchStrategy(ABC):
         crop: PILImage.Image,
         folder: str,
         images: list[str],
-        index: dict,
-        client,
-        service=None,
+        index: dict[str, dict],
+        client: OllamaWrapper,
+        service: Sam3Service,
         threshold: float = 0.3,
         max_results: int = 0,
-        progress_callback=None,
-        cancel_check=None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
+        cancel_check: Callable[[], bool] | None = None,
     ) -> list[tuple[str, float]]:
-        """Lance la recherche et retourne les résultats triés.
+        """Exécuter une recherche d'images à partir d'une région d'intérêt.
+
+        Analyse une zone d'image sélectionnée et retourne les images correspondantes
+        selon la stratégie implémentée. La recherche peut utiliser des embeddings,
+        SAM3 ou toute autre méthode de comparaison.
 
         Args:
-            crop: Image PIL recadrée sur la région d'intérêt.
-            folder: Chemin du dossier contenant les images.
-            images: Liste des noms de fichiers du dossier.
-            index: Index des métadonnées des images (description, embedding…).
-            client: Instance OllamaWrapper.
-            service: Instance Sam3Service (None si non nécessaire).
-            threshold: Score minimum pour retenir une image.
-            max_results: Nombre maximum de résultats (0 = illimité).
-            progress_callback: callable(done, total, img_name) optionnel.
-            cancel_check: callable() -> bool pour annulation coopérative.
+            crop (PILImage.Image): Image recadrée représentant la région à rechercher.
+            folder (str): Chemin du dossier contenant les images.
+            images (list[str]): Liste des noms des images à analyser.
+            index (dict[str, dict]): Index des métadonnées associées aux images.
+            client (OllamaWrapper): Client utilisé pour les traitements sémantiques.
+            service (Sam3Service): Service SAM3 utilisé par les stratégies qui en ont besoin.
+            threshold (float, optional): Score minimum requis pour retenir un résultat. Defaults to 0.3.
+            max_results (int, optional): Nombre maximal de résultats à retourner (0 = illimité).
+            progress_callback (Callable[[int, int, str], None] | None, optional): Fonction appelée pour notifier l'avancement du traitement.
+            cancel_check (Callable[[], bool] | None, optional): Fonction permettant de vérifier si la recherche doit être annulée.
 
         Returns:
-            Liste de (img_name, score) triée par score décroissant.
+            list[tuple[str, float]]: Liste des résultats sous la forme (nom_image, score),
+                triée par score décroissant.
 
         """
 
@@ -122,20 +139,20 @@ class EmbeddingBoxSearch(BoxSearchStrategy):
         crop: PILImage.Image,
         folder: str,
         images: list[str],
-        index: dict,
-        client,
-        service=None,
+        index: dict[str, dict],
+        client: OllamaWrapper,
+        service: Sam3Service,
         threshold: float = 0.3,
         max_results: int = 0,
-        progress_callback=None,
-        cancel_check=None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
+        cancel_check: Callable[[], bool] | None = None,
     ) -> list[tuple[str, float]]:
         """Cf. BoxSearchStrategy.search."""
         # 1. Description VLM du crop
         result = client.generate_with_image(
             model=MODEL_VLM,
             prompt=_PROMPT_EMBED_FR,
-            image=_pil_to_bytes(crop),
+            image=pil_to_bytes(crop),
         )
         description = result.response.strip()
 
@@ -183,22 +200,20 @@ class Sam3BoxSearch(BoxSearchStrategy):
         crop: PILImage.Image,
         folder: str,
         images: list[str],
-        index: dict,
-        client,
-        service=None,
-        threshold: float = 0.75,
+        index: dict[str, dict],
+        client: OllamaWrapper,
+        service: Sam3Service,
+        threshold: float = 0.3,
         max_results: int = 0,
-        progress_callback=None,
-        cancel_check=None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
+        cancel_check: Callable[[], bool] | None = None,
     ) -> list[tuple[str, float]]:
         """Cf. BoxSearchStrategy.search."""
-        import os
-
         # 1. Nom de l'objet en anglais via VLM
         result = client.generate_with_image(
             model=MODEL_VLM,
             prompt=_PROMPT_SAM3_EN,
-            image=_pil_to_bytes(crop),
+            image=pil_to_bytes(crop),
         )
         object_name = result.response.strip().splitlines()[0].strip()[:50]
 
@@ -251,7 +266,7 @@ class HybridBoxSearch(BoxSearchStrategy):
      1. Appel VLM pour obtenir un nom anglais ET des concepts.
      2. Embedding des concepts → présélection des N candidats (seuil bas).
      3. SAM3 sur les candidats seulement avec le nom anglais.
-     4. Score final = score_embedding × score_sam3 (ou score_sam3 si > 0).
+     4. Score final = score_embedding x score_sam3 (ou score_sam3 si > 0).
      5. Retourne triés par score final.
     """
 
@@ -260,17 +275,15 @@ class HybridBoxSearch(BoxSearchStrategy):
         crop: PILImage.Image,
         folder: str,
         images: list[str],
-        index: dict,
-        client,
-        service=None,
+        index: dict[str, dict],
+        client: OllamaWrapper,
+        service: Sam3Service,
         threshold: float = 0.3,
         max_results: int = 0,
-        progress_callback=None,
-        cancel_check=None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
+        cancel_check: Callable[[], bool] | None = None,
     ) -> list[tuple[str, float]]:
         """Cf. BoxSearchStrategy.search."""
-        import os
-
         if service is None:
             raise ValueError("HybridBoxSearch nécessite une instance Sam3Service.")
 
@@ -278,10 +291,10 @@ class HybridBoxSearch(BoxSearchStrategy):
         result = client.generate_with_image(
             model=MODEL_VLM,
             prompt=_PROMPT_HYBRID_EN,
-            image=_pil_to_bytes(crop),
+            image=pil_to_bytes(crop),
         )
         raw = result.response.strip()
-        object_name, concepts = _parse_hybrid_response(raw)
+        object_name, concepts = parse_hybrid_response(raw)
 
         if cancel_check and cancel_check():
             return []
@@ -330,7 +343,7 @@ class HybridBoxSearch(BoxSearchStrategy):
 
             if seg_result.scores:
                 sam3_score = max(seg_result.scores)
-                # Score final = embedding × SAM3 si SAM3 > 0, sinon embedding dégradé
+                # Score final = embedding x SAM3 si SAM3 > 0, sinon embedding dégradé
                 if sam3_score > 0:
                     combined = embed_score_map[img_name] * sam3_score
                 else:
@@ -348,7 +361,7 @@ class HybridBoxSearch(BoxSearchStrategy):
 # ── Helpers internes ──────────────────────────────────────────────────────────
 
 
-def _pil_to_bytes(pil_image: PILImage.Image) -> bytes:
+def pil_to_bytes(pil_image: PILImage.Image) -> bytes:
     """Convertit une PIL.Image en bytes JPEG pour OllamaWrapper.generate_with_image.
 
     Args:
@@ -358,37 +371,37 @@ def _pil_to_bytes(pil_image: PILImage.Image) -> bytes:
         Bytes JPEG de l'image.
 
     """
-    import io
-
     buf = io.BytesIO()
     pil_image.convert("RGB").save(buf, format="JPEG", quality=90)
     return buf.getvalue()
 
 
-def _parse_hybrid_response(raw: str) -> tuple[str, str]:
-    """Parse la réponse du prompt hybride.
+def parse_hybrid_response(raw: str) -> tuple[str, str]:
+    """Parser la réponse du prompt hybride.
 
-    Extrait le nom anglais de l'objet et les concepts associés.
+    Extrait le nom anglais de l'objet et les concepts associés depuis la réponse VLM.
 
     Args:
-        raw: Réponse brute du modèle VLM.
+        raw (str): Réponse brute du modèle VLM.
 
     Returns:
-        Tuple (object_name, concepts_string). En cas d'échec du parsing,
-        retourne (raw[:40], "").
+        tuple[str, str]: (nom de l'objet, concepts). En cas d'échec, fallback sécurisé.
 
     """
     name = ""
     concepts = ""
     for line in raw.splitlines():
-        line = line.strip()
-        if line.upper().startswith("NAME:"):
-            name = line[5:].strip()
-        elif line.upper().startswith("CONCEPTS:"):
-            concepts = line[9:].strip()
+        stripped = line.strip()
+        upper = stripped.upper()
+        if upper.startswith("NAME:"):
+            name = stripped[5:].strip()
+        elif upper.startswith("CONCEPTS:"):
+            concepts = stripped[9:].strip()
     if not name:
-        # Fallback : première ligne comme nom
-        name = raw.splitlines()[0].strip()[:40] if raw else "object"
+        # Fallback : première ligne exploitable
+        first = raw.splitlines()[0].strip() if raw else ""
+        name = first[:40] if first else "object"
+
     return name, concepts
 
 

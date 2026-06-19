@@ -38,11 +38,14 @@ from models import workspace_repository as ws_repo
 from services.i18n_manager import I18nManager
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import AutoCompleteWorker, SaveMetadataWorker
+from viewmodels.gallery_vm import GalleryViewModel
 
 MODEL_EMBED = "nomic-embed-text:v1.5"
 
 
 class DetailViewModel(QObject):
+    """ViewModel qui gere l'affichage et l'interaction pour la vue de details."""
+
     # ── Signaux vers la View ──────────────────────────────────────────────────
     # (img_name, desc, keywords)
     signal_metadata_loaded = pyqtSignal(str, str, list)
@@ -63,21 +66,23 @@ class DetailViewModel(QObject):
         self,
         client: OllamaWrapper,
         config: dict,
-        gallery_vm,  # GalleryViewModel (évite import circulaire)
+        gallery_vm: GalleryViewModel,
         ws_id: str,
         ws_data: dict,
-        parent=None,
-        translator: I18nManager = None,
-    ):
-        """Args:
-        client (OllamaWrapper): client Ollama
-        config (dict): config globale
-        gallery_vm (GalleryViewModel): gallery viewmodel
-        ws_id (str): identifiant du workspace
-        ws_data (dict): données du workspace (contient k_neighbors)
+        translator: I18nManager,
+    ) -> None:
+        """Initialise le widget des details de l'image.
+
+        Args:
+            client (OllamaWrapper): client Ollama
+            config (dict): config globale
+            gallery_vm (GalleryViewModel): gallery viewmodel
+            ws_id (str): identifiant du workspace
+            ws_data (dict): données du workspace (contient k_neighbors).
+            translator (I18nManager): le traducteur.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._client = client
         self._config = config
         self._gallery_vm = gallery_vm
@@ -114,7 +119,7 @@ class DetailViewModel(QObject):
         return self._k_neighbors
 
     @k_neighbors.setter
-    def k_neighbors(self, value: int):
+    def k_neighbors(self, value: int) -> None:
         """Remplace le nombre de voisins et persiste dans le workspace.
 
         Args:
@@ -124,8 +129,8 @@ class DetailViewModel(QObject):
         self._k_neighbors = value
         self.save_k_neighbors_to_workspace(value)
 
-    def save_k_neighbors_to_workspace(self, value: int):
-        """Persiste k_neighbors dans le workspace courant.
+    def save_k_neighbors_to_workspace(self, value: int) -> None:
+        """Sauvegarde k_neighbors dans le workspace courant.
 
         Args:
             value (int): Valeur à sauvegarder.
@@ -158,11 +163,14 @@ class DetailViewModel(QObject):
 
     # ── Sélection ─────────────────────────────────────────────────────────────
 
-    def on_image_selected(self, img_name: str):
-        """Callback quand une image est sélectionnée.
+    def on_image_selected(self, img_name: str) -> None:
+        """Traite la sélection d'une image et met à jour les données associées.
+
+        Charge la sélection courante, prépare et émet le preview (image), les métadonnées,
+        calcule les voisins et notifie l'état d'épinglage.
 
         Args:
-            img_name (str): nom de l'image
+            img_name (str): Nom de l'image sélectionnée.
 
         """
         self.selected_image = img_name
@@ -187,7 +195,7 @@ class DetailViewModel(QObject):
 
     # ── Épinglage ─────────────────────────────────────────────────────────────
 
-    def toggle_pin(self):
+    def toggle_pin(self) -> None:
         """Bascule l'état épinglé de l'image sélectionnée."""
         if self.selected_image:
             self._gallery_vm.toggle_pin(self.selected_image)
@@ -205,7 +213,7 @@ class DetailViewModel(QObject):
 
     # ── Sauvegarde ────────────────────────────────────────────────────────────
 
-    def schedule_save(self, desc: str, keywords: list[str]):
+    def schedule_save(self, desc: str, keywords: list[str]) -> None:
         """Planifie la sauvegarde des métadonnées.
 
         Args:
@@ -219,7 +227,7 @@ class DetailViewModel(QObject):
         self._pending_keywords = keywords
         self._save_timer.start()
 
-    def do_save(self):
+    def do_save(self) -> None:
         """Sauvegarde les métadonnées de l'image sélectionnée."""
         if not self.selected_image or not self._folder:
             return
@@ -238,15 +246,19 @@ class DetailViewModel(QObject):
         self._save_worker.signal_error.connect(self.signal_save_error)
         self._save_worker.start()
 
-    def on_save_done(self):
-        """Callback de la fin de la sauvegarde."""
+    def on_save_done(self) -> None:
+        """ "Finalise la sauvegarde des données et met à jour les composants dépendants.
+
+        Déclenche la mise à jour de la galerie, émet les signaux de fin de sauvegarde
+        et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.
+        """
         self._gallery_vm.reload_index()
         self.signal_save_finished.emit()
         self.signal_index_updated.emit(set(self._index.keys()))
 
     # ── Auto-complétion ───────────────────────────────────────────────────────
 
-    def auto_complete(self):
+    def auto_complete(self) -> None:
         """Lance l'auto-complétion des métadonnées."""
         if not self.selected_image or not self._folder:
             return
@@ -260,8 +272,13 @@ class DetailViewModel(QObject):
         self._worker.signal_error.connect(self.signal_autocomplete_error)
         self._worker.start()
 
-    def on_autocomplete_done(self, result: dict):
-        """Callback de la fin de l'auto-complétion."""
+    def on_autocomplete_done(self, result: dict) -> None:
+        """Traite le résultat de l'auto-complétion et émet le signal de fin.
+
+        Args:
+            result (dict): Résultat contenant la description et les mots-clés générés.
+
+        """
         desc = result["description"]
         keywords = result["keywords"]
         self.signal_autocomplete_finished.emit(desc, keywords)
@@ -269,10 +286,13 @@ class DetailViewModel(QObject):
     # ── Voisins ───────────────────────────────────────────────────────────────
 
     def compute_neighbors(self, img_name: str) -> None:
-        """Calcule les voisins de l'image.
+        """Fait le Calcule des voisins les plus proches d'une image à partir des embeddings.
+
+        Compare l'image cible avec l'ensemble de l'index en utilisant la similarité cosinus,
+        puis sélectionne les k voisins les plus proches.
 
         Args:
-            img_name (str): Nom de l'image.
+            img_name (str): Nom de l'image dont on souhaite calculer les voisins.
 
         """
         if img_name not in self._index:
@@ -291,14 +311,14 @@ class DetailViewModel(QObject):
         top = dict(sorted(scores.items(), key=lambda x: x[1], reverse=True)[: self._k_neighbors])
         self.signal_neighbors_ready.emit(top)
 
-    def refresh_neighbors(self):
+    def refresh_neighbors(self) -> None:
         """Rafraichi les voisins de l'image sélectionnée."""
         if self.selected_image:
             self.compute_neighbors(self.selected_image)
 
     # ── Renommage ─────────────────────────────────────────────────────────────
 
-    def rename(self, new_name: str):
+    def rename(self, new_name: str) -> None:
         """Renomme l'image sélectionnée.
 
         Args:

@@ -1,3 +1,22 @@
+"""Implémentation d'un arbre de recherche spécialisé pour les requêtes utilisateur.
+
+Ce module définit la classe SearchTree, qui étend une structure d'arbre générique
+afin de gérer des parcours de recherche interactifs.
+
+Chaque nœud de l'arbre représente :
+- une requête de recherche
+- un ensemble de résultats associés
+
+Fonctionnalités principales :
+- création de racine de recherche
+- ajout de recherches successives (navigation dans l'arbre)
+- retour à la racine
+- sérialisation / désérialisation complète de l'arbre
+- restauration de l'état (current node, relations parent/enfant)
+
+L'arbre permet de conserver l'historique des recherches sous forme de graphe navigable.
+"""
+
 from models.tree.search_node import SearchNode
 from models.tree.tree import Tree
 
@@ -11,7 +30,7 @@ class SearchTree(Tree):
     """
 
     def create_root(self, query: str, results: list[str]) -> SearchNode:
-        """Crée la racine de l'arbre avec une requête et ses résultats associés
+        """Crée la racine de l'arbre avec une requête et ses résultats associés.
 
         Args:
             query (str): Requête de recherche.
@@ -30,7 +49,7 @@ class SearchTree(Tree):
         query: str,
         results: list[str],
     ) -> SearchNode:
-        """Ajoute un noeud de recherche enfant au noeud courant
+        """Ajoute un noeud de recherche enfant au noeud courant.
 
         Args:
             query (str): Requête de recherche.
@@ -52,7 +71,7 @@ class SearchTree(Tree):
         return node
 
     def return_to_root(self) -> SearchNode:
-        """Retourne à la racine de l'arbre
+        """Retourne à la racine de l'arbre.
 
         Returns:
             SearchNode: Noeud racine.

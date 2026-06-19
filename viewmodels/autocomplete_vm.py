@@ -27,6 +27,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from models import index_repository
 from services.ollama_wrapper import OllamaWrapper
 from services.workers import AutoCompleteAllWorker
+from viewmodels.gallery_vm import GalleryViewModel
 
 MODEL_EMBED = "nomic-embed-text:v1.5"
 
@@ -44,20 +45,21 @@ class AutocompleteViewModel(QObject):
     def __init__(
         self,
         client: OllamaWrapper,
-        gallery_vm,  # GalleryViewModel
-        parent=None,
-    ):
-        """Args:
-        client (OllamaWrapper): Instance de OllamaWrapper
-        gallery_vm (GalleryViewModel): Instance de GalleryViewModel
+        gallery_vm: GalleryViewModel,
+    ) -> None:
+        """Initialise la vue d'auto-complétion.
+
+        Args:
+            client (OllamaWrapper): Instance de OllamaWrapper
+            gallery_vm (GalleryViewModel): Instance de GalleryViewModel.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._client = client
         self._gallery_vm = gallery_vm
         self._worker: AutoCompleteAllWorker | None = None
 
-    def start(self):
+    def start(self) -> None:
         """Lancement de l'auto-complétion."""
         if self._worker and self._worker.isRunning():
             return
@@ -73,17 +75,22 @@ class AutocompleteViewModel(QObject):
         self._worker.signal_all_done.connect(self.on_signal_all_done)
         self._worker.start()
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Annulation de l'auto-complétion."""
         if self._worker and self._worker.isRunning():
             self._worker.cancel()
 
     def is_running(self) -> bool:
-        """Test si l'auto-complétion est en cours."""
+        """Vérifier si l'auto-complétion est en cours d'exécution.
+
+        Returns:
+            bool: True si le worker est actif, False sinon.
+
+        """
         return bool(self._worker and self._worker.isRunning())
 
     def on_signal_image_done(self, idx: int, img_name: str, result: dict) -> None:
-        """Callback quand une image est traitée.
+        """Gere quand une image est traitée.
 
         Args:
             idx (int): Index de l'image.
@@ -107,8 +114,8 @@ class AutocompleteViewModel(QObject):
         self.signal_image_done.emit(idx, img_name)
         self.signal_progress.emit(idx + 1, total, img_name)
 
-    def on_image_error(self, idx: int, img_name: str, msg: str):
-        """Callback quand une image ne peut pas être traitée.
+    def on_image_error(self, idx: int, img_name: str, msg: str) -> None:
+        """Gere quand une image ne peut pas être traitée.
 
         Args:
             idx (int): Index de l'image.
@@ -120,7 +127,10 @@ class AutocompleteViewModel(QObject):
         self.signal_image_error.emit(idx, img_name, msg)
         self.signal_progress.emit(idx + 1, total, img_name)
 
-    def on_signal_all_done(self):
-        """Callback quand toutes les images ont été traitées."""
+    def on_signal_all_done(self) -> None:
+        """Gère la fin complète du traitement de toutes les images et émet le signal associé.
+
+        Détermine si l'opération a été annulée et notifie les composants concernés.
+        """
         cancelled = self._worker._cancelled
         self.signal_finished.emit(cancelled)

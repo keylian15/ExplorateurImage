@@ -71,19 +71,20 @@ class MapViewModel(QObject):
         gallery_vm: GalleryViewModel,
         ws_id: str,
         ws_data: dict,
-        translator: I18nManager = None,
-        parent=None,
-    ):
-        """Args:
-        client (OllamaWrapper): client Ollama
-        config (dict): configuration globale
-        gallery_vm (GalleryViewModel): ViewModel de la gallerie
-        ws_id (str): identifiant du workspace
-        ws_data (dict): données du workspace (contient map_params et history_search)
-        translator (I18nManager): gestionnaire de traduction
+        translator: I18nManager,
+    ) -> None:
+        """Initialise la map 2D.
+
+        Args:
+            client (OllamaWrapper): client Ollama
+            config (dict): configuration globale
+            gallery_vm (GalleryViewModel): ViewModel de la gallerie
+            ws_id (str): identifiant du workspace
+            ws_data (dict): données du workspace (contient map_params et history_search)
+            translator (I18nManager): gestionnaire de traduction.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._client = client
         self._config = config
         self._gallery_vm = gallery_vm
@@ -116,7 +117,7 @@ class MapViewModel(QObject):
 
     @property
     def params(self) -> dict:
-        """Renvoie les paramètres de la carte
+        """Renvoie les paramètres de la carte.
 
         Returns:
             dict: paramètres.
@@ -124,8 +125,8 @@ class MapViewModel(QObject):
         """
         return dict(self._params)
 
-    def apply_params(self, params: dict):
-        """Modifie les paramètres de la carte et les persiste dans le workspace.
+    def apply_params(self, params: dict) -> None:
+        """Set les paramètres de la carte et les persiste dans le workspace.
 
         Args:
             params (dict): Nouveaux paramètres.
@@ -136,11 +137,11 @@ class MapViewModel(QObject):
         self.signal_params_changed.emit(params)
         self.compute()
 
-    def save_params_to_workspace(self, params: dict):
-        """Persiste map_params dans le workspace courant.
+    def save_params_to_workspace(self, params: dict) -> None:
+        """Sauvegarde les paramètres de la carte dans le workspace courant.
 
         Args:
-            params (dict): Paramètres à sauvegarder.
+            params (dict): Paramètres à persister dans le workspace.
 
         """
         workspaces = ws_repo.load(self._config)
@@ -150,13 +151,14 @@ class MapViewModel(QObject):
 
     # ── Calcul ────────────────────────────────────────────────────────────────
 
-    def compute(self):
+    def compute(self) -> None:
         """Démarre le calcul de la carte."""
         if self._worker and self._worker.isRunning():
             return
 
         indexed = {k: v for k, v in self._gallery_vm.index.items() if v.get("embedding") and len(v["embedding"]) > 0}
-        if len(indexed) < 2:
+        indexed_size_min = 2
+        if len(indexed) < indexed_size_min:
             self.signal_compute_error.emit(self.translator.tr("Pas assez d'embeddings ({count} / min 2).").format(count=len(indexed)))
             return
 
@@ -174,7 +176,7 @@ class MapViewModel(QObject):
         self._worker.signal_error.connect(self.signal_compute_error)
         self._worker.start()
 
-    def autoload(self):
+    def autoload(self) -> None:
         """Lance depuis le cache si disponible, sinon calcule."""
         cache = self.load_cache()
         if cache:
@@ -187,14 +189,14 @@ class MapViewModel(QObject):
         else:
             self.compute()
 
-    def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
-        """Callback du worker.
+    def on_finished(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]) -> None:
+        """Sauvegarde les résultats du worker et déclenche le signal de fin de calcul.
 
         Args:
-            points (list[tuple[float, float]]): Les points de la carte.
-            labels (list[int]): Les labels des clusters.
-            names (list[str]): Les noms des images.
-            cluster_names (dict[int, str]): Les noms des clusters.
+            points (list[tuple[float, float]]): Coordonnées des points calculés sur la carte.
+            labels (list[int]): Labels associés aux clusters.
+            names (list[str]): Noms des éléments (images ou données associées).
+            cluster_names (dict[int, str]): Correspondance entre identifiants de clusters et leurs noms.
 
         """
         self.save_cache(points, labels, names, cluster_names)
@@ -202,7 +204,7 @@ class MapViewModel(QObject):
 
     # ── Recherche sémantique ──────────────────────────────────────────────────
 
-    def schedule_search(self, text: str):
+    def schedule_search(self, text: str) -> None:
         """Déclenche une recherche avec debounce.
 
         Args:
@@ -212,7 +214,7 @@ class MapViewModel(QObject):
         self._search_text = text
         self._search_timer.start()
 
-    def do_search(self):
+    def do_search(self) -> None:
         """Effectue la recherche et émet le signal avec les résultats."""
         text = self._search_text.strip()
         if not text:
@@ -227,7 +229,7 @@ class MapViewModel(QObject):
         self._result_names = self._gallery_vm.filtered_images(filter_text=text, context=context)
         self.signal_search_results_changed.emit(self._result_names)
 
-    def clear_search(self):
+    def clear_search(self) -> None:
         """Vide la recherche et réaffiche tous les noeuds."""
         self._search_text = ""
         self._result_names = []
@@ -276,7 +278,7 @@ class MapViewModel(QObject):
 
         return os.path.join(cache_dir, _MAP_CACHE_FILE)
 
-    def save_cache(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]):
+    def save_cache(self, points: list[tuple[float, float]], labels: list[int], names: list[str], cluster_names: dict[int, str]) -> None:
         """Sauvegarde le cache.
 
         Args:

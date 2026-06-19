@@ -21,6 +21,7 @@ Responsabilités :
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from services.i18n_manager import I18nManager
@@ -39,14 +40,16 @@ class LanguageCard(QWidget):
 
     signal_clicked = pyqtSignal(str)  # code langue
 
-    def __init__(self, code: str, label: str, selected: bool, parent=None):
-        """Args:
-        code (str): Code de la langue (ex: "fr", "en").
-        label (str): Libellé affiché (ex: "🇫🇷 Français").
-        selected (bool): True si cette langue est la langue active.
+    def __init__(self, code: str, label: str, selected: bool) -> None:
+        """Initialise la carte de langage.
+
+        Args:
+            code (str): Code de la langue (ex : "fr", "en").
+            label (str): Libellé affiché (ex: "🇫🇷 Français").
+            selected (bool): True si cette langue est la langue active.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self._code = code
         self._selected = selected
 
@@ -93,7 +96,7 @@ class LanguageCard(QWidget):
 
         self.setToolTip(f"Passer l'application en {name}")
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent) -> None:
         """Émet signal_clicked si la carte n'est pas déjà sélectionnée.
 
         Args:
@@ -111,13 +114,14 @@ class LanguageSelector(QWidget):
     # Émis quand l'utilisateur choisit une nouvelle langue différente de l'actuelle.
     signal_language_chosen = pyqtSignal(str)  # nouveau code langue
 
-    def __init__(self, translator: I18nManager, parent=None):
-        """Args:
-        translator (I18nManager): Gestionnaire de traduction (fournit la
-            langue active et la liste des langues disponibles).
+    def __init__(self, translator: I18nManager) -> None:
+        """Instancie la selection de langue.
+
+        Args:
+            translator (I18nManager): Le traducteur.
 
         """
-        super().__init__(parent)
+        super().__init__()
         self.translator = translator
         self._build_ui()
 

@@ -1,39 +1,25 @@
-"""Dialog plein écran avec segmentation SAM3 interactive.
+"""Fenêtre principale SAM3 pour segmentation interactive.
 
-SAM3 permettant :
-  - Segmentation par prompt texte (ex : "shoe", "dog")
-  - Segmentation par boîte dessinée à la souris (positive ou négative)
-  - Zoom via molette ou boutons
-  - Reset des prompts
-  - Recherche globale sur tout le dossier avec panneau de résultats
-  - Recherche par box avec trois stratégies : Embedding, SAM3, Hybride
-
-Ce widget ne contient AUCUNE logique métier :
-  - Pas d'import numpy, PIL, services/
-  - Ne connaît que MaskOverlay (type View-friendly exposé par le ViewModel)
-  - Toute interaction est relayée au Sam3ViewModel via des appels de méthode
-  - Tout résultat est reçu via des signaux Qt
-
-Responsabilités (View uniquement) :
- 1. Afficher l'image avec zoom interactif
- 2. Dessiner les boîtes à la souris et émettre les coordonnées pixel
- 3. Afficher les masques et boîtes reçus via signal_overlay_ready
- 4. Gérer les états visuels (chargement, prêt, erreur)
- 5. Relayer les actions utilisateur vers le ViewModel
- 6. Afficher les résultats de la recherche globale (miniatures + scores)
- 7. Permettre la sélection de la stratégie de recherche par box
+Permet :
+- segmentation par prompt texte ou boîte dessinée
+- affichage des masques SAM3 sur l'image
+- zoom interactif
+- recherche d'images (embedding / SAM3 / hybride)
+- affichage des résultats avec navigation
 """
 
 from __future__ import annotations
 
 import os
 
-from PyQt6.QtCore import QPoint, QRect, Qt, pyqtSignal
+import numpy as np
+from PyQt6.QtCore import QPoint, QRect, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import (
     QColor,
     QCursor,
     QFont,
     QImage,
+    QMouseEvent,
     QPainter,
     QPen,
     QPixmap,
@@ -58,6 +44,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from PyQt6.QtWidgets import QCheckBox as _QCB
 
 from services.i18n_manager import I18nManager
 from styles import COLORS, neighbor_thumb_style, score_label_style
@@ -98,8 +85,9 @@ class ImageCanvas(QLabel):
     signal_box_drawn = pyqtSignal(float, float, float, float)
     # x0, y0, x1, y1 en coordonnées pixel de l'image originale (non zoomée)
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self) -> None:
+        """Initialise le canva d'image."""
+        super().__init__()
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setCursor(QCursor(Qt.CursorShape.CrossCursor))
 
@@ -115,13 +103,24 @@ class ImageCanvas(QLabel):
     # ── API ───────────────────────────────────────────────────────────────────
 
     def set_base_pixmap(self, pixmap: QPixmap) -> None:
+        """Définit la base de l'image.
+
+        Args:
+            pixmap (QPixmap): La base.
+
+        """
         self._base_pixmap = pixmap
         self._overlay = None
         self._box_start = self._box_end = None
         self._render()
 
     def set_overlay(self, overlay: MaskOverlay) -> None:
-        """Met à jour l'overlay SAM3 (reçu du ViewModel via signal)."""
+        """Met à jour l'overlay SAM3 (reçu du ViewModel via signal).
+
+        Args:
+            overlay (MaskOverlay): Overlay a mettre sur l'image.
+
+        """
         self._overlay = overlay
         self._box_start = self._box_end = None
         self._render()
@@ -133,15 +132,28 @@ class ImageCanvas(QLabel):
         self._render()
 
     def set_zoom(self, zoom: float) -> None:
+        """Définit le zoom.
+
+        Args:
+            zoom (float): Le niveau de zoom.
+
+        """
         self._zoom = max(0.05, min(10.0, zoom))
         self._render()
 
     def set_box_positive(self, positive: bool) -> None:
+        """Défini si la box est positive ou non.
+
+        Args:
+            positive (bool): True : on prend, False : on exclut.
+
+        """
         self._box_positive = positive
 
     # ── Rendu ─────────────────────────────────────────────────────────────────
 
     def _render(self) -> None:
+        """Fait le rendu."""
         if self._base_pixmap is None:
             self.clear()
             return
@@ -164,11 +176,15 @@ class ImageCanvas(QLabel):
         """Dessine les masques et boîtes SAM3 sur le pixmap.
 
         Utilise uniquement QImage/QPainter.
-        Les données numpy (mask bool array) viennent du MaskOverlay produit
-        par le ViewModel.
-        """
-        import numpy as np
+        Les données numpy (mask bool array) viennent du MaskOverlay produit par le ViewModel.
 
+        Args:
+            pixmap (QPixmap) : L'image où l'on vas dessiner.
+
+        Returns:
+            QPixmap : L'image avec les masques et boîtes.
+
+        """
         overlay = self._overlay
         out = QPixmap(pixmap)
         painter = QPainter(out)
@@ -220,18 +236,36 @@ class ImageCanvas(QLabel):
 
     # ── Souris ────────────────────────────────────────────────────────────────
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        """Initialise le dessin de la bouding box à la souris.
+
+        Args:
+            event (QMouseEvent): Événement Qt du clic gauche de la souris.
+
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self._drawing = True
             self._box_start = event.pos()
             self._box_end = event.pos()
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        """Fait le dessin d'une bounding box à la souris.
+
+        Args:
+            event (QMouseEvent): Événement Qt de la souris.
+
+        """
         if self._drawing:
             self._box_end = event.pos()
             self._draw_preview()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+        """Finalise le dessin d'une bounding box à la souris.
+
+        Args:
+            event (QMouseEvent): Événement Qt du relâchement de la souris.
+
+        """
         if not self._drawing:
             return
         self._drawing = False
@@ -239,7 +273,8 @@ class ImageCanvas(QLabel):
             return
 
         start, end = self._box_start, self._box_end
-        if abs(end.x() - start.x()) < 5 or abs(end.y() - start.y()) < 5:
+        limit_abs = 5
+        if abs(end.x() - start.x()) < limit_abs or abs(end.y() - start.y()) < limit_abs:
             self._box_start = self._box_end = None
             self._render()
             return
@@ -312,8 +347,14 @@ class SearchResultsPanel(QWidget):
     # Intervalle entre deux ticks (ms)
     _FLUSH_INTERVAL_MS = 16  # ~60fps
 
-    def __init__(self, folder: str | None, parent=None):
-        super().__init__(parent)
+    def __init__(self, folder: str | None) -> None:
+        """Initialise le panel de recherche.
+
+        Args:
+            folder (str | None): Le nom du dossier.
+
+        """
+        super().__init__()
         self._folder = folder
         self._count = 0
         # File d'attente des résultats reçus mais pas encore affichés
@@ -324,8 +365,7 @@ class SearchResultsPanel(QWidget):
         self._build_ui()
 
     def _build_ui(self) -> None:
-        from PyQt6.QtCore import QTimer
-
+        """Construit l'ui."""
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
@@ -386,6 +426,12 @@ class SearchResultsPanel(QWidget):
     # ── API ───────────────────────────────────────────────────────────────────
 
     def set_folder(self, folder: str | None) -> None:
+        """Définit le dossier.
+
+        Args:
+            folder (str | None): Le nom du dossier.
+
+        """
         self._folder = folder
 
     def set_wait_mode(self, enabled: bool) -> None:
@@ -395,13 +441,18 @@ class SearchResultsPanel(QWidget):
         ne s'affichent qu'au moment de finish_search(), triés par score.
 
         Args:
-            enabled: True = attendre la fin, False = afficher au fil de l'eau.
+            enabled (bool): True = attendre la fin, False = afficher au fil de l'eau.
 
         """
         self._wait_mode = enabled
 
     def start_search(self, total: int) -> None:
-        """Prépare le panneau pour une nouvelle recherche."""
+        """Prépare le panneau pour une nouvelle recherche.
+
+        Args:
+            total (int): Le nombre total d'images sur lequelles ont fait la recherche.
+
+        """
         self.clear(keep_header=True)
         self._progress_bar.setMaximum(total)
         self._progress_bar.setValue(0)
@@ -411,6 +462,14 @@ class SearchResultsPanel(QWidget):
         self._lbl_title.setText("Recherche…")
 
     def update_progress(self, done: int, total: int, img_name: str) -> None:
+        """Met a jour l'ui sur l'avancé.
+
+        Args:
+            done (int): Nombre d'images traitées.
+            total (int): Nombre d'images totales.
+            img_name (str): Le nom de l'image.
+
+        """
         self._progress_bar.setValue(done)
         label = f"{done} / {total}"
         if img_name:
@@ -427,7 +486,7 @@ class SearchResultsPanel(QWidget):
 
         Args:
             img_name: Nom du fichier image résultat.
-            score: Score de similarité (0–1).
+            score: Score de similarité (0-1).
 
         """
         self._pending_results.append((img_name, score))
@@ -460,12 +519,19 @@ class SearchResultsPanel(QWidget):
                 self._flush_timer.start(0)
 
     def show_cancelled(self) -> None:
+        """Cache les indications de progrès."""
         self._progress_bar.setVisible(False)
         self._lbl_progress.setVisible(False)
         self._search_done = True
         self._final_count = None  # None = annulé
 
     def clear(self, keep_header: bool = False) -> None:
+        """Clear les résultats.
+
+        Args:
+            keep_header (bool, optional): Parametre pour garder les résultats. Defaults to False.
+
+        """
         if self._flush_timer:
             self._flush_timer.stop()
         self._pending_results.clear()
@@ -561,9 +627,10 @@ class SearchResultsPanel(QWidget):
 
 
 class Sam3SidebarContent(QWidget):
-    """Contrôles SAM3 organisés en deux zones distinctes :
-    - Zone 1 : Segmentation dans l'image courante
-    - Zone 2 : Recherche dans le dossier
+    """Contrôles SAM3 organisés en deux zones distinctes.
+
+    - Zone 1 : Segmentation dans l'image courante.
+    - Zone 2 : Recherche dans le dossier.
     """
 
     signal_text_prompt = pyqtSignal(str)
@@ -575,17 +642,21 @@ class Sam3SidebarContent(QWidget):
     signal_reset = pyqtSignal()
     signal_wait_mode_changed = pyqtSignal(bool)  # True = attendre la fin avant d'afficher
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self) -> None:
+        """Initiaalise le contenu latéral de sam3."""
+        super().__init__()
         # Mémorise les dernières coordonnées de box dessinée (coords image originale)
         self._last_box: tuple[float, float, float, float] | None = None
         self._build_ui()
 
     def set_last_box(self, x0: float, y0: float, x1: float, y1: float) -> None:
-        """Mémorise les coordonnées de la dernière box dessinée.
+        """Mémorise les coordonnées de la dernière bounding box dessinée.
 
         Args:
-            x0, y0, x1, y1: Coordonnées pixel sur l'image originale.
+            x0 (float): Coordonnée X du coin supérieur gauche.
+            y0 (float): Coordonnée Y du coin supérieur gauche.
+            x1 (float): Coordonnée X du coin inférieur droit.
+            y1 (float): Coordonnée Y du coin inférieur droit.
 
         """
         self._last_box = (x0, y0, x1, y1)
@@ -614,7 +685,8 @@ class Sam3SidebarContent(QWidget):
             return "hybrid"
         return "embedding"
 
-    def _build_ui(self) -> None:
+    def _build_ui(self) -> None:  # noqa: PLR0915
+        """Construit l'ui."""
         c = COLORS
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 16, 12, 12)
@@ -766,8 +838,6 @@ class Sam3SidebarContent(QWidget):
         z2l.addLayout(btn_cancel_row)
 
         # ── Mode attente ──────────────────────────────────────────────────────
-        from PyQt6.QtWidgets import QCheckBox as _QCB
-
         self.checkbox_wait_end = _QCB("⏳ Attendre la fin")
         self.checkbox_wait_end.setChecked(False)
         self.checkbox_wait_end.setToolTip(
@@ -883,31 +953,71 @@ class Sam3SidebarContent(QWidget):
             self.text_input.setFocus()
 
     def set_status(self, text: str) -> None:
+        """Définit le statut sur l'interface.
+
+        Args:
+            text (str): Le nouveau message.
+
+        """
         self.lbl_status.setText(text)
 
     def set_busy(self, busy: bool, message: str = "") -> None:
+        """Definit si le modele est occupé.
+
+        Args:
+            busy (bool): Le statut.
+            message (str, optional): _description_. Defaults to "".
+
+        """
         self.set_ready(not busy)
         if message:
             self.lbl_status.setText(f"⏳ {message}")
 
     def set_searching(self, searching: bool) -> None:
-        """Bascule l'état visuel pendant la recherche globale."""
+        """Bascule l'état visuel pendant la recherche globale.
+
+        Args:
+            searching (bool): Le statut.
+
+        """
         self.btn_search_all.setVisible(not searching)
         self.btn_search_box.setVisible(not searching)
         self.btn_cancel_search.setVisible(searching)
 
     def is_positive_mode(self) -> bool:
+        """Retourne True si on est en box positive.
+
+        Returns:
+            bool: le statut de la box.
+
+        """
         return self.btn_positive.isChecked()
 
     def current_wait_mode(self) -> bool:
-        """Retourne True si l'utilisateur veut attendre la fin avant d'afficher."""
+        """Retourne True si l'utilisateur veut attendre la fin avant d'afficher.
+
+        Returns:
+            bool: le statut d'attente.
+
+        """
         return self.checkbox_wait_end.isChecked()
 
     def current_embed_threshold(self) -> float:
+        """Retourne le seuil de confiance de l'embedding.
+
+        Returns:
+            float: la confiance de l'embedding.
+
+        """
         return self.spin_embed_threshold.value()
 
     def current_sam3_threshold(self) -> float:
-        """Retourne le seuil de confiance (fusionné avec le seuil SAM3)."""
+        """Retourne le seuil de confiance (fusionné avec le seuil SAM3).
+
+        Returns:
+            float: la confiance de sam3.
+
+        """
         return self.slider_conf.value() / 100.0
 
     # ── Slots internes ────────────────────────────────────────────────────────
@@ -1032,11 +1142,11 @@ class Sam3Dialog(QMainWindow):
         self._sidebar_content.signal_box_positive.connect(self._canvas.set_box_positive)
         self._sidebar_content.signal_confidence_changed.connect(self._vm.set_confidence)
         self._sidebar_content.signal_reset.connect(self._vm.reset_prompts)
-        self._sidebar_content.signal_search_requested.connect(self._on_search_requested)
-        self._sidebar_content.signal_box_search_requested.connect(self._on_box_search_requested)
+        self._sidebar_content.signal_search_requested.connect(self.on_search_requested)
+        self._sidebar_content.signal_box_search_requested.connect(self.on_box_search_requested)
         self._sidebar_content.signal_search_cancel.connect(self._vm.cancel_search)
 
-        self._results_panel.signal_image_clicked.connect(self._on_result_clicked)
+        self._results_panel.signal_image_clicked.connect(self.on_result_clicked)
         self._results_panel.signal_image_right_clicked.connect(self.on_result_right_clicked)
 
         scroll_dock = QScrollArea()
@@ -1088,24 +1198,24 @@ class Sam3Dialog(QMainWindow):
         sb = self._sidebar_content
 
         vm.signal_model_loading.connect(lambda: sb.set_status(self.translator.tr("⏳ Chargement du modèle…")))
-        vm.signal_model_ready.connect(self._on_model_ready)
+        vm.signal_model_ready.connect(self.on_model_ready)
         vm.signal_model_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Erreur modèle : {e}").format(e=e)))
         vm.signal_encoding.connect(lambda: sb.set_busy(True, self.translator.tr("Encodage de l'image…")))
-        vm.signal_encoded.connect(self._on_encoded)
+        vm.signal_encoded.connect(self.on_encoded)
         vm.signal_encoding_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Encodage : {e}").format(e=e)))
         vm.signal_segmenting.connect(lambda: sb.set_busy(True, self.translator.tr("Segmentation en cours…")))
-        vm.signal_overlay_ready.connect(self._on_overlay_ready)
+        vm.signal_overlay_ready.connect(self.on_overlay_ready)
         vm.signal_segment_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Segmentation : {e}").format(e=e)))
         vm.signal_resetting.connect(lambda: sb.set_busy(True, self.translator.tr("Réinitialisation…")))
-        vm.signal_reset_done.connect(self._on_reset_done)
+        vm.signal_reset_done.connect(self.on_reset_done)
 
-        vm.signal_search_started.connect(self._on_search_started)
+        vm.signal_search_started.connect(self.on_search_started)
         vm.signal_search_progress.connect(self._results_panel.update_progress)
         vm.signal_search_match.connect(self._results_panel.add_result)
-        vm.signal_search_finished.connect(self._on_search_finished)
-        vm.signal_search_cancelled.connect(self._on_search_cancelled)
+        vm.signal_search_finished.connect(self.on_search_finished)
+        vm.signal_search_cancelled.connect(self.on_search_cancelled)
         vm.signal_search_error.connect(lambda e: sb.set_status(self.translator.tr("❌ Recherche : {error}").format(error=e)))
-        vm.signal_box_search_strategy.connect(self._on_box_search_strategy)
+        vm.signal_box_search_strategy.connect(self.on_box_search_strategy)
 
         sb.signal_wait_mode_changed.connect(self._results_panel.set_wait_mode)
 
@@ -1121,40 +1231,40 @@ class Sam3Dialog(QMainWindow):
 
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
-    def _on_model_ready(self) -> None:
+    def on_model_ready(self) -> None:
         self._sidebar_content.set_status(self.translator.tr("✅ Modèle prêt"))
         if not self._vm.is_image_encoded:
             self._vm.encode_image(self._pixmap, self._img_path)
 
-    def _on_encoded(self) -> None:
+    def on_encoded(self) -> None:
         self._sidebar_content.set_ready(True)
         self._sidebar_content.set_status(self.translator.tr("✅ Prêt — saisissez un prompt ou dessinez une boîte"))
 
-    def _on_overlay_ready(self, overlay: MaskOverlay) -> None:
+    def on_overlay_ready(self, overlay: MaskOverlay) -> None:
         self._sidebar_content.set_ready(True)
         n = len(overlay.masks)
         self._sidebar_content.set_status(self.translator.tr("✅ {n} objet(s) trouvé(s)").format(n=n))
         self._canvas.set_overlay(overlay)
 
-    def _on_reset_done(self) -> None:
+    def on_reset_done(self) -> None:
         self._canvas.clear_overlay()
         self._sidebar_content.set_ready(True)
         self._sidebar_content.set_status(self.translator.tr("✅ Prompts réinitialisés"))
 
-    def _on_box_search_strategy(self, strategy_name: str) -> None:
+    def on_box_search_strategy(self, strategy_name: str) -> None:
         label = _STRATEGY_LABELS.get(strategy_name, strategy_name)
         self._sidebar_content.set_status(self.translator.tr("🔍 Recherche par box — stratégie : {label}").format(label=label))
 
     # ── Slots recherche ───────────────────────────────────────────────────────
 
-    def _on_search_requested(self, text: str, embed_threshold: float, sam3_threshold: float) -> None:
+    def on_search_requested(self, text: str, embed_threshold: float, sam3_threshold: float) -> None:
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
         self._results_panel.set_wait_mode(self._sidebar_content.current_wait_mode())
         strategy = self._sidebar_content.current_strategy()
         threshold = embed_threshold if strategy == "embedding" else sam3_threshold
         self._vm.search_objects(text, threshold, strategy_name=strategy)
 
-    def _on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
+    def on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
         box = self._sidebar_content.get_last_box()
         if box is None:
             self._sidebar_content.set_status(self.translator.tr("⚠️ Aucune box disponible."))
@@ -1178,23 +1288,23 @@ class Sam3Dialog(QMainWindow):
             sam3_threshold=sam3_threshold,
         )
 
-    def _on_search_started(self, total: int) -> None:
+    def on_search_started(self, total: int) -> None:
         self._sidebar_content.set_searching(True)
         self._sidebar_content.set_status(self.translator.tr("🔍 Analyse de {total} image(s)…").format(total=total))
         self._results_panel.start_search(total)
 
-    def _on_search_finished(self, matched: list) -> None:
+    def on_search_finished(self, matched: list) -> None:
         self._sidebar_content.set_searching(False)
         n = len(matched)
         self._sidebar_content.set_status(self.translator.tr("✅ Recherche terminée — {n} correspondance(s)").format(n=n))
         self._results_panel.finish_search(matched)
 
-    def _on_search_cancelled(self) -> None:
+    def on_search_cancelled(self) -> None:
         self._sidebar_content.set_searching(False)
         self._sidebar_content.set_status(self.translator.tr("⛔ Recherche annulée"))
         self._results_panel.show_cancelled()
 
-    def _on_result_clicked(self, img_name: str) -> None:
+    def on_result_clicked(self, img_name: str) -> None:
         folder = self._vm._gallery_vm.current_folder
         if not folder:
             return

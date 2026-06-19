@@ -1,8 +1,6 @@
 [tool.ruff]
 line-length = 200
-exclude = [
-    "sam3",
-]
+exclude = ["sam3"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
