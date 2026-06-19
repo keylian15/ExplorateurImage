@@ -2984,13 +2984,7 @@ logique d'interface graphique.</p>
 <span class="normal">429</span>
 <span class="normal">430</span>
 <span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GalleryViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+<span class="normal">432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GalleryViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class qui gère la logique de la vue de la galerie.&quot;&quot;&quot;</span>
 
     <span class="c1"># ── Signaux émis vers la View ─────────────────────────────────────────────</span>
@@ -3002,17 +2996,16 @@ logique d'interface graphique.</p>
     <span class="n">signal_pin_changed</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>  <span class="c1"># (img_name, is_pinned)</span>
     <span class="n">signal_saved_search</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>  <span class="c1"># une recherche a été sauvegardée</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise la logique de la vue de la galerie.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            client (OllamaWrapper): client Ollama</span>
-<span class="sd">            config (dict): configuration</span>
-<span class="sd">            ws_id (str): identifiant du workspace (pour la persistance des épingles)</span>
-<span class="sd">            ws_data (dict | None): données du workspace (pour restaurer les épingles et l&#39;arbre)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">        client (OllamaWrapper): client Ollama</span>
+<span class="sd">        config (dict): configuration</span>
+<span class="sd">        ws_id (str): identifiant du workspace (pour la persistance des épingles)</span>
+<span class="sd">        ws_data (dict | None): données du workspace (pour restaurer les épingles et l&#39;arbre)</span>
+<span class="sd">        parent (QObject, optional): parent. Defaults to None.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
@@ -3082,7 +3075,7 @@ logique d'interface graphique.</p>
 
     <span class="c1"># ── Dossier ───────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ouvre un dossier.</span>
 
 <span class="sd">        Args:</span>
@@ -3099,19 +3092,19 @@ logique d'interface graphique.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_folder_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Charge l&#39;index du dossier courant.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index_repository</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_folder</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_indexed</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">reload_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reload_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Recharge l&#39;index du dossier courant.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_index</span><span class="p">()</span>
 
     <span class="c1"># ── Images ────────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rafraîchit la liste des images. Les épinglées apparaissent en premier.</span>
 
 <span class="sd">        Args:</span>
@@ -3179,7 +3172,7 @@ logique d'interface graphique.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">img_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">pin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Épingle une image (la met en tête de galerie).</span>
 
 <span class="sd">        Args:</span>
@@ -3194,7 +3187,7 @@ logique d'interface graphique.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">unpin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unpin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Désépingle une image.</span>
 
 <span class="sd">        Args:</span>
@@ -3209,11 +3202,11 @@ logique d'interface graphique.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_pin_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">img_name</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bascule l&#39;état d&#39;épinglage d&#39;une image (épinglée ↔ non épinglée).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bascule l&#39;état épinglé d&#39;une image.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            img_name (str): Nom de l&#39;image à épingler ou désépingler.</span>
+<span class="sd">            img_name (str): Nom de l&#39;image.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_pinned</span><span class="p">(</span><span class="n">img_name</span><span class="p">):</span>
@@ -3221,8 +3214,8 @@ logique d'interface graphique.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pin_image</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sauvegarde la liste des épingles dans le workspace courant.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persiste la liste des épingles dans le workspace courant.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="n">workspaces</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
@@ -3232,7 +3225,7 @@ logique d'interface graphique.</p>
 
     <span class="c1"># ── Recherche ─────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">schedule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">schedule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance la recherche après un delai.</span>
 
 <span class="sd">        Args:</span>
@@ -3263,20 +3256,16 @@ logique d'interface graphique.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result_images</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recherche et filtre les images les plus pertinentes pour une requête textuelle.</span>
-
-<span class="sd">        Construit une similarité entre la requête et les embeddings des images, puis combine</span>
-<span class="sd">        la similarité cosinus et un score de correspondance textuelle pour classer les résultats.</span>
-<span class="sd">        Les images épinglées sont exclues du calcul et réinjectées en priorité ailleurs dans le flux.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Renvoi les 100 images les plus proches de la requête.</span>
+<span class="sd">        Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            filter_text (str): Texte de la requête de recherche.</span>
-<span class="sd">            context (list[str] | None): Liste optionnelle d&#39;images servant de périmètre de recherche.</span>
-<span class="sd">                Si None ou vide, la recherche est effectuée sur l&#39;ensemble de l&#39;index.</span>
+<span class="sd">            filter_text (str): Requête de recherche.</span>
+<span class="sd">            context (list[str]): Liste de nom d&#39;images servant de base. Si none ce base sur toutes les images.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list[str]: Liste des noms d&#39;images triées par pertinence (jusqu&#39;à 100 résultats).</span>
+<span class="sd">            list[str]: Liste des images. Les épinglées sont en tête.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Récupère les embeddings de la requête</span>
@@ -3291,7 +3280,6 @@ logique d'interface graphique.</p>
 
         <span class="n">pinned_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">)</span>
         <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">score_sim</span> <span class="o">=</span> <span class="mf">0.5</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">images</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Exclut les images épinglées.</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pinned_set</span><span class="p">:</span>
@@ -3302,8 +3290,8 @@ logique d'interface graphique.</p>
             <span class="n">score</span> <span class="o">=</span> <span class="n">sim</span> <span class="o">*</span> <span class="mf">1.0</span>
             <span class="k">if</span> <span class="n">text_match</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">+=</span> <span class="mf">0.3</span>
-            <span class="k">if</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="n">score_sim</span> <span class="ow">and</span> <span class="n">text_match</span><span class="p">:</span>
-                <span class="n">score</span> <span class="o">+=</span> <span class="n">score_sim</span>
+            <span class="k">if</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="n">text_match</span><span class="p">:</span>
+                <span class="n">score</span> <span class="o">+=</span> <span class="mf">0.5</span>
             <span class="n">scores</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span>
         <span class="n">sorted_items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sorted_items</span><span class="p">[:</span><span class="mi">100</span><span class="p">]]</span>
@@ -3334,7 +3322,7 @@ logique d'interface graphique.</p>
 
     <span class="c1"># ── Sélection ─────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">select_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Selectionne l&#39;image.</span>
 
 <span class="sd">        Args:</span>
@@ -3346,20 +3334,20 @@ logique d'interface graphique.</p>
 
     <span class="c1"># ── Zoom ──────────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom in sur les images.&quot;&quot;&quot;</span>
         <span class="n">levels</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;size_levels&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">apply_zoom</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Zoom out sur les images.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">apply_zoom</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Applique le zoom.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cell_size</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;size_levels&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cell_size</span><span class="p">)</span>
@@ -3369,7 +3357,7 @@ logique d'interface graphique.</p>
 
     <span class="c1"># ── Repaint ───────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_repaint_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_signal_repaint_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Notifie quand une image a été modifiée.</span>
 
 <span class="sd">        Args:</span>
@@ -3487,93 +3475,19 @@ logique d'interface graphique.</p>
 
 
 <h4 id="viewmodels.gallery_vm.GalleryViewModel.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">ws_id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ws_data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">ws_id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ws_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
 
     <div class="doc doc-contents ">
 
-        <p>Initialise la logique de la vue de la galerie.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>client</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="OllamaWrapper (services.ollama_wrapper.OllamaWrapper)" href="../../services/ollama_wrapper/#services.ollama_wrapper.OllamaWrapper">OllamaWrapper</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>client Ollama</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>config</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>configuration</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ws_id</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>identifiant du workspace (pour la persistance des épingles)</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ws_data</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span> | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>données du workspace (pour restaurer les épingles et l'arbre)</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Args:
+client (OllamaWrapper): client Ollama
+config (dict): configuration
+ws_id (str): identifiant du workspace (pour la persistance des épingles)
+ws_data (dict | None): données du workspace (pour restaurer les épingles et l'arbre)
+parent (QObject, optional): parent. Defaults to None.</p>
 
 
             <details class="mkdocstrings-source">
@@ -3631,18 +3545,16 @@ logique d'interface graphique.</p>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise la logique de la vue de la galerie.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        client (OllamaWrapper): client Ollama</span>
-<span class="sd">        config (dict): configuration</span>
-<span class="sd">        ws_id (str): identifiant du workspace (pour la persistance des épingles)</span>
-<span class="sd">        ws_data (dict | None): données du workspace (pour restaurer les épingles et l&#39;arbre)</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">    client (OllamaWrapper): client Ollama</span>
+<span class="sd">    config (dict): configuration</span>
+<span class="sd">    ws_id (str): identifiant du workspace (pour la persistance des épingles)</span>
+<span class="sd">    ws_data (dict | None): données du workspace (pour restaurer les épingles et l&#39;arbre)</span>
+<span class="sd">    parent (QObject, optional): parent. Defaults to None.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span> <span class="o">=</span> <span class="n">ws_id</span>
@@ -3732,7 +3644,8 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
+<span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -3741,8 +3654,7 @@ logique d'interface graphique.</p>
 <span class="normal">213</span>
 <span class="normal">214</span>
 <span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">all_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">all_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Renvoie la liste de toutes les images du dossier courant.</span>
 
 <span class="sd">    Returns:</span>
@@ -3775,13 +3687,13 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Applique le zoom.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_cell_size</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;size_levels&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cell_size</span><span class="p">)</span>
@@ -3810,7 +3722,8 @@ logique d'interface graphique.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">304</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">303</span>
+<span class="normal">304</span>
 <span class="normal">305</span>
 <span class="normal">306</span>
 <span class="normal">307</span>
@@ -3828,8 +3741,7 @@ logique d'interface graphique.</p>
 <span class="normal">319</span>
 <span class="normal">320</span>
 <span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">322</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Effectue la recherche sémantique et met à jour la liste des images.&quot;&quot;&quot;</span>
     <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
@@ -3866,10 +3778,8 @@ logique d'interface graphique.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Recherche et filtre les images les plus pertinentes pour une requête textuelle.</p>
-<p>Construit une similarité entre la requête et les embeddings des images, puis combine
-la similarité cosinus et un score de correspondance textuelle pour classer les résultats.
-Les images épinglées sont exclues du calcul et réinjectées en priorité ailleurs dans le flux.</p>
+        <p>Renvoi les 100 images les plus proches de la requête.
+Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3892,7 +3802,7 @@ Les images épinglées sont exclues du calcul et réinjectées en priorité aill
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Texte de la requête de recherche.</p>
+                <p>Requête de recherche.</p>
               </div>
             </td>
             <td>
@@ -3904,12 +3814,11 @@ Les images épinglées sont exclues du calcul et réinjectées en priorité aill
                 <code>context</code>
             </td>
             <td>
-                  <code><span title="list">list</span>[<span title="str">str</span>] | None</code>
+                  <code><span title="list">list</span>[<span title="str">str</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Liste optionnelle d'images servant de périmètre de recherche.
-Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
+                <p>Liste de nom d'images servant de base. Si none ce base sur toutes les images.</p>
               </div>
             </td>
             <td>
@@ -3935,7 +3844,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>list[str]: Liste des noms d'images triées par pertinence (jusqu'à 100 résultats).</p>
+                <p>list[str]: Liste des images. Les épinglées sont en tête.</p>
               </div>
             </td>
           </tr>
@@ -3945,7 +3854,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
+<span class="normal">325</span>
 <span class="normal">326</span>
 <span class="normal">327</span>
 <span class="normal">328</span>
@@ -3982,26 +3892,16 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">359</span>
 <span class="normal">360</span>
 <span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recherche et filtre les images les plus pertinentes pour une requête textuelle.</span>
-
-<span class="sd">    Construit une similarité entre la requête et les embeddings des images, puis combine</span>
-<span class="sd">    la similarité cosinus et un score de correspondance textuelle pour classer les résultats.</span>
-<span class="sd">    Les images épinglées sont exclues du calcul et réinjectées en priorité ailleurs dans le flux.</span>
+<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">filtered_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Renvoi les 100 images les plus proches de la requête.</span>
+<span class="sd">    Les images épinglées sont exclues : elles sont réinjectées en tête par do_search.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        filter_text (str): Texte de la requête de recherche.</span>
-<span class="sd">        context (list[str] | None): Liste optionnelle d&#39;images servant de périmètre de recherche.</span>
-<span class="sd">            Si None ou vide, la recherche est effectuée sur l&#39;ensemble de l&#39;index.</span>
+<span class="sd">        filter_text (str): Requête de recherche.</span>
+<span class="sd">        context (list[str]): Liste de nom d&#39;images servant de base. Si none ce base sur toutes les images.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list[str]: Liste des noms d&#39;images triées par pertinence (jusqu&#39;à 100 résultats).</span>
+<span class="sd">        list[str]: Liste des images. Les épinglées sont en tête.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Récupère les embeddings de la requête</span>
@@ -4016,7 +3916,6 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
     <span class="n">pinned_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="p">)</span>
     <span class="n">scores</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">score_sim</span> <span class="o">=</span> <span class="mf">0.5</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">images</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Exclut les images épinglées.</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pinned_set</span><span class="p">:</span>
@@ -4027,8 +3926,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
         <span class="n">score</span> <span class="o">=</span> <span class="n">sim</span> <span class="o">*</span> <span class="mf">1.0</span>
         <span class="k">if</span> <span class="n">text_match</span><span class="p">:</span>
             <span class="n">score</span> <span class="o">+=</span> <span class="mf">0.3</span>
-        <span class="k">if</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="n">score_sim</span> <span class="ow">and</span> <span class="n">text_match</span><span class="p">:</span>
-            <span class="n">score</span> <span class="o">+=</span> <span class="n">score_sim</span>
+        <span class="k">if</span> <span class="n">sim</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="n">text_match</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">+=</span> <span class="mf">0.5</span>
         <span class="n">scores</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span>
     <span class="n">sorted_items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sorted_items</span><span class="p">[:</span><span class="mi">100</span><span class="p">]]</span>
@@ -4054,9 +3953,9 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">indexed_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">indexed_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Renvoie la liste des images indexées du dossier courant.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_images</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
@@ -4135,7 +4034,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">228</span>
+<span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
@@ -4144,8 +4044,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">235</span>
 <span class="normal">236</span>
 <span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indique si une image est épinglée.</span>
 
 <span class="sd">    Args:</span>
@@ -4178,11 +4077,11 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">160</span>
+<span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Charge l&#39;index du dossier courant.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index_repository</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_folder</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">set_indexed</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
@@ -4240,14 +4139,14 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_repaint_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_signal_repaint_requested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Notifie quand une image a été modifiée.</span>
 
 <span class="sd">    Args:</span>
@@ -4308,7 +4207,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">144</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
+<span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
@@ -4322,8 +4222,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">open_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Ouvre un dossier.</span>
 
 <span class="sd">    Args:</span>
@@ -4392,7 +4291,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
+<span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
@@ -4404,8 +4304,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">pin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">pin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Épingle une image (la met en tête de galerie).</span>
 
 <span class="sd">    Args:</span>
@@ -4472,7 +4371,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">172</span>
+<span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
@@ -4486,8 +4386,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rafraîchit la liste des images. Les épinglées apparaissent en premier.</span>
 
 <span class="sd">    Args:</span>
@@ -4525,9 +4424,9 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reload_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reload_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recharge l&#39;index du dossier courant.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">load_index</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -4547,20 +4446,20 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Sauvegarde la liste des épingles dans le workspace courant.</p>
+        <p>Persiste la liste des épingles dans le workspace courant.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">283</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">282</span>
+<span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
 <span class="normal">287</span>
 <span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sauvegarde la liste des épingles dans le workspace courant.&quot;&quot;&quot;</span>
+<span class="normal">289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Persiste la liste des épingles dans le workspace courant.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ws_id</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">workspaces</span> <span class="o">=</span> <span class="n">ws_repo</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">)</span>
@@ -4589,19 +4488,19 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">370</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
 <span class="normal">371</span>
 <span class="normal">372</span>
 <span class="normal">373</span>
 <span class="normal">374</span>
 <span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_search</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enregistre la recherche dans l&#39;historique.&quot;&quot;&quot;</span>
     <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
@@ -4667,15 +4566,15 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">293</span>
+<span class="normal">294</span>
 <span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance la recherche après un delai.</span>
 
 <span class="sd">    Args:</span>
@@ -4737,15 +4636,15 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">396</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
 <span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">select_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">select_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Selectionne l&#39;image.</span>
 
 <span class="sd">    Args:</span>
@@ -4807,15 +4706,15 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
 <span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_affinage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_affinage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Active ou désactive l&#39;affinage des recherches.</span>
 
 <span class="sd">    Args:</span>
@@ -4900,7 +4799,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">189</span>
+<span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span>
@@ -4914,8 +4814,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sort_with_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sort_with_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Trie la liste en mettant les épinglées en premier (dans leur ordre d&#39;épinglage).</span>
 
 <span class="sd">    Args:</span>
@@ -4948,7 +4847,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Bascule l'état d'épinglage d'une image (épinglée ↔ non épinglée).</p>
+        <p>Bascule l'état épinglé d'une image.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -4971,7 +4870,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Nom de l'image à épingler ou désépingler.</p>
+                <p>Nom de l'image.</p>
               </div>
             </td>
             <td>
@@ -4984,7 +4883,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">270</span>
+<span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
 <span class="normal">274</span>
@@ -4993,12 +4893,11 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">277</span>
 <span class="normal">278</span>
 <span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bascule l&#39;état d&#39;épinglage d&#39;une image (épinglée ↔ non épinglée).</span>
+<span class="normal">280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bascule l&#39;état épinglé d&#39;une image.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        img_name (str): Nom de l&#39;image à épingler ou désépingler.</span>
+<span class="sd">        img_name (str): Nom de l&#39;image.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_pinned</span><span class="p">(</span><span class="n">img_name</span><span class="p">):</span>
@@ -5027,9 +4926,9 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">unindexed_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">unindexed_images</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Renvoie la liste des images non indexées du dossier courant.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_images</span><span class="p">()</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
@@ -5085,7 +4984,8 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">256</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">255</span>
+<span class="normal">256</span>
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
@@ -5097,8 +4997,7 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 <span class="normal">265</span>
 <span class="normal">266</span>
 <span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">unpin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">268</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">unpin_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Désépingle une image.</span>
 
 <span class="sd">    Args:</span>
@@ -5134,12 +5033,12 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Zoom in sur les images.&quot;&quot;&quot;</span>
     <span class="n">levels</span> <span class="o">=</span> <span class="n">THUMB</span><span class="p">[</span><span class="s2">&quot;size_levels&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -5167,11 +5066,11 @@ Si None ou vide, la recherche est effectuée sur l'ensemble de l'index.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/gallery_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Zoom out sur les images.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_size_index</span> <span class="o">-=</span> <span class="mi">1</span>

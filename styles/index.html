@@ -2396,8 +2396,8 @@
 
     <div class="doc doc-contents first">
 
-        <p>Ce module centralise l'ensemble du système de style de l'application (QSS, couleurs, typographie et métriques).</p>
-<p>Il constitue l'unique point de configuration de l'apparence graphique et permet une mise à jour dynamique du thème.</p>
+        <p>Ce module centralise l'ensemble du système de style de l'application (QSS, couleurs, typographie et métriques).
+Il constitue l'unique point de configuration de l'apparence graphique et permet une mise à jour dynamique du thème.</p>
 <p>Les couleurs sont chargées depuis <code>colors.json</code> via <code>color_repository</code>, ce qui permet leur modification en temps réel
 depuis l'interface utilisateur sans redémarrage de l'application.</p>
 <p>Responsabilités :
@@ -2501,7 +2501,8 @@ utilisé comme indicateur visuel à côté du nom du cluster.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">438</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">437</span>
+<span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span>
 <span class="normal">441</span>
@@ -2514,8 +2515,7 @@ utilisé comme indicateur visuel à côté du nom du cluster.</p>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dot_color_style</span><span class="p">(</span><span class="n">color_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dot_color_style</span><span class="p">(</span><span class="n">color_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le point coloré d&#39;un cluster dans la légende.</span>
 
 <span class="sd">    Génère un petit carré plein aux coins arrondis avec la couleur du cluster,</span>
@@ -2577,7 +2577,8 @@ compacts dans le panneau latéral de la carte 2D.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">455</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">454</span>
+<span class="normal">455</span>
 <span class="normal">456</span>
 <span class="normal">457</span>
 <span class="normal">458</span>
@@ -2586,8 +2587,7 @@ compacts dans le panneau latéral de la carte 2D.</p>
 <span class="normal">461</span>
 <span class="normal">462</span>
 <span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dot_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">464</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">dot_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le label textuel d&#39;un cluster dans la légende.</span>
 
 <span class="sd">    Applique une petite taille de police pour que les noms de clusters restent</span>
@@ -2645,7 +2645,8 @@ des boutons de zoom de la zone d'affichage de l'image.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">373</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
+<span class="normal">373</span>
 <span class="normal">374</span>
 <span class="normal">375</span>
 <span class="normal">376</span>
@@ -2654,8 +2655,7 @@ des boutons de zoom de la zone d'affichage de l'image.</p>
 <span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fullscreen_bar_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fullscreen_bar_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour la barre de contrôle du dialog plein écran.</span>
 
 <span class="sd">    Applique le fond principal et une bordure inférieure séparant la barre</span>
@@ -2713,7 +2713,8 @@ derrière l'image zoomée, quelle que soit sa taille.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">399</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">398</span>
+<span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span>
 <span class="normal">402</span>
@@ -2722,8 +2723,7 @@ derrière l'image zoomée, quelle que soit sa taille.</p>
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fullscreen_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fullscreen_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le QLabel portant l&#39;image en plein écran.</span>
 
 <span class="sd">    Applique uniquement le fond « carte » pour assurer un arrière-plan cohérent</span>
@@ -2781,7 +2781,8 @@ afin que la zone d'image occupe l'espace sans cadre superflu.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">386</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
+<span class="normal">386</span>
 <span class="normal">387</span>
 <span class="normal">388</span>
 <span class="normal">389</span>
@@ -2790,8 +2791,7 @@ afin que la zone d'image occupe l'espace sans cadre superflu.</p>
 <span class="normal">392</span>
 <span class="normal">393</span>
 <span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fullscreen_scroll_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fullscreen_scroll_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour la zone de défilement du dialog plein écran.</span>
 
 <span class="sd">    Combine le fond « carte » avec la suppression de toute bordure visible,</span>
@@ -2855,7 +2855,8 @@ pour que les changements soient pris en compte en live.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 70</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 69</span>
+<span class="normal"> 70</span>
 <span class="normal"> 71</span>
 <span class="normal"> 72</span>
 <span class="normal"> 73</span>
@@ -3094,8 +3095,7 @@ pour que les changements soient pris en compte en live.</p>
 <span class="normal">306</span>
 <span class="normal">307</span>
 <span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_stylesheet</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_stylesheet</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Génère et retourne la feuille de style QSS complète de l&#39;application.</span>
 
 <span class="sd">    La feuille de style est construite dynamiquement à partir des dictionnaires</span>
@@ -3383,7 +3383,8 @@ défini dans COLORS. Utilisé dans le dock de détail.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">316</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">315</span>
+<span class="normal">316</span>
 <span class="normal">317</span>
 <span class="normal">318</span>
 <span class="normal">319</span>
@@ -3392,8 +3393,7 @@ défini dans COLORS. Utilisé dans le dock de détail.</p>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">image_preview_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">image_preview_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le widget d&#39;aperçu de l&#39;image sélectionnée.</span>
 
 <span class="sd">    Applique une bordure fine, des coins arrondis et le fond « carte »</span>
@@ -3482,7 +3482,8 @@ une bordure neutre sinon. Coins arrondis et fond « carte » dans les deux cas.<
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">551</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
+<span class="normal">551</span>
 <span class="normal">552</span>
 <span class="normal">553</span>
 <span class="normal">554</span>
@@ -3506,8 +3507,7 @@ une bordure neutre sinon. Coins arrondis et fond « carte » dans les deux cas.<
 <span class="normal">572</span>
 <span class="normal">573</span>
 <span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_card_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_card_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour une carte de langue cliquable.</span>
 
 <span class="sd">    Affiche une bordure accentuée si la langue est actuellement sélectionnée,</span>
@@ -3580,7 +3580,8 @@ indiquer clairement la langue actuellement sélectionnée.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">610</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">609</span>
+<span class="normal">610</span>
 <span class="normal">611</span>
 <span class="normal">612</span>
 <span class="normal">613</span>
@@ -3589,8 +3590,7 @@ indiquer clairement la langue actuellement sélectionnée.</p>
 <span class="normal">616</span>
 <span class="normal">617</span>
 <span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_check_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">619</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_check_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour la coche affichée sur la langue active.</span>
 
 <span class="sd">    Applique la couleur de succès et une taille de police adaptée pour</span>
@@ -3648,7 +3648,8 @@ immédiatement reconnaissable dans la grille de sélection.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">579</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">578</span>
+<span class="normal">579</span>
 <span class="normal">580</span>
 <span class="normal">581</span>
 <span class="normal">582</span>
@@ -3657,8 +3658,7 @@ immédiatement reconnaissable dans la grille de sélection.</p>
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_flag_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">588</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_flag_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour l&#39;emoji drapeau d&#39;une carte de langue.</span>
 
 <span class="sd">    Applique une grande taille de police pour que le drapeau soit</span>
@@ -3747,7 +3747,8 @@ en texte secondaire sinon.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">591</span>
+<span class="normal">592</span>
 <span class="normal">593</span>
 <span class="normal">594</span>
 <span class="normal">595</span>
@@ -3761,8 +3762,7 @@ en texte secondaire sinon.</p>
 <span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
-<span class="normal">606</span>
-<span class="normal">607</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_name_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">606</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">lang_name_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le nom d&#39;une langue dans sa carte.</span>
 
 <span class="sd">    Le texte est en accent et en gras si la langue est sélectionnée,</span>
@@ -3825,7 +3825,8 @@ l'en-tête « Clusters » reste lisible dans le panneau latéral de la carte.</p
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">424</span>
+<span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
 <span class="normal">428</span>
@@ -3834,8 +3835,7 @@ l'en-tête « Clusters » reste lisible dans le panneau latéral de la carte.</p
 <span class="normal">431</span>
 <span class="normal">432</span>
 <span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">legend_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">434</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">legend_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le titre de la légende de la carte 2D.</span>
 
 <span class="sd">    Applique une graisse élevée et la taille de police normale pour que</span>
@@ -3925,7 +3925,8 @@ accent si sélectionné, bordure neutre sinon.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">329</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
+<span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
@@ -3939,8 +3940,7 @@ accent si sélectionné, bordure neutre sinon.</p>
 <span class="normal">340</span>
 <span class="normal">341</span>
 <span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">neighbor_thumb_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">343</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">neighbor_thumb_style</span><span class="p">(</span><span class="n">selected</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour une miniature de voisin dans la grille de similaires.</span>
 
 <span class="sd">    La couleur de bordure change selon l&#39;état de sélection :</span>
@@ -4003,7 +4003,8 @@ cadre par défaut de Qt.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">535</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">534</span>
+<span class="normal">535</span>
 <span class="normal">536</span>
 <span class="normal">537</span>
 <span class="normal">538</span>
@@ -4012,8 +4013,7 @@ cadre par défaut de Qt.</p>
 <span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">no_border_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">no_border_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS supprimant toute bordure visible sur un widget.</span>
 
 <span class="sd">    Utile pour les QScrollArea ou tout conteneur dont on veut effacer le</span>
@@ -4071,7 +4071,8 @@ au QLineEdit du nom de fichier lorsque le renommage échoue.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">412</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">411</span>
+<span class="normal">412</span>
 <span class="normal">413</span>
 <span class="normal">414</span>
 <span class="normal">415</span>
@@ -4080,8 +4081,7 @@ au QLineEdit du nom de fichier lorsque le renommage échoue.</p>
 <span class="normal">418</span>
 <span class="normal">419</span>
 <span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_error_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">421</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename_error_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS signalant une erreur de renommage sur le champ de titre.</span>
 
 <span class="sd">    Applique une bordure rouge (couleur ``error`` du thème) et des coins arrondis</span>
@@ -4139,7 +4139,8 @@ afin que le score reste discret sous chaque miniature de voisin.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">347</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">346</span>
+<span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
@@ -4148,8 +4149,7 @@ afin que le score reste discret sous chaque miniature de voisin.</p>
 <span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">score_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">score_label_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le label de score de similarité cosinus.</span>
 
 <span class="sd">    Applique une petite taille de police et la couleur de texte secondaire,</span>
@@ -4207,7 +4207,8 @@ principale pour distinguer visuellement les sections (ex : « Images similaires 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">359</span>
+<span class="normal">360</span>
 <span class="normal">361</span>
 <span class="normal">362</span>
 <span class="normal">363</span>
@@ -4216,8 +4217,7 @@ principale pour distinguer visuellement les sections (ex : « Images similaires 
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">section_title_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">section_title_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour les titres de section dans le dock de détail.</span>
 
 <span class="sd">    Applique une graisse élevée, une marge supérieure et la couleur de texte</span>
@@ -4276,7 +4276,8 @@ clairement lisible dans la grille de l'éditeur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">468</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">467</span>
+<span class="normal">468</span>
 <span class="normal">469</span>
 <span class="normal">470</span>
 <span class="normal">471</span>
@@ -4286,8 +4287,7 @@ clairement lisible dans la grille de l'éditeur.</p>
 <span class="normal">475</span>
 <span class="normal">476</span>
 <span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_label_name_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">478</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_label_name_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le nom d&#39;une couleur dans l&#39;onglet Thème.</span>
 
 <span class="sd">    Applique une graisse élevée et la taille de police normale afin que</span>
@@ -4346,7 +4346,8 @@ afin que la description reste discrète sous le nom principal de la couleur.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">482</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">481</span>
+<span class="normal">482</span>
 <span class="normal">483</span>
 <span class="normal">484</span>
 <span class="normal">485</span>
@@ -4355,8 +4356,7 @@ afin que la description reste discrète sous le nom principal de la couleur.</p>
 <span class="normal">488</span>
 <span class="normal">489</span>
 <span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_label_subname_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">491</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_label_subname_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour la description courte d&#39;une couleur dans l&#39;onglet Thème.</span>
 
 <span class="sd">    Applique une petite taille de police et la couleur de texte secondaire,</span>
@@ -4415,7 +4415,8 @@ titres de section discrets (uppercase + letter-spacing).</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">508</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">507</span>
+<span class="normal">508</span>
 <span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
@@ -4425,8 +4426,7 @@ titres de section discrets (uppercase + letter-spacing).</p>
 <span class="normal">515</span>
 <span class="normal">516</span>
 <span class="normal">517</span>
-<span class="normal">518</span>
-<span class="normal">519</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_presset_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_presset_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le label de section « Thèmes prédéfinis ».</span>
 
 <span class="sd">    Applique une petite taille de police en majuscules, un espacement de</span>
@@ -4485,7 +4485,8 @@ les groupes de couleurs restent subtiles et cohérentes avec le fond.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">522</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">521</span>
+<span class="normal">522</span>
 <span class="normal">523</span>
 <span class="normal">524</span>
 <span class="normal">525</span>
@@ -4494,8 +4495,7 @@ les groupes de couleurs restent subtiles et cohérentes avec le fond.</p>
 <span class="normal">528</span>
 <span class="normal">529</span>
 <span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_separator_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_separator_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour les séparateurs horizontaux de l&#39;onglet Thème.</span>
 
 <span class="sd">    Utilise la couleur « bg_card » pour que les lignes de séparation entre</span>
@@ -4553,7 +4553,8 @@ en valeur le titre « Éditeur de paramètres » en haut de l'onglet.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>styles.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">495</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">494</span>
+<span class="normal">495</span>
 <span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span>
@@ -4562,8 +4563,7 @@ en valeur le titre « Éditeur de paramètres » en haut de l'onglet.</p>
 <span class="normal">501</span>
 <span class="normal">502</span>
 <span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_tittle_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">504</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">style_tittle_style</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retourne le style QSS pour le titre principal de l&#39;onglet Thème.</span>
 
 <span class="sd">    Applique une grande taille de police et une graisse élevée pour mettre</span>

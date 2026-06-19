@@ -345,17 +345,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#main.main" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        main
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#main.restart_app" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1899,17 +1888,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#main.main" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        main
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#main.restart_app" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1996,113 +1974,6 @@ fenêtre principale. Les ViewModels sont désormais créés par chaque workspace
 <div class="doc doc-object doc-function">
 
 
-<h3 id="main.main" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">main</span><span class="p">()</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Point d'entrée principal de l'application.</p>
-<p>Initialise l'application Qt, charge la configuration globale et instancie
-les services principaux (client LLM, gestionnaire i18n, service SAM3).</p>
-<p>Met également en place le chargement asynchrone du modèle SAM3 avant de
-lancer la boucle d'événements de l'application.</p>
-<p>Workflow :
-- création de QApplication
-- application du style global
-- chargement de la configuration
-- initialisation des services (Ollama, i18n, SAM3)
-- création et affichage de la fenêtre principale
-- lancement du worker de chargement SAM3
-- démarrage de la boucle Qt</p>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>main.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Point d&#39;entrée principal de l&#39;application.</span>
-
-<span class="sd">    Initialise l&#39;application Qt, charge la configuration globale et instancie</span>
-<span class="sd">    les services principaux (client LLM, gestionnaire i18n, service SAM3).</span>
-
-<span class="sd">    Met également en place le chargement asynchrone du modèle SAM3 avant de</span>
-<span class="sd">    lancer la boucle d&#39;événements de l&#39;application.</span>
-
-<span class="sd">    Workflow :</span>
-<span class="sd">    - création de QApplication</span>
-<span class="sd">    - application du style global</span>
-<span class="sd">    - chargement de la configuration</span>
-<span class="sd">    - initialisation des services (Ollama, i18n, SAM3)</span>
-<span class="sd">    - création et affichage de la fenêtre principale</span>
-<span class="sd">    - lancement du worker de chargement SAM3</span>
-<span class="sd">    - démarrage de la boucle Qt</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">get_stylesheet</span><span class="p">())</span>
-
-    <span class="n">client</span> <span class="o">=</span> <span class="n">OllamaWrapper</span><span class="p">()</span>
-    <span class="n">config</span> <span class="o">=</span> <span class="n">config_repository</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-
-    <span class="n">saved_lang</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;language&quot;</span><span class="p">,</span> <span class="s2">&quot;fr&quot;</span><span class="p">)</span>
-    <span class="n">translator</span> <span class="o">=</span> <span class="n">I18nManager</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="n">saved_lang</span><span class="p">)</span>
-
-    <span class="n">sam3_service</span> <span class="o">=</span> <span class="n">Sam3Service</span><span class="p">()</span>
-
-    <span class="n">window</span> <span class="o">=</span> <span class="n">MainWindow</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">translator</span><span class="p">,</span> <span class="n">sam3_service</span><span class="p">)</span>
-    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-    <span class="n">sam3_load_worker</span> <span class="o">=</span> <span class="n">Sam3LoadWorker</span><span class="p">(</span><span class="n">sam3_service</span><span class="p">)</span>
-    <span class="n">sam3_load_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-    <span class="n">window</span><span class="o">.</span><span class="n">_sam3_load_worker</span> <span class="o">=</span> <span class="n">sam3_load_worker</span>
-
-    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">())</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h3 id="main.restart_app" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">restart_app</span><span class="p">()</span></code>
 
@@ -2136,7 +2007,7 @@ libère proprement les ressources (incluant SAM3) avant le redémarrage.</p>
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">restart_app</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">restart_app</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Redémarre complètement le processus de l&#39;application.</span>
 
 <span class="sd">    Utilisé après un changement de langue : la configuration (incluant la</span>
@@ -2149,7 +2020,7 @@ libère proprement les ressources (incluant SAM3) avant le redémarrage.</p>
 <span class="sd">    libère proprement les ressources (incluant SAM3) avant le redémarrage.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">python</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">executable</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">execv</span><span class="p">(</span><span class="n">python</span><span class="p">,</span> <span class="p">[</span><span class="n">python</span><span class="p">,</span> <span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">])</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">execv</span><span class="p">(</span><span class="n">python</span><span class="p">,</span> <span class="p">[</span><span class="n">python</span><span class="p">]</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

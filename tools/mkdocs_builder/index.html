@@ -1063,28 +1063,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#tools.mkdocs_builder.main" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        main
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#tools.mkdocs_builder.should_ignore" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        should_ignore
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#tools.mkdocs_builder.to_module" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1912,28 +1890,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#tools.mkdocs_builder.main" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        main
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#tools.mkdocs_builder.should_ignore" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        should_ignore
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#tools.mkdocs_builder.to_module" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1980,17 +1936,6 @@
 
     <div class="doc doc-contents first">
 
-        <p>Générer automatiquement la documentation MkDocs à partir des modules Python du projet.</p>
-<p>Ce script parcourt récursivement les fichiers Python à partir de la racine du projet,
-convertit chaque fichier en nom de module importable, puis génère les fichiers Markdown
-correspondants dans le dossier de documentation MkDocs.</p>
-<p>Les fichiers déjà existants ne sont pas écrasés.</p>
-<p>Contenu du module :
-- Définition des chemins de base (ROOT, DOCS)
-- Conversion chemin → module Python
-- Filtrage des fichiers à ignorer
-- Génération des fichiers de documentation MkDocs</p>
-
 
 
 
@@ -2014,312 +1959,33 @@ correspondants dans le dossier de documentation MkDocs.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="tools.mkdocs_builder.main" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">main</span><span class="p">()</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Générer automatiquement la documentation MkDocs à partir des fichiers Python du projet.</p>
-<p>Parcourt récursivement les fichiers Python du projet, convertit chaque module en
-chemin de documentation MkDocs et crée les fichiers Markdown correspondants dans le
-dossier cible s'ils n'existent pas déjà.</p>
-<p>Ne modifie pas les fichiers existants.</p>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>tools/mkdocs_builder.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Générer automatiquement la documentation MkDocs à partir des fichiers Python du projet.</span>
-
-<span class="sd">    Parcourt récursivement les fichiers Python du projet, convertit chaque module en</span>
-<span class="sd">    chemin de documentation MkDocs et crée les fichiers Markdown correspondants dans le</span>
-<span class="sd">    dossier cible s&#39;ils n&#39;existent pas déjà.</span>
-
-<span class="sd">    Ne modifie pas les fichiers existants.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">python_files</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.py&quot;</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">python_files</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">should_ignore</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
-            <span class="k">continue</span>
-
-        <span class="n">module</span> <span class="o">=</span> <span class="n">to_module</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
-
-        <span class="c1"># chemin cible md</span>
-        <span class="n">md_path</span> <span class="o">=</span> <span class="n">DOCS</span> <span class="o">/</span> <span class="n">file</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.md&quot;</span><span class="p">)</span>
-
-        <span class="c1"># création dossier si nécessaire</span>
-        <span class="n">md_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># contenu mkdocs</span>
-        <span class="n">content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;::: </span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-
-        <span class="c1"># écrire seulement si fichier n&#39;existe pas</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">md_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">md_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[CREATED] </span><span class="si">{</span><span class="n">md_path</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[SKIP] </span><span class="si">{</span><span class="n">md_path</span><span class="si">}</span><span class="s2"> already exists&quot;</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="tools.mkdocs_builder.should_ignore" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">should_ignore</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></code>
-
-</h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Détermine si un fichier doit être ignoré lors de la génération de documentation.</p>
-<p>Ignore les fichiers appartenant au dossier 'sam3' ou les fichiers <strong>init</strong>.py.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>file</code>
-            </td>
-            <td>
-                  <code><span title="pathlib.Path">Path</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Fichier à évaluer.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>bool</code></td>            <td>
-                  <code><span title="bool">bool</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>True si le fichier doit être ignoré, False sinon.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-            <details class="mkdocstrings-source">
-              <summary>Source code in <code>tools/mkdocs_builder.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">should_ignore</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Détermine si un fichier doit être ignoré lors de la génération de documentation.</span>
-
-<span class="sd">    Ignore les fichiers appartenant au dossier &#39;sam3&#39; ou les fichiers __init__.py.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        file (Path): Fichier à évaluer.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        bool: True si le fichier doit être ignoré, False sinon.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;sam3&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">parts</span> <span class="ow">or</span> <span class="s2">&quot;__init__&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h3 id="tools.mkdocs_builder.to_module" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">to_module</span><span class="p">(</span><span class="n">_root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">to_module</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span></code>
 
 </h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Convertit un chemin de fichier Python en nom de module importable.</p>
-<p>Transforme un chemin relatif en notation pointée (ex: models/index_repository.py
-→ models.index_repository).</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>root</code>
-            </td>
-            <td>
-                  <code><span title="pathlib.Path">Path</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Racine du projet.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>file</code>
-            </td>
-            <td>
-                  <code><span title="pathlib.Path">Path</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Fichier Python à convertir.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-<th>Name</th>          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-<td><code>str</code></td>            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Nom du module Python correspondant.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Convertit un chemin fichier en module python.
+ex: models/index_repository.py -&gt; models.index_repository
+    main.py -&gt; main</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>tools/mkdocs_builder.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_module</span><span class="p">(</span><span class="n">_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convertit un chemin de fichier Python en nom de module importable.</span>
-
-<span class="sd">    Transforme un chemin relatif en notation pointée (ex: models/index_repository.py</span>
-<span class="sd">    → models.index_repository).</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        root (Path): Racine du projet.</span>
-<span class="sd">        file (Path): Fichier Python à convertir.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        str: Nom du module Python correspondant.</span>
-
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_module</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convertit un chemin fichier en module python.</span>
+<span class="sd">    ex: models/index_repository.py -&gt; models.index_repository</span>
+<span class="sd">        main.py -&gt; main</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">relative</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># enlève .py</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="n">relative</span><span class="o">.</span><span class="n">parts</span>

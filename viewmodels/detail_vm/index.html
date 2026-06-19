@@ -2325,8 +2325,6 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
 
 
-        <p>ViewModel qui gere l'affichage et l'interaction pour la vue de details.</p>
-
 
 
 
@@ -2336,7 +2334,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 46</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 45</span>
+<span class="normal"> 46</span>
 <span class="normal"> 47</span>
 <span class="normal"> 48</span>
 <span class="normal"> 49</span>
@@ -2631,29 +2630,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;ViewModel qui gere l&#39;affichage et l&#39;interaction pour la vue de details.&quot;&quot;&quot;</span>
-
+<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DetailViewModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
     <span class="c1"># ── Signaux vers la View ──────────────────────────────────────────────────</span>
     <span class="c1"># (img_name, desc, keywords)</span>
     <span class="n">signal_metadata_loaded</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
@@ -2674,23 +2651,21 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span>
         <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span>
+        <span class="n">gallery_vm</span><span class="p">,</span>  <span class="c1"># GalleryViewModel (évite import circulaire)</span>
         <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-        <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise le widget des details de l&#39;image.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            client (OllamaWrapper): client Ollama</span>
-<span class="sd">            config (dict): config globale</span>
-<span class="sd">            gallery_vm (GalleryViewModel): gallery viewmodel</span>
-<span class="sd">            ws_id (str): identifiant du workspace</span>
-<span class="sd">            ws_data (dict): données du workspace (contient k_neighbors).</span>
-<span class="sd">            translator (I18nManager): le traducteur.</span>
+        <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">        client (OllamaWrapper): client Ollama</span>
+<span class="sd">        config (dict): config globale</span>
+<span class="sd">        gallery_vm (GalleryViewModel): gallery viewmodel</span>
+<span class="sd">        ws_id (str): identifiant du workspace</span>
+<span class="sd">        ws_data (dict): données du workspace (contient k_neighbors)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span> <span class="o">=</span> <span class="n">gallery_vm</span>
@@ -2727,7 +2702,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_neighbors</span>
 
     <span class="nd">@k_neighbors</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">k_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">k_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remplace le nombre de voisins et persiste dans le workspace.</span>
 
 <span class="sd">        Args:</span>
@@ -2737,8 +2712,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_k_neighbors</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_k_neighbors_to_workspace</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">save_k_neighbors_to_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sauvegarde k_neighbors dans le workspace courant.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_k_neighbors_to_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persiste k_neighbors dans le workspace courant.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value (int): Valeur à sauvegarder.</span>
@@ -2771,14 +2746,11 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
     <span class="c1"># ── Sélection ─────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_image_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Traite la sélection d&#39;une image et met à jour les données associées.</span>
-
-<span class="sd">        Charge la sélection courante, prépare et émet le preview (image), les métadonnées,</span>
-<span class="sd">        calcule les voisins et notifie l&#39;état d&#39;épinglage.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_image_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback quand une image est sélectionnée.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            img_name (str): Nom de l&#39;image sélectionnée.</span>
+<span class="sd">            img_name (str): nom de l&#39;image</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="o">=</span> <span class="n">img_name</span>
@@ -2803,7 +2775,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
     <span class="c1"># ── Épinglage ─────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Bascule l&#39;état épinglé de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">)</span>
@@ -2821,7 +2793,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
     <span class="c1"># ── Sauvegarde ────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">schedule_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">schedule_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Planifie la sauvegarde des métadonnées.</span>
 
 <span class="sd">        Args:</span>
@@ -2835,7 +2807,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pending_keywords</span> <span class="o">=</span> <span class="n">keywords</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_timer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">do_save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">do_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sauvegarde les métadonnées de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">:</span>
             <span class="k">return</span>
@@ -2854,19 +2826,15 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_save_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;Finalise la sauvegarde des données et met à jour les composants dépendants.</span>
-
-<span class="sd">        Déclenche la mise à jour de la galerie, émet les signaux de fin de sauvegarde</span>
-<span class="sd">        et notifie la mise à jour de l&#39;index avec l&#39;ensemble des clés disponibles.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback de la fin de la sauvegarde.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_save_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
     <span class="c1"># ── Auto-complétion ───────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">auto_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">auto_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lance l&#39;auto-complétion des métadonnées.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">:</span>
             <span class="k">return</span>
@@ -2880,13 +2848,8 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">signal_error</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_error</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Traite le résultat de l&#39;auto-complétion et émet le signal de fin.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            result (dict): Résultat contenant la description et les mots-clés générés.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback de la fin de l&#39;auto-complétion.&quot;&quot;&quot;</span>
         <span class="n">desc</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
         <span class="n">keywords</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
@@ -2894,13 +2857,10 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
     <span class="c1"># ── Voisins ───────────────────────────────────────────────────────────────</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fait le Calcule des voisins les plus proches d&#39;une image à partir des embeddings.</span>
-
-<span class="sd">        Compare l&#39;image cible avec l&#39;ensemble de l&#39;index en utilisant la similarité cosinus,</span>
-<span class="sd">        puis sélectionne les k voisins les plus proches.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calcule les voisins de l&#39;image.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            img_name (str): Nom de l&#39;image dont on souhaite calculer les voisins.</span>
+<span class="sd">            img_name (str): Nom de l&#39;image.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">img_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">:</span>
@@ -2919,14 +2879,14 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
         <span class="n">top</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k_neighbors</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_neighbors_ready</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">refresh_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refresh_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rafraichi les voisins de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">compute_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">)</span>
 
     <span class="c1"># ── Renommage ─────────────────────────────────────────────────────────────</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Renomme l&#39;image sélectionnée.</span>
 
 <span class="sd">        Args:</span>
@@ -3033,130 +2993,27 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
 
 <h4 id="viewmodels.detail_vm.DetailViewModel.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">gallery_vm</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">,</span> <span class="n">translator</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">gallery_vm</span><span class="p">,</span> <span class="n">ws_id</span><span class="p">,</span> <span class="n">ws_data</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">translator</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h4>
 
 
     <div class="doc doc-contents ">
 
-        <p>Initialise le widget des details de l'image.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>client</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="OllamaWrapper (services.ollama_wrapper.OllamaWrapper)" href="../../services/ollama_wrapper/#services.ollama_wrapper.OllamaWrapper">OllamaWrapper</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>client Ollama</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>config</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>config globale</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>gallery_vm</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="GalleryViewModel (viewmodels.gallery_vm.GalleryViewModel)" href="../gallery_vm/#viewmodels.gallery_vm.GalleryViewModel">GalleryViewModel</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>gallery viewmodel</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ws_id</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>identifiant du workspace</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ws_data</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>données du workspace (contient k_neighbors).</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>translator</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="I18nManager (services.i18n_manager.I18nManager)" href="../../services/i18n_manager/#services.i18n_manager.I18nManager">I18nManager</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>le traducteur.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Args:
+client (OllamaWrapper): client Ollama
+config (dict): config globale
+gallery_vm (GalleryViewModel): gallery viewmodel
+ws_id (str): identifiant du workspace
+ws_data (dict): données du workspace (contient k_neighbors)</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 65</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
 <span class="normal"> 66</span>
 <span class="normal"> 67</span>
 <span class="normal"> 68</span>
@@ -3193,32 +3050,25 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">102</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">client</span><span class="p">:</span> <span class="n">OllamaWrapper</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="n">gallery_vm</span><span class="p">:</span> <span class="n">GalleryViewModel</span><span class="p">,</span>
+    <span class="n">gallery_vm</span><span class="p">,</span>  <span class="c1"># GalleryViewModel (évite import circulaire)</span>
     <span class="n">ws_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ws_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialise le widget des details de l&#39;image.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        client (OllamaWrapper): client Ollama</span>
-<span class="sd">        config (dict): config globale</span>
-<span class="sd">        gallery_vm (GalleryViewModel): gallery viewmodel</span>
-<span class="sd">        ws_id (str): identifiant du workspace</span>
-<span class="sd">        ws_data (dict): données du workspace (contient k_neighbors).</span>
-<span class="sd">        translator (I18nManager): le traducteur.</span>
+    <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">translator</span><span class="p">:</span> <span class="n">I18nManager</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Args:</span>
+<span class="sd">    client (OllamaWrapper): client Ollama</span>
+<span class="sd">    config (dict): config globale</span>
+<span class="sd">    gallery_vm (GalleryViewModel): gallery viewmodel</span>
+<span class="sd">    ws_id (str): identifiant du workspace</span>
+<span class="sd">    ws_data (dict): données du workspace (contient k_neighbors)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">client</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span> <span class="o">=</span> <span class="n">gallery_vm</span>
@@ -3263,19 +3113,19 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auto_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">auto_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lance l&#39;auto-complétion des métadonnées.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">:</span>
         <span class="k">return</span>
@@ -3305,9 +3155,7 @@ en exposant des signaux Qt pour piloter l'interface de manière réactive.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Fait le Calcule des voisins les plus proches d'une image à partir des embeddings.</p>
-<p>Compare l'image cible avec l'ensemble de l'index en utilisant la similarité cosinus,
-puis sélectionne les k voisins les plus proches.</p>
+        <p>Calcule les voisins de l'image.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3330,7 +3178,7 @@ puis sélectionne les k voisins les plus proches.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Nom de l'image dont on souhaite calculer les voisins.</p>
+                <p>Nom de l'image.</p>
               </div>
             </td>
             <td>
@@ -3343,38 +3191,32 @@ puis sélectionne les k voisins les plus proches.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">288</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
 <span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
-<span class="normal">298</span>
-<span class="normal">299</span>
-<span class="normal">300</span>
-<span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span>
-<span class="normal">307</span>
-<span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fait le Calcule des voisins les plus proches d&#39;une image à partir des embeddings.</span>
-
-<span class="sd">    Compare l&#39;image cible avec l&#39;ensemble de l&#39;index en utilisant la similarité cosinus,</span>
-<span class="sd">    puis sélectionne les k voisins les plus proches.</span>
+<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calcule les voisins de l&#39;image.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        img_name (str): Nom de l&#39;image dont on souhaite calculer les voisins.</span>
+<span class="sd">        img_name (str): Nom de l&#39;image.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">img_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">:</span>
@@ -3414,7 +3256,15 @@ puis sélectionne les k voisins les plus proches.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">230</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
@@ -3423,15 +3273,7 @@ puis sélectionne les k voisins les plus proches.</p>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">do_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sauvegarde les métadonnées de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_folder</span><span class="p">:</span>
         <span class="k">return</span>
@@ -3494,16 +3336,16 @@ puis sélectionne les k voisins les plus proches.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">is_pinned</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indique si l&#39;image sélectionnée est épinglée.</span>
 
 <span class="sd">    Returns:</span>
@@ -3530,58 +3372,17 @@ puis sélectionne les k voisins les plus proches.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Traite le résultat de l'auto-complétion et émet le signal de fin.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>result</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Résultat contenant la description et les mots-clés générés.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
+        <p>Callback de la fin de l'auto-complétion.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Traite le résultat de l&#39;auto-complétion et émet le signal de fin.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        result (dict): Résultat contenant la description et les mots-clés générés.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_autocomplete_done</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback de la fin de l&#39;auto-complétion.&quot;&quot;&quot;</span>
     <span class="n">desc</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;keywords&quot;</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">signal_autocomplete_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">keywords</span><span class="p">)</span>
@@ -3602,9 +3403,7 @@ puis sélectionne les k voisins les plus proches.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Traite la sélection d'une image et met à jour les données associées.</p>
-<p>Charge la sélection courante, prépare et émet le preview (image), les métadonnées,
-calcule les voisins et notifie l'état d'épinglage.</p>
+        <p>Callback quand une image est sélectionnée.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3627,7 +3426,7 @@ calcule les voisins et notifie l'état d'épinglage.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Nom de l'image sélectionnée.</p>
+                <p>nom de l'image</p>
               </div>
             </td>
             <td>
@@ -3640,7 +3439,12 @@ calcule les voisins et notifie l'état d'épinglage.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
 <span class="normal">167</span>
 <span class="normal">168</span>
 <span class="normal">169</span>
@@ -3660,22 +3464,11 @@ calcule les voisins et notifie l'état d'épinglage.</p>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_image_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Traite la sélection d&#39;une image et met à jour les données associées.</span>
-
-<span class="sd">    Charge la sélection courante, prépare et émet le preview (image), les métadonnées,</span>
-<span class="sd">    calcule les voisins et notifie l&#39;état d&#39;épinglage.</span>
+<span class="normal">186</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_image_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback quand une image est sélectionnée.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        img_name (str): Nom de l&#39;image sélectionnée.</span>
+<span class="sd">        img_name (str): nom de l&#39;image</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span> <span class="o">=</span> <span class="n">img_name</span>
@@ -3714,27 +3507,17 @@ calcule les voisins et notifie l'état d'épinglage.</p>
 
     <div class="doc doc-contents ">
 
-        <p>"Finalise la sauvegarde des données et met à jour les composants dépendants.</p>
-<p>Déclenche la mise à jour de la galerie, émet les signaux de fin de sauvegarde
-et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
+        <p>Callback de la fin de la sauvegarde.</p>
 
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; &quot;Finalise la sauvegarde des données et met à jour les composants dépendants.</span>
-
-<span class="sd">    Déclenche la mise à jour de la galerie, émet les signaux de fin de sauvegarde</span>
-<span class="sd">    et notifie la mise à jour de l&#39;index avec l&#39;ensemble des clés disponibles.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_save_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Callback de la fin de la sauvegarde.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">reload_index</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">signal_save_finished</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">signal_index_updated</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
@@ -3760,10 +3543,10 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">314</span>
-<span class="normal">315</span>
-<span class="normal">316</span>
-<span class="normal">317</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">refresh_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">refresh_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rafraichi les voisins de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_neighbors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">)</span>
@@ -3820,7 +3603,27 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">321</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
@@ -3840,27 +3643,7 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Renomme l&#39;image sélectionnée.</span>
 
 <span class="sd">    Args:</span>
@@ -3918,7 +3701,7 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Sauvegarde k_neighbors dans le workspace courant.</p>
+        <p>Persiste k_neighbors dans le workspace courant.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3954,18 +3737,18 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_k_neighbors_to_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sauvegarde k_neighbors dans le workspace courant.</span>
+<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_k_neighbors_to_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Persiste k_neighbors dans le workspace courant.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        value (int): Valeur à sauvegarder.</span>
@@ -4044,19 +3827,19 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">216</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
 <span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
-<span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">schedule_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Planifie la sauvegarde des métadonnées.</span>
 
 <span class="sd">    Args:</span>
@@ -4091,10 +3874,10 @@ et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>viewmodels/detail_vm.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bascule l&#39;état épinglé de l&#39;image sélectionnée.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_gallery_vm</span><span class="o">.</span><span class="n">toggle_pin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_image</span><span class="p">)</span>
