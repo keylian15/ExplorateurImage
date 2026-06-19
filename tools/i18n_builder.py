@@ -46,7 +46,7 @@ TR_REGEX = re.compile(r'\.tr\("([^"]+)"\)')
 def extract_tr_calls(source: str) -> list[str]:
     """Extraire les chaînes de traduction présentes dans le code source.
 
-    Repère et récupère toutes les occurrences de `.tr("...")` dans un fichier source.
+    Repère et récupère toutes les occurrences de `tr("...")` dans un fichier source.
 
     Args:
         source (str): Contenu du fichier Python.
@@ -161,7 +161,9 @@ def main(project_root: str, languages: list[str]) -> None:
 
     found_keys = set()
     generated = 0
+    nb_gen_to_save = 5
     for file in Path(project_root).rglob("*.py"):
+        print(f"[i18n] scanning file: {file}")
         if file.parts[0] == "sam3":
             continue
         try:
@@ -170,6 +172,7 @@ def main(project_root: str, languages: list[str]) -> None:
             continue
 
         for text in extract_tr_calls(source):
+            print(f"[i18n] found key: {text}")
             found_keys.add(text)
 
             if text not in translations:
@@ -188,9 +191,16 @@ def main(project_root: str, languages: list[str]) -> None:
 
                 if entry.get(lang):
                     continue
+                print(f"[i18n] translating '{text}' -> {lang}")
 
                 entry[lang] = ollama_translate(text, lang)
                 generated += 1
+
+                print(f"[i18n] done '{text}' -> {lang}")
+
+                if generated % nb_gen_to_save == 0:
+                    print("[i18n] auto-save")
+                    save_i18n(translations)
 
     # option: cleanup ou debug
     print(f"[i18n] keys found: {len(found_keys)}")

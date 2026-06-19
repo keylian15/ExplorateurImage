@@ -13,47 +13,58 @@
   },
   "Un fichier avec ce nom existe déjà.": {
     "fr": "Un fichier avec ce nom existe déjà.",
-    "en": "A file with this name already exists."
+    "en": "A file with this name already exists.",
+    "es": "Un archivo con este nombre ya existe."
   },
   "Pas assez d'embeddings ({count} / min 2).": {
     "fr": "Pas assez d'embeddings ({count} / min 2).",
-    "en": "Not enough embeddings ({count} / min 2)."
+    "en": "Not enough embeddings ({count} / min 2).",
+    "es": "No hay suficientes embeddings ({count} / mín 2)."
   },
   "Impossible de convertir l'image.": {
     "fr": "Impossible de convertir l'image.",
-    "en": "Cannot convert the image."
+    "en": "Cannot convert the image.",
+    "es": "Imposible de convertir la imagen."
   },
   "Le modèle SAM3 n'est pas encore chargé.": {
     "fr": "Le modèle SAM3 n'est pas encore chargé.",
-    "en": "The SAM3 model is not yet loaded."
+    "en": "The SAM3 model is not yet loaded.",
+    "es": "El modelo SAM3 no está aún cargado."
   },
   "Aucun dossier ouvert.": {
     "fr": "Aucun dossier ouvert.",
-    "en": "No open file."
+    "en": "No open file.",
+    "es": "Ningún archivo abierto."
   },
   "Aucune image dans le dossier.": {
     "fr": "Aucune image dans le dossier.",
-    "en": "No image in the folder."
+    "en": "No image in the folder.",
+    "es": "No hay imagen en la carpeta."
   },
   "Une recherche est déjà en cours.": {
     "fr": "Une recherche est déjà en cours.",
-    "en": "A research is already in progress."
+    "en": "A research is already in progress.",
+    "es": "Una búsqueda ya está en curso."
   },
   "Aucune image indexée dans ce dossier.": {
     "fr": "Aucune image indexée dans ce dossier.",
-    "en": "No image indexed in this folder."
+    "en": "No image indexed in this folder.",
+    "es": "Ninguna imagen indexada en esta carpeta."
   },
   "Impossible de convertir l'image courante.": {
     "fr": "Impossible de convertir l'image courante.",
-    "en": "Cannot convert the current image."
+    "en": "Cannot convert the current image.",
+    "es": "Imposible de convertir la imagen actual."
   },
   "La région sélectionnée est trop petite.": {
     "fr": "La région sélectionnée est trop petite.",
-    "en": "The selected region is too small."
+    "en": "The selected region is too small.",
+    "es": "La región seleccionada es demasiado pequeña."
   },
   "Stratégie inconnue : {name}.": {
     "fr": "Stratégie inconnue : {name}.",
-    "en": "Unknown strategy: {name}."
+    "en": "Unknown strategy: {name}.",
+    "es": "Estrategia desconocida : {name}."
   },
   "Ouvrir un dossier": {
     "fr": "Ouvrir un dossier",
@@ -101,39 +112,48 @@
   },
   "Nom de l'image…": {
     "fr": "Nom de l'image…",
-    "en": "Image name…"
+    "en": "Image name…",
+    "es": "Nombre de la imagen…"
   },
   "Renommer le fichier": {
     "fr": "Renommer le fichier",
-    "en": "Rename the file"
+    "en": "Rename the file",
+    "es": "Renombrar el archivo"
   },
   "Épingler / désépingler cette image": {
     "fr": "Épingler / désépingler cette image",
-    "en": "Pin / Unpin this image"
+    "en": "Pin / Unpin this image",
+    "es": "Pintar / Despintar esta imagen"
   },
   "Clic : ouvrir dans SAM3 (segmentation interactive)": {
     "fr": "Clic : ouvrir dans SAM3 (segmentation interactive)",
-    "en": "Click: Open in SAM3 (interactive segmentation)"
+    "en": "Click: Open in SAM3 (interactive segmentation)",
+    "es": "Clic : Abrir en SAM3 (segmentación interactiva)"
   },
   "Description…": {
     "fr": "Description…",
-    "en": "Description…"
+    "en": "Description…",
+    "es": "Descripción…"
   },
   "Mots-clés…": {
     "fr": "Mots-clés…",
-    "en": "Keywords…"
+    "en": "Keywords…",
+    "es": "Palabras clave…"
   },
   "Auto-compléter": {
     "fr": "Auto-compléter",
-    "en": "Auto-complete"
+    "en": "Auto-complete",
+    "es": "Autocompletar"
   },
   "Analyse en cours…": {
     "fr": "Analyse en cours…",
-    "en": "Analysis in progress…"
+    "en": "Analysis in progress…",
+    "es": "Análisis en curso…"
   },
   "Images similaires": {
     "fr": "Images similaires",
-    "en": "Similar Images"
+    "en": "Similar Images",
+    "es": "Imágenes similares /think"
   },
   "Search": {
     "fr": "Search",
