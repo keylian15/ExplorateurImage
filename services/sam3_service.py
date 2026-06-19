@@ -292,5 +292,13 @@ class Sam3Service(QObject):
         return result
 
     def check_loaded(self) -> None:
+        """Vérifie que le modèle est chargé avant utilisation.
+
+        Lève une erreur si le modèle SAM3 n'est pas encore initialisé.
+
+        Raises:
+            RuntimeError: si le modèle n'a pas été chargé via load_model().
+
+        """
         if not self._is_loaded:
             raise RuntimeError("Le modèle SAM3 n'est pas encore chargé. Appelez load_model() d'abord.")

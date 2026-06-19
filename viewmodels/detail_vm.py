@@ -247,7 +247,7 @@ class DetailViewModel(QObject):
         self._save_worker.start()
 
     def on_save_done(self) -> None:
-        """ "Finalise la sauvegarde des données et met à jour les composants dépendants.
+        """Finalise la sauvegarde des données et met à jour les composants dépendants.
 
         Déclenche la mise à jour de la galerie, émet les signaux de fin de sauvegarde
         et notifie la mise à jour de l'index avec l'ensemble des clés disponibles.

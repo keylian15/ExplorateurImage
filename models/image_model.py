@@ -31,6 +31,7 @@ from PyQt6.QtCore import (
     QModelIndex,
     QPoint,
     QRect,
+    QSize,
     Qt,
     pyqtSignal,
 )
@@ -250,6 +251,22 @@ class ImageGridDelegate(QStyledItemDelegate):
         self.scheduler = scheduler
         self.cell_size = cell_size
         self.scheduler.signal_thumbnail_ready.connect(self.on_signal_thumbnail_ready)
+
+    def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
+        """Retourne la taille recommandée d'un élément de la liste.
+
+        Cette méthode définit la taille d'affichage de chaque cellule dans le modèle.
+        Elle permet de forcer une taille carrée uniforme basée sur `self.cell_size`.
+
+        Args:
+            option (QStyleOptionViewItem): Options de style de la cellule.
+            index (QModelIndex): Index de l'élément.
+
+        Returns:
+            QSize: Taille (largeur, hauteur) de la cellule.
+
+        """
+        return QSize(self.cell_size, self.cell_size)
 
     def set_cell_size(self, size: int) -> None:
         """Met à jour la taille des cellules.

@@ -542,7 +542,7 @@ class Sam3SegmentWorker(QThread):
     signal_finished = pyqtSignal(object, object)  # (new_state, SegmentationResult)
     signal_error = pyqtSignal(str)
 
-    def __init__(self, service: Sam3Service, state: dict, prompt_fn) -> None:
+    def __init__(self, service: Sam3Service, state: dict, prompt_fn) -> None:  # noqa ANN001
         """Initialise le worker de segmentation.
 
         Args:

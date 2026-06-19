@@ -1122,14 +1122,14 @@ class Sam3Dialog(QMainWindow):
         self._canvas = ImageCanvas()
         self._canvas.set_base_pixmap(self._pixmap)
         self._canvas.set_zoom(self._zoom)
-        self._canvas.signal_box_drawn.connect(self._on_box_drawn)
+        self._canvas.signal_box_drawn.connect(self.on_box_drawn)
 
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(False)
         self._scroll.setWidget(self._canvas)
         self._scroll.setStyleSheet(f"background: {COLORS['bg_card']}; border: none;")
         self._scroll.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._scroll.wheelEvent = self._on_scroll_wheel
+        self._scroll.wheelEvent = self.on_scroll_wheel
         central_layout.addWidget(self._scroll)
 
         self.setCentralWidget(central)
@@ -1181,9 +1181,9 @@ class Sam3Dialog(QMainWindow):
         bar.addWidget(self._lbl_zoom)
         bar.addStretch()
 
-        self._btn_zoom_in.clicked.connect(lambda: self._apply_zoom(self._zoom + 0.15))
-        self._btn_zoom_out.clicked.connect(lambda: self._apply_zoom(self._zoom - 0.15))
-        self._btn_zoom_reset.clicked.connect(lambda: self._apply_zoom(0.75))
+        self._btn_zoom_in.clicked.connect(lambda: self.apply_zoom(self._zoom + 0.15))
+        self._btn_zoom_out.clicked.connect(lambda: self.apply_zoom(self._zoom - 0.15))
+        self._btn_zoom_reset.clicked.connect(lambda: self.apply_zoom(0.75))
 
         bar_w = QWidget()
         bar_w.setLayout(bar)
@@ -1232,32 +1232,65 @@ class Sam3Dialog(QMainWindow):
     # ── Slots ViewModel → View ────────────────────────────────────────────────
 
     def on_model_ready(self) -> None:
+        """Déclenché lorsque le modèle est prêt.
+
+        Lance l'encodage de l'image si elle n'a pas encore été traitée.
+        Met à jour le statut de l'interface utilisateur.
+        """
         self._sidebar_content.set_status(self.translator.tr("✅ Modèle prêt"))
         if not self._vm.is_image_encoded:
             self._vm.encode_image(self._pixmap, self._img_path)
 
     def on_encoded(self) -> None:
+        """Déclenché lorsque l'encodage de l'image est terminé.
+
+        Met l'interface en état prêt et affiche un message indiquant
+        que l'utilisateur peut saisir un prompt ou dessiner une zone.
+        """
         self._sidebar_content.set_ready(True)
         self._sidebar_content.set_status(self.translator.tr("✅ Prêt — saisissez un prompt ou dessinez une boîte"))
 
     def on_overlay_ready(self, overlay: MaskOverlay) -> None:
+        """Déclenché lorsque les masques d'objets sont générés.
+
+        Met à jour l'affichage avec l'overlay et indique le nombre
+        d'objets détectés dans l'image.
+
+        Args:
+        overlay (MaskOverlay): Contient les masques détectés.
+
+        """
         self._sidebar_content.set_ready(True)
         n = len(overlay.masks)
         self._sidebar_content.set_status(self.translator.tr("✅ {n} objet(s) trouvé(s)").format(n=n))
         self._canvas.set_overlay(overlay)
 
     def on_reset_done(self) -> None:
+        """Réinitialise l'état de l'interface après un reset des prompts et nettoie le canvas."""
         self._canvas.clear_overlay()
         self._sidebar_content.set_ready(True)
         self._sidebar_content.set_status(self.translator.tr("✅ Prompts réinitialisés"))
 
     def on_box_search_strategy(self, strategy_name: str) -> None:
+        """Met à jour la stratégie de recherche par box et affiche son libellé dans la sidebar."""
         label = _STRATEGY_LABELS.get(strategy_name, strategy_name)
         self._sidebar_content.set_status(self.translator.tr("🔍 Recherche par box — stratégie : {label}").format(label=label))
 
     # ── Slots recherche ───────────────────────────────────────────────────────
 
     def on_search_requested(self, text: str, embed_threshold: float, sam3_threshold: float) -> None:
+        """Gère une requête de recherche d'objets dans l'application.
+
+        Cette méthode configure le panneau de résultats selon la stratégie sélectionnée,
+        détermine le seuil à utiliser (embedding ou SAM3), puis déclenche la recherche
+        dans le modèle de vue associé.
+
+        Args:
+        text (str): Texte de recherche saisi par l'utilisateur.
+        embed_threshold (float): Seuil utilisé pour la recherche par embeddings.
+        sam3_threshold (float): Seuil utilisé pour la segmentation SAM3.
+
+        """
         self._results_panel.set_folder(self._vm._gallery_vm.current_folder)
         self._results_panel.set_wait_mode(self._sidebar_content.current_wait_mode())
         strategy = self._sidebar_content.current_strategy()
@@ -1265,6 +1298,7 @@ class Sam3Dialog(QMainWindow):
         self._vm.search_objects(text, threshold, strategy_name=strategy)
 
     def on_box_search_requested(self, embed_threshold: float, sam3_threshold: float) -> None:
+        """Lance une recherche à partir d'une zone sélectionnée (box), en utilisant les seuils fournis."""
         box = self._sidebar_content.get_last_box()
         if box is None:
             self._sidebar_content.set_status(self.translator.tr("⚠️ Aucune box disponible."))
@@ -1289,22 +1323,44 @@ class Sam3Dialog(QMainWindow):
         )
 
     def on_search_started(self, total: int) -> None:
+        """Démarre l'état de recherche et met à jour l'interface avec le nombre d'images à analyser."""
         self._sidebar_content.set_searching(True)
         self._sidebar_content.set_status(self.translator.tr("🔍 Analyse de {total} image(s)…").format(total=total))
         self._results_panel.start_search(total)
 
     def on_search_finished(self, matched: list) -> None:
+        """Gère la fin d'une recherche et met à jour l'interface avec les résultats obtenus."""
         self._sidebar_content.set_searching(False)
         n = len(matched)
         self._sidebar_content.set_status(self.translator.tr("✅ Recherche terminée — {n} correspondance(s)").format(n=n))
         self._results_panel.finish_search(matched)
 
     def on_search_cancelled(self) -> None:
+        """Gère l'annulation d'une recherche et met à jour l'interface (sidebar + résultats)."""
         self._sidebar_content.set_searching(False)
         self._sidebar_content.set_status(self.translator.tr("⛔ Recherche annulée"))
         self._results_panel.show_cancelled()
 
     def on_result_clicked(self, img_name: str) -> None:
+        """Gère le clic sur une image issue des résultats de recherche.
+
+        Cette méthode met à jour l'affichage principal avec l'image sélectionnée,
+        charge son contenu dans le canvas, réinitialise certains états de l'interface
+        et déclenche éventuellement son encodage sémantique si le modèle est prêt.
+
+        Actions principales :
+        - Construit le chemin complet de l'image sélectionnée
+        - Charge et vérifie l'image via QPixmap
+        - Met à jour les attributs internes (pixmap, dimensions, chemin)
+        - Met à jour le canvas avec la nouvelle image et le zoom actuel
+        - Met à jour le titre de la fenêtre
+        - Réinitialise l'état de la sidebar (box précédente, bouton désactivé)
+        - Lance l'encodage de l'image si le modèle est disponible et non occupé
+
+        Args:
+        img_name (str): Nom du fichier image sélectionné dans les résultats.
+
+        """
         folder = self._vm._gallery_vm.current_folder
         if not folder:
             return
@@ -1354,7 +1410,7 @@ class Sam3Dialog(QMainWindow):
 
     # ── Slots UI → ViewModel ──────────────────────────────────────────────────
 
-    def _on_box_drawn(self, x0: float, y0: float, x1: float, y1: float) -> None:
+    def on_box_drawn(self, x0: float, y0: float, x1: float, y1: float) -> None:
         """Dessine une box sur l'image.
 
         Args:
@@ -1370,7 +1426,7 @@ class Sam3Dialog(QMainWindow):
 
     # ── Zoom ──────────────────────────────────────────────────────────────────
 
-    def _apply_zoom(self, zoom: float) -> None:
+    def apply_zoom(self, zoom: float) -> None:
         """Applique le zoom sur l'image.
 
         Args:
@@ -1381,7 +1437,7 @@ class Sam3Dialog(QMainWindow):
         self._canvas.set_zoom(self._zoom)
         self._lbl_zoom.setText(f"{int(self._zoom * 100)}%")
 
-    def _on_scroll_wheel(self, event: QWheelEvent) -> None:
+    def on_scroll_wheel(self, event: QWheelEvent) -> None:
         """Ajuste le zoom sur l'image.
 
         Args:
@@ -1389,4 +1445,4 @@ class Sam3Dialog(QMainWindow):
 
         """
         delta = 0.1 if event.angleDelta().y() > 0 else -0.1
-        self._apply_zoom(self._zoom + delta)
+        self.apply_zoom(self._zoom + delta)

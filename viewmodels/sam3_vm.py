@@ -614,7 +614,7 @@ class Sam3ViewModel(QObject):
         """
         return self._service.is_loaded and self._state is not None and not self.is_busy
 
-    def run_segment(self, prompt_fn) -> None:
+    def run_segment(self, prompt_fn) -> None:  # noqa ANN001
         """Lance la segmentation.
 
         Args:
