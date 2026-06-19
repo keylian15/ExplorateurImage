@@ -26,7 +26,7 @@ def to_module(_root: Path, file: Path) -> str:
     → models.index_repository).
 
     Args:
-        root (Path): Racine du projet.
+        _root (Path): Racine du projet.
         file (Path): Fichier Python à convertir.
 
     Returns:

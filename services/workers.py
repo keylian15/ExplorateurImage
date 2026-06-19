@@ -103,7 +103,6 @@ class ThumbnailScheduler(QObject):
 
         Args:
             cache (ThumbnailCache): Cache utilisé pour stocker et récupérer les miniatures.
-            parent (QObject, optional): Objet parent Qt.
 
         """
         super().__init__()

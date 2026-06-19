@@ -11,6 +11,14 @@ Contenu du module :
 - Conversion chemin → module Python
 - Filtrage des fichiers à ignorer
 - Génération des fichiers de documentation MkDocs
+
+USAGE CLI:
+
+# Mode standard : génère les langues demandées (sans écraser l'existant)
+python -m tools.i18n_builder --root . --langs en,es,de
+
+# Mode sync : complète uniquement les langues déjà présentes dans i18n.json
+python -m tools.i18n_builder --root . --sync
 """
 
 import json
@@ -190,4 +198,33 @@ def main(project_root: str, languages: list[str]) -> None:
     save_i18n(translations)
 
 
-# python -m tools.i18n_builder --root . --langs en
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Générateur i18n")
+    parser.add_argument("--root", required=True, help="Racine du projet")
+    parser.add_argument("--langs", required=True, help="Langues séparées par des virgules (ex: en,es,de)")
+    parser.add_argument("--sync", action="store_true", help="Complète uniquement les langues déjà présentes dans i18n.json")
+
+    args = parser.parse_args()
+
+    translations = load_i18n()
+
+    if args.sync:
+        # récupérer uniquement les langues déjà présentes dans le fichier
+        existing_langs = set()
+
+        for entry in translations.values():
+            if isinstance(entry, dict):
+                existing_langs.update(entry.keys())
+
+        languages = sorted(existing_langs - {SOURCE_LANG})
+
+    else:
+        languages = [lang.strip() for lang in args.langs.split(",") if lang.strip()]
+
+    main(args.root, languages)
+
+    # Commande pour lancer la traduction d'une langue :
+    # python -m tools.i18n_builder --root . --langs en
+    # Commande pour lancer la traduction
