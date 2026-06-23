@@ -23,7 +23,7 @@ Chaque workspace est autonome et instancie ses propres ViewModels. La fenêtre p
 
 ## Fonctionnalités principales
 
-- **Galerie d'images** avec thumbnails paginés, zoom (Ctrl+molette) et cache LRU deux niveaux (mémoire + disque)
+- **Galerie d'images** avec thumbnails paginés et cache LRU deux niveaux (mémoire + disque)
 - **Indexation automatique** des images par description textuelle et embedding sémantique via un modèle vision-langage
 - **Recherche sémantique** hybride combinant similarité cosinus sur les embeddings et correspondance textuelle
 - **Images similaires** calculées par similarité cosinus (top-K voisins)
